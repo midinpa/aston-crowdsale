@@ -23,7 +23,7 @@ contract ASTPresale is Pausable, PresaleKYC {
 
   event PresaleTokenPurchase(address indexed buyer, address indexed beneficiary, uint256 toFund, uint256 tokens);
 
-  function ASTPreslae(
+  function ASTPresale(
     address _token,
     address _vault,
     address _multisig,
@@ -88,7 +88,8 @@ contract ASTPresale is Pausable, PresaleKYC {
 
   function validPurchase() internal constant returns (bool) {
     bool nonZeroPurchase = msg.value != 0;
-    return nonZeroPurchase && !maxReached();
+    bool validTime = now >= startTime && now <= endTime;
+    return nonZeroPurchase && !maxReached() && validTime;
   }
 
   /**

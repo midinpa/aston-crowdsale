@@ -13,20 +13,24 @@ module.exports = async function (deployer, network, accounts) {
   accounts.forEach((account, i) => console.log(`[${ i }]  ${ account }`));
 
   try {
-    const maxEtherCap = 100000 * 10 ** 18;
+    const maxEtherCap = 1000 * 10 ** 18;
 
-    const startTime = moment.utc("2017-09-26").unix();
-    const endTime = moment.utc("2017-10-10").unix();
+    let startTime, endTime;
+    if (network === "development") {
+      startTime = moment().add(5, "minutes").unix();
+      endTime = moment().add(20, "minutes").unix();
+    } else {
+      startTime = moment.utc("2017-12-06").unix();
+      endTime = moment.utc("2017-12-10").unix();
+    }
+
+    const rate = 200;
 
     const reserveWallet = [
-      "0x822Bb1cdd2051323ABdb3D705E6d67F70c6F1516",
-      "0x3a9DdA0eC79B6C38b650C56F4885C291551542a2",
-      "0x528960b54D618A99683EbDcCd83Ed5da02616a45",
+      "0x922aa0d0e720caf10bcd7a02be187635a6f36ab0",
+      "0x6267901dbb0055e12ea895fc768b68486d57dcf8",
+      "0x236df55249ac7a6dfea613cd69ccd014c3cb8445",
     ];
-
-    const presaleKYC = await PresaleKYC.new();
-
-    console.log("presaleKYC deployed at", presaleKYC.address);
 
     const multiSig = await MultiSig.new(reserveWallet, reserveWallet.length - 1); // 2 out of 3
     console.log("multiSigs deployed at", multiSig.address);
@@ -39,7 +43,6 @@ module.exports = async function (deployer, network, accounts) {
 
     /*eslint-disable */
     const presale = await ASTPresale.new(
-      presaleKYC.address,
       token.address,
       vault.address,
       multiSig.address,
@@ -47,6 +50,7 @@ module.exports = async function (deployer, network, accounts) {
       startTime,
       endTime,
       maxEtherCap,
+      rate
     );
     /*eslint-enable */
     console.log("presale deployed at", presale.address);
@@ -58,7 +62,7 @@ module.exports = async function (deployer, network, accounts) {
       multiSig: multiSig.address,
       token: token.address,
       vault: vault.address,
-      crowdsale: crowdsale.address,
+      presale: presale.address,
     }, undefined, 2));
   } catch (e) {
     console.error(e);

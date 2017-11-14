@@ -5,8 +5,8 @@ import "./token/MiniMeToken.sol";
 
 contract AST is MiniMeToken {
   bool public transfersHalted;
-  mapping (address => bool) blacklisted;
-  bool generateFinished;
+  mapping (address => bool) public blacklisted;
+  bool public generateFinished;
 
   // @dev AST constructor just parametrizes the MiniMeToken constructor
   function AST(address _tokenFactory)
@@ -40,6 +40,10 @@ contract AST is MiniMeToken {
   }
   function haltTransfer() public onlyController returns (bool success) {
     transfersHalted = true;
+    return true;
+  }
+  function unHaltTransfer() public onlyController returns (bool success) {
+    transfersHalted = false;
     return true;
   }
   function blacklistAccount(address tokenOwner) public onlyController returns (bool success) {

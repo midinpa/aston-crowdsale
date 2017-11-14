@@ -1,0 +1,32 @@
+{
+  "name": "aston-crowdsale",
+  "version": "1.0.0",
+  "description": "",
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "babel-register": "^6.26.0",
+    "dotenv": "^4.0.0",
+    "fs": "0.0.1-security",
+    "moment": "^2.19.2",
+    "path": "^0.12.7",
+    "truffle-hdwallet-provider": "0.0.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Onther-Tech/aston-crowdsale.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Onther-Tech/aston-crowdsale/issues"
+  },
+  "homepage": "https://github.com/Onther-Tech/aston-crowdsale#readme"
+}
