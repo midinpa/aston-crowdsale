@@ -4,7 +4,6 @@ import "./token/MiniMeToken.sol";
 
 
 contract AST is MiniMeToken {
-  bool public transfersHalted;
   mapping (address => bool) public blacklisted;
   bool public generateFinished;
 
@@ -29,7 +28,6 @@ contract AST is MiniMeToken {
       }
   function doTransfer(address _from, address _to, uint _amount
       ) internal returns(bool) {
-        require(transfersHalted == false);
         require(blacklisted[_from] == false);
         super.doTransfer(_from, _to, _amount);
       }
@@ -38,14 +36,7 @@ contract AST is MiniMeToken {
     generateFinished = true;
     return true;
   }
-  function haltTransfer() public onlyController returns (bool success) {
-    transfersHalted = true;
-    return true;
-  }
-  function unHaltTransfer() public onlyController returns (bool success) {
-    transfersHalted = false;
-    return true;
-  }
+
   function blacklistAccount(address tokenOwner) public onlyController returns (bool success) {
     blacklisted[tokenOwner] = true;
     return true;
