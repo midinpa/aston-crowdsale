@@ -345,16 +345,7 @@
     },
     {
       "constant": false,
-      "inputs": [
-        {
-          "name": "_to",
-          "type": "address"
-        },
-        {
-          "name": "_amount",
-          "type": "uint256"
-        }
-      ],
+      "inputs": [],
       "name": "finishGenerating",
       "outputs": [
         {
@@ -405,20 +396,7 @@
     },
     {
       "constant": true,
-      "inputs": [
-        {
-          "name": "_spender",
-          "type": "address"
-        },
-        {
-          "name": "_amount",
-          "type": "uint256"
-        },
-        {
-          "name": "_extraData",
-          "type": "bytes"
-        }
-      ],
+      "inputs": [],
       "name": "parentSnapShotBlock",
       "outputs": [
         {
@@ -463,10 +441,6 @@
         {
           "name": "tokenOwner",
           "type": "address"
-        },
-        {
-          "name": "_amount",
-          "type": "uint256"
         }
       ],
       "name": "blacklistAccount",
@@ -574,23 +548,20 @@
       "type": "function"
     },
     {
+      "constant": false,
       "inputs": [
         {
           "name": "_transfersEnabled",
           "type": "bool"
         }
       ],
+      "name": "enableTransfers",
+      "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "constant": false,
-      "name": "enableTransfers",
-      "outputs": []
+      "type": "function"
     },
     {
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function",
       "constant": true,
       "inputs": [],
       "name": "controller",
@@ -599,30 +570,15 @@
           "name": "",
           "type": "address"
         }
-      ]
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
     },
     {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "name": "_token",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "name": "_controller",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "name": "_amount",
-          "type": "uint256"
-        }
-      ],
-      "name": "unHaltTransfer",
-      "type": "function",
       "constant": false,
+      "inputs": [],
+      "name": "unHaltTransfer",
       "outputs": [
         {
           "name": "success",
@@ -630,50 +586,24 @@
         }
       ],
       "payable": false,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "function"
     },
     {
-      "anonymous": false,
       "inputs": [
         {
-          "indexed": true,
           "name": "_tokenFactory",
           "type": "address"
-        },
-        {
-          "indexed": true,
-          "name": "_to",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "name": "_amount",
-          "type": "uint256"
         }
       ],
-      "name": "Transfer",
-      "type": "constructor",
       "payable": false,
-      "stateMutability": "nonpayable"
+      "stateMutability": "nonpayable",
+      "type": "constructor"
     },
     {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "name": "_cloneToken",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "name": "_snapshotBlock",
-          "type": "uint256"
-        }
-      ],
-      "name": "NewCloneToken",
-      "type": "fallback",
       "payable": true,
-      "stateMutability": "payable"
+      "stateMutability": "payable",
+      "type": "fallback"
     },
     {
       "anonymous": false,
@@ -790,7 +720,7 @@
       },
       {
         "attributes": {
-          "SourceUnit": 2384,
+          "SourceUnit": 2348,
           "absolutePath": "/Users/midinpa/workspace/dapps/aston-crowdsale/contracts/token/MiniMeToken.sol",
           "file": "./token/MiniMeToken.sol",
           "scope": 166,
@@ -806,16 +736,16 @@
       {
         "attributes": {
           "contractDependencies": [
-            1312,
-            2342
+            1276,
+            2306
           ],
           "contractKind": "contract",
           "documentation": null,
           "fullyImplemented": true,
           "linearizedBaseContracts": [
             165,
-            2342,
-            1312
+            2306,
+            1276
           ],
           "name": "AST",
           "scope": 166
@@ -832,7 +762,7 @@
                 "attributes": {
                   "contractScope": null,
                   "name": "MiniMeToken",
-                  "referencedDeclaration": 2342,
+                  "referencedDeclaration": 2306,
                   "type": "contract MiniMeToken"
                 },
                 "id": 3,
@@ -1006,7 +936,7 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 2342,
+                      "referencedDeclaration": 2306,
                       "type": "type(contract MiniMeToken)",
                       "value": "MiniMeToken"
                     },
@@ -1160,7 +1090,7 @@
               "payable": false,
               "scope": 165,
               "stateMutability": "nonpayable",
-              "superFunction": 1963,
+              "superFunction": 1927,
               "visibility": "public"
             },
             "children": [
@@ -1269,7 +1199,7 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 1288,
+                      "referencedDeclaration": 1252,
                       "type": "modifier ()",
                       "value": "onlyController"
                     },
@@ -1312,7 +1242,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 3393,
+                              "referencedDeclaration": 3357,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -1415,7 +1345,7 @@
                               "isPure": false,
                               "lValueRequested": false,
                               "member_name": "generateTokens",
-                              "referencedDeclaration": 1963,
+                              "referencedDeclaration": 1927,
                               "type": "function (address,uint256) returns (bool)"
                             },
                             "children": [
@@ -1425,7 +1355,7 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 3412,
+                                  "referencedDeclaration": 3376,
                                   "type": "contract super AST",
                                   "value": "super"
                                 },
@@ -1498,7 +1428,7 @@
               "payable": false,
               "scope": 165,
               "stateMutability": "nonpayable",
-              "superFunction": 1603,
+              "superFunction": 1567,
               "visibility": "internal"
             },
             "children": [
@@ -1650,7 +1580,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 3393,
+                              "referencedDeclaration": 3357,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -1747,7 +1677,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 3393,
+                              "referencedDeclaration": 3357,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -1883,7 +1813,7 @@
                               "isPure": false,
                               "lValueRequested": false,
                               "member_name": "doTransfer",
-                              "referencedDeclaration": 1603,
+                              "referencedDeclaration": 1567,
                               "type": "function (address,address,uint256) returns (bool)"
                             },
                             "children": [
@@ -1893,7 +1823,7 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 3412,
+                                  "referencedDeclaration": 3376,
                                   "type": "contract super AST",
                                   "value": "super"
                                 },
@@ -2038,7 +1968,7 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 1288,
+                      "referencedDeclaration": 1252,
                       "type": "modifier ()",
                       "value": "onlyController"
                     },
@@ -2214,7 +2144,7 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 1288,
+                      "referencedDeclaration": 1252,
                       "type": "modifier ()",
                       "value": "onlyController"
                     },
@@ -2334,42 +2264,15 @@
             },
             "children": [
               {
-                "children": [
-                  {
-                    "attributes": {
-                      "constant": false,
-                      "name": "tokenOwner",
-                      "scope": 132,
-                      "stateVariable": false,
-                      "storageLocation": "default",
-                      "type": "address",
-                      "value": null,
-                      "visibility": "internal"
-                    },
-                    "children": [
-                      {
-                        "attributes": {
-                          "name": "address",
-                          "type": "address"
-                        },
-                        "id": 115,
-                        "name": "ElementaryTypeName",
-                        "src": "1471:7:0"
-                      }
-                    ],
-                    "id": 116,
-                    "name": "VariableDeclaration",
-                    "src": "1471:18:0"
-                  }
-                ],
-                "id": 115,
-                "name": "ParameterList",
-                "src": "1482:2:0",
                 "attributes": {
                   "parameters": [
                     null
                   ]
-                }
+                },
+                "children": [],
+                "id": 115,
+                "name": "ParameterList",
+                "src": "1482:2:0"
               },
               {
                 "children": [
@@ -2417,7 +2320,7 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 1288,
+                      "referencedDeclaration": 1252,
                       "type": "modifier ()",
                       "value": "onlyController"
                     },
@@ -2448,47 +2351,13 @@
                           {
                             "attributes": {
                               "argumentTypes": null,
-                              "isConstant": false,
-                              "isLValue": true,
-                              "isPure": false,
-                              "lValueRequested": true,
-                              "type": "bool",
                               "overloadedDeclarations": [
                                 null
                               ],
                               "referencedDeclaration": 6,
+                              "type": "bool",
                               "value": "transfersHalted"
                             },
-                            "children": [
-                              {
-                                "attributes": {
-                                  "argumentTypes": null,
-                                  "overloadedDeclarations": [
-                                    null
-                                  ],
-                                  "referencedDeclaration": 10,
-                                  "type": "mapping(address => bool)",
-                                  "value": "blacklisted"
-                                },
-                                "id": 123,
-                                "name": "Identifier",
-                                "src": "1542:11:0"
-                              },
-                              {
-                                "attributes": {
-                                  "argumentTypes": null,
-                                  "overloadedDeclarations": [
-                                    null
-                                  ],
-                                  "referencedDeclaration": 116,
-                                  "type": "address",
-                                  "value": "tokenOwner"
-                                },
-                                "id": 124,
-                                "name": "Identifier",
-                                "src": "1554:10:0"
-                              }
-                            ],
                             "id": 121,
                             "name": "Identifier",
                             "src": "1536:15:0"
@@ -2649,7 +2518,7 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 1288,
+                      "referencedDeclaration": 1252,
                       "type": "modifier ()",
                       "value": "onlyController"
                     },
@@ -2876,7 +2745,7 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 1288,
+                      "referencedDeclaration": 1252,
                       "type": "modifier ()",
                       "value": "onlyController"
                     },
@@ -3027,5 +2896,5 @@
   },
   "networks": {},
   "schemaVersion": "1.0.1",
-  "updatedAt": "2017-11-14T11:48:36.815Z"
+  "updatedAt": "2017-11-15T00:23:08.136Z"
 }

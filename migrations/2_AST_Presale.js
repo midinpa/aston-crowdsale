@@ -17,7 +17,7 @@ module.exports = async function (deployer, network, accounts) {
 
     let startTime, endTime;
     if (network === "development") {
-      startTime = moment().add(5, "minutes").unix();
+      startTime = moment().add(1, "minutes").unix();
       endTime = moment().add(20, "minutes").unix();
     } else {
       startTime = moment.utc("2017-12-06").unix();

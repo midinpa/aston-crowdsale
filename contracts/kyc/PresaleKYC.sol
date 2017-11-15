@@ -1,6 +1,5 @@
 pragma solidity ^0.4.18;
 
-import '../math/SafeMath.sol';
 import '../ownership/Ownable.sol';
 
 /**
@@ -8,7 +7,7 @@ import '../ownership/Ownable.sol';
  * @dev PresaleKYC contract handles the white list for ASTPresale contract
  * Only accounts registered in PresaleKYC contract can buy AST token as Presale.
  */
-contract PresaleKYC is  SafeMath, Ownable {
+contract PresaleKYC is Ownable {
 
   // check the address is registered for token sale
   mapping (address => bool) public registeredAddress;

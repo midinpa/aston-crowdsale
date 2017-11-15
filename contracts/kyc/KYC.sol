@@ -1,6 +1,5 @@
 pragma solidity ^0.4.18;
 
-import '../math/SafeMath.sol';
 import '../ownership/Ownable.sol';
 
 /**
@@ -9,7 +8,7 @@ import '../ownership/Ownable.sol';
  * Only accounts registered in KYC contract can buy AST token.
  * Admins can register account, and the reason why
  */
-contract KYC is Ownable, SafeMath {
+contract KYC is Ownable {
   // check the address is registered for token sale
   mapping (address => bool) public registeredAddress;
 

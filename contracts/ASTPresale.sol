@@ -1,12 +1,13 @@
 pragma solidity ^0.4.18;
 
 import './crowdsale/RefundVault.sol';
-import './kyc/PresaleKYC.sol';
 import './wallet/MultiSigWallet.sol';
 import './AST.sol';
+import './kyc/PresaleKYC.sol';
 import './lifecycle/Pausable.sol';
+import './math/SafeMath.sol';
 
-contract ASTPresale is Pausable, PresaleKYC {
+contract ASTPresale is PresaleKYC, Pausable, SafeMath {
   AST public token;
   RefundVault public vault;
   MultiSigWallet public multisig;
@@ -18,6 +19,7 @@ contract ASTPresale is Pausable, PresaleKYC {
   uint256 public maxEtherCap;
   uint64 public startTime;
   uint64 public endTime;
+
 
   mapping (address => uint256) public buyerFunded;
 
@@ -42,6 +44,7 @@ contract ASTPresale is Pausable, PresaleKYC {
       maxEtherCap = _maxEtherCap;
       rate = _rate;
     }
+
   function () payable {
     buyPresale(msg.sender);
   }
@@ -77,6 +80,7 @@ contract ASTPresale is Pausable, PresaleKYC {
     weiRaised = add(weiRaised, toFund);
     buyerFunded[beneficiary] = add(buyerFunded[beneficiary], toFund);
 
+    //TODO: Error check
     token.generateTokens(beneficiary, tokens);
 
     if (toReturn > 0) {
