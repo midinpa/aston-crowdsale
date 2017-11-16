@@ -59,7 +59,7 @@ contract PresaleKYC is Ownable, SafeMath {
       require(_addrs[i] != address(0) && registeredAddress[_addrs[i]] == false);
 
       registeredAddress[_addrs[i]] = true;
-      presaleGuaranteedLimit[_addrs[i]] = _maxGuaranteedLimits[i];*/
+      presaleGuaranteedLimit[_addrs[i]] = _maxGuaranteedLimits[i];
 
       totalPresaleGuaranteedLimit = add(totalPresaleGuaranteedLimit, _maxGuaranteedLimits[i]);
 
