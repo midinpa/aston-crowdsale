@@ -32,5 +32,13 @@ module.exports = {
       gas: 4500000,
       gasPrice: 25e9,
     },
+    onther: {
+      host: "onther.io",
+      port: 60010,
+      network_id: "777",
+      from: "0x71283a1d35f63e35a34476f6ad0a85a49317181b", // accounts[0]
+      gas: 4700000,
+      gasPrice: 18e9,
+    },
   },
 };
