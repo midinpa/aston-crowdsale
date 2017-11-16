@@ -3,19 +3,19 @@ pragma solidity ^0.4.18;
 import "./token/MiniMeToken.sol";
 
 
-contract AST is MiniMeToken {
+contract ATC is MiniMeToken {
   mapping (address => bool) public blacklisted;
   bool public generateFinished;
 
-  // @dev AST constructor just parametrizes the MiniMeToken constructor
-  function AST(address _tokenFactory)
+  // @dev ATC constructor just parametrizes the MiniMeToken constructor
+  function ATC(address _tokenFactory)
           MiniMeToken(
               _tokenFactory,
               0x0,                     // no parent token
               0,                       // no snapshot block number from parent
-              "Aston Token",  // Token name
+              "ATCon Token",  // Token name
               18,                      // Decimals
-              "AST",                   // Symbol
+              "ATC",                   // Symbol
               true                     // Enable transfers
           ) {}
 

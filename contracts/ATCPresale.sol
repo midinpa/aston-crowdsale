@@ -1,16 +1,14 @@
 pragma solidity ^0.4.18;
 
 import './crowdsale/RefundVault.sol';
-import './wallet/MultiSigWallet.sol';
-import './AST.sol';
+import './ATC.sol';
 import './kyc/PresaleKYC.sol';
 import './lifecycle/Pausable.sol';
 import './math/SafeMath.sol';
 
-contract ASTPresale is PresaleKYC, Pausable, SafeMath {
-  AST public token;
+contract ATCPresale is PresaleKYC, Pausable, SafeMath {
+  ATC public token;
   RefundVault public vault;
-  MultiSigWallet public multisig;
 
   address[] reserveWallet;
 
@@ -25,19 +23,17 @@ contract ASTPresale is PresaleKYC, Pausable, SafeMath {
 
   event PresaleTokenPurchase(address indexed buyer, address indexed beneficiary, uint256 toFund, uint256 tokens);
 
-  function ASTPresale(
+  function ATCPresale(
     address _token,
     address _vault,
-    address _multisig,
     address[] _reserveWallet,
     uint64 _startTime,
     uint64 _endTime,
     uint256 _maxEtherCap,
     uint256 _rate
     ) {
-      token = AST(_token);
+      token = ATC(_token);
       vault = RefundVault(_vault);
-      multisig = MultiSigWallet(_multisig);
       reserveWallet = _reserveWallet;
       startTime = _startTime;
       endTime = _endTime;
@@ -65,10 +61,17 @@ contract ASTPresale is PresaleKYC, Pausable, SafeMath {
     uint256 totalAmount = add(buyerFunded[beneficiary], weiAmount);
 
     uint256 toFund;
+
     if (totalAmount > guaranteedLimit) {
       toFund = sub(guaranteedLimit, buyerFunded[beneficiary]);
     } else {
       toFund = weiAmount;
+    }
+
+    uint256 postWeiRaised = add(weiRaised, toFund);
+
+    if (postWeiRaised > maxEtherCap) {
+      toFund = sub(maxEtherCap, weiRaised);
     }
 
     require(toFund > 0);
@@ -111,6 +114,7 @@ contract ASTPresale is PresaleKYC, Pausable, SafeMath {
   function finalizePresale(
     address newOwner
     ) onlyOwner {
+    require(now > endTime);
     changeTokenController(newOwner);
     changeVaultOwner(newOwner);
   }

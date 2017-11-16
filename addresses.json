@@ -1,6 +1,6 @@
 {
-  "multiSig": "0x600e66c8b0a273593e66121a529c565ea647cb1e",
-  "token": "0x21db81102fb0ef3405974ac0c4e85917e7f5b14a",
-  "vault": "0xede3e346c3b9eb9c16c83223c785101a3fa5d51c",
-  "presale": "0x50904fb08dcdeb60790101d1ff5e9c0baf6cd5d2"
+  "multiSig": "0x04f85a11c8c30ff96ea01838c6198ae57fab5adb",
+  "token": "0xcdf75a615bc5993eb8fbbb53e8792b1535b6268f",
+  "vault": "0x32bf727a642fae2af4714f4d11263dcaa0d184bc",
+  "presale": "0x52018b2fb35bef960b3993db09f28bf963783dd8"
 }
