@@ -45,7 +45,7 @@ contract(
 
     let reserveWallet;
 
-    const newOwner = "0x01ad78dbd65579882a7058bc19b104103627a2ff";
+    const newOwner = accounts[25];
 
     before(async () => {
       reserveWallet = [
@@ -271,6 +271,9 @@ now:\t\t\t${ now }
         const vaultEtherAmount = await eth.getBalance(vault.address);
         vaultEtherAmount.should.be.bignumber.equal(maxEtherCap);
 
+        await token.transfer(accounts[1], 100, {from: investor})
+          .should.be.rejectedWith(EVMThrow);
+
         console.log("buyPresale Gas Used :", buyPresaleTx.receipt.gasUsed);
       }); //end "should buy presaled amount"
 
@@ -293,6 +296,19 @@ now:\t\t\t${ now }
       //after end//
       ///////////////
       it("should finalizePresale", async () => {
+        const presaledAmount = ether(5000);
+        const investedAmount = ether(5000);
+
+        await presale.register(
+          investor,
+          presaledAmount,
+        ).should.be.fulfilled;
+
+        await presale.buyPresale(investor, {
+          value: investedAmount,
+          from: investor,
+        }).should.be.fulfilled;
+
         await increaseTimeTo(afterEndTime);
         const finalizePresaleTx = await presale.finalizePresale(newOwner)
         .should.be.fulfilled;
@@ -300,6 +316,10 @@ now:\t\t\t${ now }
         (await vault.owner()).should.be.equal(newOwner);
         (await token.controller()).should.be.equal(newOwner);
 
+        await token.enableTransfers(true, {from: newOwner}).should.be.fulfilled;
+        await token.transfer(accounts[1], 100, {from: investor})
+          .should.be.fulfilled;
+          
         console.log("finalizePresale Gas Used :", finalizePresaleTx.receipt.gasUsed);
       }); //end "should finalizePresale"
 
