@@ -16,7 +16,7 @@ contract ATC is MiniMeToken {
               "ATCon Token",  // Token name
               18,                      // Decimals
               "ATC",                   // Symbol
-              true                     // Enable transfers
+              false                     // Enable transfers
           ) {}
 
   function generateTokens(address _owner, uint _amount
