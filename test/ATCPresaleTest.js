@@ -127,7 +127,7 @@ now:\t\t\t${ now }
       }
     });
 
-    describe("ATCPresale", async () => {
+    describe("ATCPresale Test", async () => {
       //before start//
       ///////////////
       it("should reject payments before start", async () => {
@@ -180,9 +180,12 @@ now:\t\t\t${ now }
         var registeredAmounts = new Array(10);
         const registeredAmount = ether(100)
 
-        for (var i = 0; i < 210; i++){
+        for (var i = 0; i < 10; i++){
           registeredAmounts[i] = registeredAmount;
         }
+
+        console.log(accounts.slice(0, 10), accounts.slice(0, 10).length);
+        console.log(registeredAmounts, registeredAmounts.length);
 
         const registerByList10Tx = await presale.registerByList(
           accounts.slice(0, 10),
@@ -209,7 +212,40 @@ now:\t\t\t${ now }
         console.log("unregisterByList10Tx Gas Used :", unregisterByList10Tx.receipt.gasUsed);
       }); //end "register and unregister by list presale"
 
+      it("excessive register should be rejected", async () => {
+        const registeredAmount = ether(12000);
 
+        await presale.register(
+          investor,
+          registeredAmount
+        ).should.be.rejectedWith(EVMThrow);
+
+        (await presale.registeredAddress(investor)).should.be.equal(false);
+
+        (await presale.presaleGuaranteedLimit(investor))
+          .should.be.bignumber.equal(new BigNumber(0));
+
+      }); //end "excessive register should be rejected"
+
+      it("excessive registerby list should be rejected", async () => {
+        var registeredAmounts = new Array(10);
+        const registeredAmount = ether(1200)
+
+        for (var i = 0; i < 10; i++){
+          registeredAmounts[i] = registeredAmount;
+        }
+
+        const registerByList10Tx = await presale.registerByList(
+          accounts.slice(0, 10),
+          registeredAmounts
+        ).should.be.rejectedWith(EVMThrow);
+
+        for (const account of accounts.slice(0, 10)) {
+            (await presale.registeredAddress(account)).should.be.equal(false);
+            (await presale.presaleGuaranteedLimit(account))
+              .should.be.bignumber.equal(new BigNumber(0));
+        }
+      }); //end "excessive registerby list should be rejected"
 
       //after start//
       ///////////////
@@ -219,8 +255,7 @@ now:\t\t\t${ now }
         const presaledAmount = ether(5000);
         const investedAmount = ether(6000);
 
-        const presaledAmount2 = ether(6000);
-        const investedAmount2 = ether(6000);
+        const excessivePresaledAmount = ether(6000);
 
         await presale.register(
           investor,
@@ -229,7 +264,12 @@ now:\t\t\t${ now }
 
         await presale.register(
           accounts[0],
-          presaledAmount2,
+          excessivePresaledAmount,
+        ).should.be.rejectedWith(EVMThrow);
+
+        await presale.register(
+          accounts[0],
+          presaledAmount,
         ).should.be.fulfilled;
 
         const balanceBeforeInvest = await eth.getBalance(investor);
@@ -241,7 +281,7 @@ now:\t\t\t${ now }
         }).should.be.fulfilled;
 
         await presale.buyPresale(accounts[0], {
-          value: investedAmount2,
+          value: investedAmount,
           from: accounts[0],
         }).should.be.fulfilled;
 
@@ -249,13 +289,12 @@ now:\t\t\t${ now }
         const balanceAfterInvest2 = await eth.getBalance(accounts[0]);
 
         const expectedTokenAmount = presaledAmount.mul(rate);
-        const expectedTokenAmount2 = maxEtherCap.sub(presaledAmount).mul(rate);
-        const totalExpectedTokenAmount = expectedTokenAmount.add(expectedTokenAmount2);
+        const totalExpectedTokenAmount = expectedTokenAmount.mul(2);
 
         (await token.balanceOf(investor))
           .should.be.bignumber.equal(expectedTokenAmount);
         (await token.balanceOf(accounts[0]))
-          .should.be.bignumber.equal(expectedTokenAmount2);
+          .should.be.bignumber.equal(expectedTokenAmount);
 
         (await token.totalSupply())
           .should.be.bignumber.equal(totalExpectedTokenAmount);
@@ -263,9 +302,9 @@ now:\t\t\t${ now }
           presaledAmount.toNumber(),
           presaledAmount.add(ether(1)).toNumber(),
         );
-        (balanceBeforeInvest - balanceAfterInvest).should.be.within(
-          maxEtherCap.sub(presaledAmount).toNumber(),
-          maxEtherCap.sub(presaledAmount).add(ether(1)).toNumber(),
+        (balanceBeforeInvest2 - balanceAfterInvest2).should.be.within(
+          presaledAmount.toNumber(),
+          presaledAmount.add(ether(1)).toNumber(),
         );
 
         const vaultEtherAmount = await eth.getBalance(vault.address);
@@ -319,7 +358,7 @@ now:\t\t\t${ now }
         await token.enableTransfers(true, {from: newOwner}).should.be.fulfilled;
         await token.transfer(accounts[1], 100, {from: investor})
           .should.be.fulfilled;
-          
+
         console.log("finalizePresale Gas Used :", finalizePresaleTx.receipt.gasUsed);
       }); //end "should finalizePresale"
 

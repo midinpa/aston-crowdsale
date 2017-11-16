@@ -1,19 +1,21 @@
 pragma solidity ^0.4.18;
 
 import '../ownership/Ownable.sol';
+import '../math/SafeMath.sol';
 
 /**
  * @title PresaleKYC
  * @dev PresaleKYC contract handles the white list for ASTPresale contract
  * Only accounts registered in PresaleKYC contract can buy AST token as Presale.
  */
-contract PresaleKYC is Ownable {
+contract PresaleKYC is Ownable, SafeMath {
 
   // check the address is registered for token sale
   mapping (address => bool) public registeredAddress;
 
   // guaranteedlimit for each presale investor
   mapping (address => uint256) public presaleGuaranteedLimit;
+  uint256 public totalPresaleGuaranteedLimit;
 
   event Registered(address indexed _addr);
   event Unregistered(address indexed _addr);
@@ -40,6 +42,8 @@ contract PresaleKYC is Ownable {
     registeredAddress[_addr] = true;
     presaleGuaranteedLimit[_addr] = _maxGuaranteedLimit;
 
+    totalPresaleGuaranteedLimit = add(totalPresaleGuaranteedLimit, _maxGuaranteedLimit);
+
     Registered(_addr);
   }
 
@@ -55,7 +59,9 @@ contract PresaleKYC is Ownable {
       require(_addrs[i] != address(0) && registeredAddress[_addrs[i]] == false);
 
       registeredAddress[_addrs[i]] = true;
-      presaleGuaranteedLimit[_addrs[i]] = _maxGuaranteedLimits[i];
+      presaleGuaranteedLimit[_addrs[i]] = _maxGuaranteedLimits[i];*/
+
+      totalPresaleGuaranteedLimit = add(totalPresaleGuaranteedLimit, _maxGuaranteedLimits[i]);
 
       Registered(_addrs[i]);
     }
@@ -70,6 +76,9 @@ contract PresaleKYC is Ownable {
     onlyOwner
     onlyRegistered(_addr)
   {
+
+    totalPresaleGuaranteedLimit = sub(totalPresaleGuaranteedLimit, presaleGuaranteedLimit[_addr]);
+
     registeredAddress[_addr] = false;
     presaleGuaranteedLimit[_addr] = 0;
 
@@ -86,6 +95,8 @@ contract PresaleKYC is Ownable {
   {
     for(uint256 i = 0; i < _addrs.length; i++) {
       require(registeredAddress[_addrs[i]]);
+
+      totalPresaleGuaranteedLimit = sub(totalPresaleGuaranteedLimit, presaleGuaranteedLimit[_addrs[i]]);
 
       registeredAddress[_addrs[i]] = false;
       presaleGuaranteedLimit[_addrs[i]] = 0;

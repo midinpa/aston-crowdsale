@@ -6,7 +6,7 @@ import './kyc/PresaleKYC.sol';
 import './lifecycle/Pausable.sol';
 import './math/SafeMath.sol';
 
-contract ATCPresale is PresaleKYC, Pausable, SafeMath {
+contract ATCPresale is PresaleKYC, Pausable {
   ATC public token;
   RefundVault public vault;
 
@@ -45,6 +45,29 @@ contract ATCPresale is PresaleKYC, Pausable, SafeMath {
     buyPresale(msg.sender);
   }
 
+  function register(address _addr, uint256 _maxGuaranteedLimit)
+    public
+    onlyOwner
+  {
+    uint256 postTotalPresaleGuaranteedLimit = add(totalPresaleGuaranteedLimit, _maxGuaranteedLimit);
+    require(maxEtherCap >= postTotalPresaleGuaranteedLimit);
+
+    super.register(_addr, _maxGuaranteedLimit);
+  }
+
+  function registerByList(address[] _addrs, uint256[] _maxGuaranteedLimits)
+    public
+    onlyOwner
+  {
+    uint256 postTotalPresaleGuaranteedLimit = totalPresaleGuaranteedLimit;
+    for(uint256 i = 0; i < _addrs.length; i++) {
+      postTotalPresaleGuaranteedLimit = add(postTotalPresaleGuaranteedLimit, _maxGuaranteedLimits[i]);
+    }
+    require(maxEtherCap >= postTotalPresaleGuaranteedLimit);
+
+    super.registerByList(_addrs, _maxGuaranteedLimits);
+  }
+
   function buyPresale(address beneficiary)
     payable
     onlyRegistered(beneficiary)
@@ -66,12 +89,6 @@ contract ATCPresale is PresaleKYC, Pausable, SafeMath {
       toFund = sub(guaranteedLimit, buyerFunded[beneficiary]);
     } else {
       toFund = weiAmount;
-    }
-
-    uint256 postWeiRaised = add(weiRaised, toFund);
-
-    if (postWeiRaised > maxEtherCap) {
-      toFund = sub(maxEtherCap, weiRaised);
     }
 
     require(toFund > 0);
