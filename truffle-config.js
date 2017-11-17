@@ -18,6 +18,12 @@ module.exports = {
       network_id: "*",
       gas: 4500000,
     },
+    ganache: {
+      host: "localhost",
+      port: 7545,
+      network_id: "*",
+      gas: 4500000,
+    },
     ropsten: {
       network_id: 3,
       provider: providerRopsten,
