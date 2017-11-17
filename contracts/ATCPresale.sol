@@ -32,6 +32,15 @@ contract ATCPresale is PresaleKYC, Pausable {
     uint256 _maxEtherCap,
     uint256 _rate
     ) {
+      require(_token != 0x00 && _vault != 0x00);
+      for(uint256 i = 0; i < _reserveWallet.length; i++){
+        require(_reserveWallet[i] != 0x00);
+      }
+
+      require(now < _startTime && _startTime < _endTime);
+      require(_maxEtherCap > 0);
+      require(_rate > 0);
+
       token = ATC(_token);
       vault = RefundVault(_vault);
       reserveWallet = _reserveWallet;
@@ -66,6 +75,31 @@ contract ATCPresale is PresaleKYC, Pausable {
     require(maxEtherCap >= postTotalPresaleGuaranteedLimit);
 
     super.registerByList(_addrs, _maxGuaranteedLimits);
+  }
+
+  function unregister(address _addr)
+    public
+    onlyOwner
+    onlyRegistered(_addr)
+  {
+    require(buyerFunded[_addr] == 0);
+    super.unregister(_addr);
+  }
+
+  /**
+   * @dev unregister the registered addresses
+   * @param _addrs address[] The addresses to unregister for token sale
+   */
+  function unregisterByList(address[] _addrs)
+    public
+    onlyOwner
+  {
+    uint256 totalBuyerFunded;
+    for(uint256 i = 0; i < _addrs.length; i++) {
+      totalBuyerFunded = add(totalBuyerFunded, buyerFunded[_addrs[i]]);
+    }
+    require(totalBuyerFunded == 0);
+    super.unregisterByList(_addrs);
   }
 
   function buyPresale(address beneficiary)

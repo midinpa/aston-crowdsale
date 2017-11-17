@@ -24,7 +24,7 @@ module.exports = async function (deployer, network, accounts) {
       endTime = moment.utc("2017-12-10").unix();
     } else {
       maxEtherCap = 1 * 10**18;
-      startTime = moment().add(5, "minutes").unix();
+      startTime = moment().add(10, "minutes").unix();
       endTime = moment().add(20, "minutes").unix();
 
       reserveWallet = [

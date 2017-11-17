@@ -138,7 +138,7 @@ now:\t\t\t${ now }
 
         (await presale.registeredAddress(investor)).should.be.equal(true);
 
-        await presale.send(ether(1))
+        await presale.send(ether(1), {from: investor})
           .should.be.rejectedWith(EVMThrow);
 
         await presale
@@ -184,9 +184,6 @@ now:\t\t\t${ now }
           registeredAmounts[i] = registeredAmount;
         }
 
-        console.log(accounts.slice(0, 10), accounts.slice(0, 10).length);
-        console.log(registeredAmounts, registeredAmounts.length);
-
         const registerByList10Tx = await presale.registerByList(
           accounts.slice(0, 10),
           registeredAmounts
@@ -198,7 +195,6 @@ now:\t\t\t${ now }
               .should.be.bignumber.equal(registeredAmount);
         }
 
-        // unregister
         const unregisterByList10Tx = await presale.unregisterByList(accounts.slice(0, 10))
           .should.be.fulfilled;
 
@@ -227,7 +223,7 @@ now:\t\t\t${ now }
 
       }); //end "excessive register should be rejected"
 
-      it("excessive registerby list should be rejected", async () => {
+      it("excessive register by list should be rejected", async () => {
         var registeredAmounts = new Array(10);
         const registeredAmount = ether(1200)
 
@@ -325,6 +321,58 @@ now:\t\t\t${ now }
         }).should.be.rejectedWith(EVMThrow);
 
       }); //end "not registered investor should be rejected"
+
+      it("unregister already funded investor should be rejected", async () => {
+        const registeredAmount = ether(5000);
+
+        await presale.register(
+          investor,
+          registeredAmount
+        ).should.be.fulfilled;
+
+        (await presale.registeredAddress(investor)).should.be.equal(true);
+
+        (await presale.presaleGuaranteedLimit(investor))
+          .should.be.bignumber.equal(registeredAmount);
+
+        await presale.buyPresale(investor, {
+            value: ether(1),
+            from: investor,
+          }).should.be.fulfilled;
+
+        const unregisterPresaleTx = await presale.unregister(investor)
+          .should.be.rejectedWith(EVMThrow);
+
+      }); //end "unregister already funded investor should be rejected"
+
+      it("unregister already funded investor by list should be rejected", async () => {
+        var registeredAmounts = new Array(10);
+        const registeredAmount = ether(100)
+
+        for (var i = 0; i < 10; i++){
+          registeredAmounts[i] = registeredAmount;
+        }
+
+        const registerByList10Tx = await presale.registerByList(
+          accounts.slice(0, 10),
+          registeredAmounts
+        ).should.be.fulfilled;
+
+        for (const account of accounts.slice(0, 10)) {
+            (await presale.registeredAddress(account)).should.be.equal(true);
+            (await presale.presaleGuaranteedLimit(account))
+              .should.be.bignumber.equal(registeredAmount);
+        }
+
+        await presale.buyPresale(accounts[1], {
+            value: ether(1),
+            from: accounts[1],
+          }).should.be.fulfilled;
+
+        // unregister
+        const unregisterByList10Tx = await presale.unregisterByList(accounts.slice(0, 10))
+          .should.be.rejectedWith(EVMThrow);
+      }); //end "unregister already funded investor by list should be rejected"
 
       it("finalizePresale should be rejected before endTime", async () => {
         await presale.finalizePresale(newOwner)
