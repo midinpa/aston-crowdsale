@@ -13,24 +13,28 @@ module.exports = async function (deployer, network, accounts) {
   accounts.forEach((account, i) => console.log(`[${ i }]  ${ account }`));
 
   try {
-    const maxEtherCap = 10000 * 10**18;
 
+    let maxEtherCap;
     let startTime, endTime;
-    if (network === "development") {
-      startTime = moment().add(5, "minutes").unix();
-      endTime = moment().add(20, "minutes").unix();
-    } else {
+    let reserveWallet;
+
+    if (network === "mainnet") {
+      maxEtherCap = 10000 * 10**18;
       startTime = moment.utc("2017-12-06").unix();
       endTime = moment.utc("2017-12-10").unix();
+    } else {
+      maxEtherCap = 1 * 10**18;
+      startTime = moment().add(5, "minutes").unix();
+      endTime = moment().add(20, "minutes").unix();
+
+      reserveWallet = [
+        "0xb7aa50eb5e42c74076ea1b902a6142539f654796",
+        "0x922aa0d0e720caf10bcd7a02be187635a6f36ab0",
+        "0x6267901dbb0055e12ea895fc768b68486d57dcf8",
+      ];
     }
 
     const rate = 200;
-
-    const reserveWallet = [
-      "0xb7aa50eb5e42c74076ea1b902a6142539f654796",
-      "0x922aa0d0e720caf10bcd7a02be187635a6f36ab0",
-      "0x6267901dbb0055e12ea895fc768b68486d57dcf8",
-    ];
 
     const multiSig = await MultiSig.new(reserveWallet, reserveWallet.length - 1)
     console.log("multiSig deployed at", multiSig.address);
