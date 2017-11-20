@@ -6,7 +6,7 @@ import './kyc/PresaleKYC.sol';
 import './lifecycle/Pausable.sol';
 import './math/SafeMath.sol';
 
-contract ATCCrowdSaleInterface {
+contract PresaleFallbackReceiver {
     function presaleFallBack(uint256 _presaleWeiRaised) public returns (bool);
 }
 
@@ -172,7 +172,7 @@ contract ATCPresale is PresaleKYC, Pausable {
       require(!isFinalized);
       require(now > endTime);
 
-      ATCCrowdSaleInterface crowdsale = ATCCrowdSaleInterface(newOwner);
+      PresaleFallbackReceiver crowdsale = PresaleFallbackReceiver(newOwner);
       crowdsale.presaleFallBack(weiRaised);
 
       changeTokenController(newOwner);

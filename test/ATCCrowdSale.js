@@ -184,7 +184,7 @@ contract(
 
       beforePresaleStartTime = presaleStartTime - duration.seconds(100);
       afterPresaleStartTime = presaleStartTime + duration.seconds(1);
-      afterPresaleEndTime = presaleEndTime + duration.seconds(1);
+      afterPresaleEndTime = presaleEndTime + duration.seconds(10);
 
       logger(`
 ------------------------------
@@ -238,12 +238,11 @@ now:\t\t\t\t${ now }
 
         await increaseTimeTo(afterPresaleEndTime);
 
-        // const finalizeTx = await presale.finalizePresale(crowdsale.address)
-        //   .should.be.fulfilled;
-        // // (await crowdsale.presaleFallBackCalled())
-        // //   .should.be.equal(true);
-        //
-        // console.log("presale finalize");
+        const finalizeTx = await presale.finalizePresale(crowdsale.address)
+          .should.be.fulfilled;
+        (await crowdsale.presaleFallBackCalled())
+          .should.be.equal(true);
+        console.log("presale finalize");
         //
         // let period,
         //   periodIndex = 0;
