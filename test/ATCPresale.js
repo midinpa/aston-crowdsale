@@ -26,15 +26,29 @@ contract(
     [
       owner,
       investor,
+      _,
+      _,
+      _,
+      _,
+      _,
       reserveWallet0,
       reserveWallet1,
       reserveWallet2,
+      reserveWallet3,
+      reserveWallet4,
+      reserveWallet5,
+      reserveWallet6,
+      reserveWallet7,
+      reserveWallet8,
+      reserveWallet9,
+      _,
+      _,
       ...accounts
     ],
   ) => {
     let snapshotId;
 
-    let multiSig, tokenFactory, presale, token, vault;
+    let tokenFactory, presale, token, vault;
 
     let now, startTime, endTime;
     let beforeStartTime, afterEndTime, afterStartTime;
@@ -45,13 +59,20 @@ contract(
 
     let reserveWallet;
 
-    const newOwner = accounts[25];
+    const newOwner = accounts[ 25 ];
 
     before(async () => {
       reserveWallet = [
         reserveWallet0,
         reserveWallet1,
         reserveWallet2,
+        reserveWallet3,
+        reserveWallet4,
+        reserveWallet5,
+        reserveWallet6,
+        reserveWallet7,
+        reserveWallet8,
+        reserveWallet9,
       ];
 
       startTime = moment().add(5, "minutes").unix();
@@ -60,23 +81,19 @@ contract(
       rate = 200;
       maxEtherCap = ether(10000);
 
-      multiSig = await MultiSig.new(reserveWallet, reserveWallet.length - 1)
-      console.log("multiSig deployed at", multiSig.address);
-
       tokenFactory = await MiniMeTokenFactory.new();
       console.log("tokenFactory deployed at", tokenFactory.address);
 
       token = await ATC.new(tokenFactory.address);
       console.log("token deployed at", token.address);
 
-      vault = await RefundVault.new(multiSig.address, reserveWallet);
+      vault = await RefundVault.new(reserveWallet);
       console.log("vault deployed at", vault.address);
 
       /*eslint-disable */
       presale = await ATCPresale.new(
         token.address,
         vault.address,
-        reserveWallet,
         startTime,
         endTime,
         maxEtherCap,
@@ -128,8 +145,8 @@ now:\t\t\t${ now }
     });
 
     describe("ATCPresale Test", async () => {
-      //before start//
-      ///////////////
+      // before start//
+      // /////////////
       it("should reject payments before start", async () => {
         await increaseTimeTo(beforeStartTime);
 
@@ -138,7 +155,7 @@ now:\t\t\t${ now }
 
         (await presale.registeredAddress(investor)).should.be.equal(true);
 
-        await presale.send(ether(1), {from: investor})
+        await presale.send(ether(1), { from: investor })
           .should.be.rejectedWith(EVMThrow);
 
         await presale
@@ -146,14 +163,14 @@ now:\t\t\t${ now }
           .should.be.rejectedWith(EVMThrow);
 
         console.log("registerPresale Gas Used :", registerPresaleTx.receipt.gasUsed);
-      });//end "should reject payments before start"
+      });// end "should reject payments before start"
 
       it("register and unregister presale", async () => {
         const registeredAmount = ether(5000);
 
         await presale.register(
           investor,
-          registeredAmount
+          registeredAmount,
         ).should.be.fulfilled;
 
         (await presale.registeredAddress(investor)).should.be.equal(true);
@@ -163,7 +180,7 @@ now:\t\t\t${ now }
 
         await presale.register(
           investor,
-          registeredAmount
+          registeredAmount,
         ).should.be.rejectedWith(EVMThrow);
 
         // unregister
@@ -174,79 +191,77 @@ now:\t\t\t${ now }
           .should.be.bignumber.equal(new BigNumber(0));
 
         console.log("unregisterPresale Gas Used :", unregisterPresaleTx.receipt.gasUsed);
-      }); //end "register and unregister presale"
+      }); // end "register and unregister presale"
 
       it("register and unregister by list presale", async () => {
-        var registeredAmounts = new Array(10);
-        const registeredAmount = ether(100)
+        const registeredAmounts = new Array(10);
+        const registeredAmount = ether(100);
 
-        for (var i = 0; i < 10; i++){
-          registeredAmounts[i] = registeredAmount;
+        for (let i = 0; i < 10; i++) {
+          registeredAmounts[ i ] = registeredAmount;
         }
 
         const registerByList10Tx = await presale.registerByList(
           accounts.slice(0, 10),
-          registeredAmounts
+          registeredAmounts,
         ).should.be.fulfilled;
 
         for (const account of accounts.slice(0, 10)) {
-            (await presale.registeredAddress(account)).should.be.equal(true);
-            (await presale.presaleGuaranteedLimit(account))
-              .should.be.bignumber.equal(registeredAmount);
+          (await presale.registeredAddress(account)).should.be.equal(true);
+          (await presale.presaleGuaranteedLimit(account))
+            .should.be.bignumber.equal(registeredAmount);
         }
 
         const unregisterByList10Tx = await presale.unregisterByList(accounts.slice(0, 10))
           .should.be.fulfilled;
 
         for (const account of accounts.slice(0, 10)) {
-            (await presale.registeredAddress(account)).should.be.equal(false);
-            (await presale.presaleGuaranteedLimit(account))
-              .should.be.bignumber.equal(new BigNumber(0));
-          }
+          (await presale.registeredAddress(account)).should.be.equal(false);
+          (await presale.presaleGuaranteedLimit(account))
+            .should.be.bignumber.equal(new BigNumber(0));
+        }
 
         console.log("registerByList10Tx Gas Used :", registerByList10Tx.receipt.gasUsed);
         console.log("unregisterByList10Tx Gas Used :", unregisterByList10Tx.receipt.gasUsed);
-      }); //end "register and unregister by list presale"
+      }); // end "register and unregister by list presale"
 
       it("excessive register should be rejected", async () => {
         const registeredAmount = ether(12000);
 
         await presale.register(
           investor,
-          registeredAmount
+          registeredAmount,
         ).should.be.rejectedWith(EVMThrow);
 
         (await presale.registeredAddress(investor)).should.be.equal(false);
 
         (await presale.presaleGuaranteedLimit(investor))
           .should.be.bignumber.equal(new BigNumber(0));
-
-      }); //end "excessive register should be rejected"
+      }); // end "excessive register should be rejected"
 
       it("excessive register by list should be rejected", async () => {
-        var registeredAmounts = new Array(10);
-        const registeredAmount = ether(1200)
+        const registeredAmounts = new Array(10);
+        const registeredAmount = ether(1200);
 
-        for (var i = 0; i < 10; i++){
-          registeredAmounts[i] = registeredAmount;
+        for (let i = 0; i < 10; i++) {
+          registeredAmounts[ i ] = registeredAmount;
         }
 
         const registerByList10Tx = await presale.registerByList(
           accounts.slice(0, 10),
-          registeredAmounts
+          registeredAmounts,
         ).should.be.rejectedWith(EVMThrow);
 
         for (const account of accounts.slice(0, 10)) {
-            (await presale.registeredAddress(account)).should.be.equal(false);
-            (await presale.presaleGuaranteedLimit(account))
-              .should.be.bignumber.equal(new BigNumber(0));
+          (await presale.registeredAddress(account)).should.be.equal(false);
+          (await presale.presaleGuaranteedLimit(account))
+            .should.be.bignumber.equal(new BigNumber(0));
         }
-      }); //end "excessive registerby list should be rejected"
+      }); // end "excessive registerby list should be rejected"
 
-      //after start//
-      ///////////////
+      // after start//
+      // /////////////
       it("should buy presaled amount", async () => {
-
         await increaseTimeTo(afterStartTime);
         const presaledAmount = ether(5000);
         const investedAmount = ether(6000);
@@ -259,37 +274,37 @@ now:\t\t\t${ now }
         ).should.be.fulfilled;
 
         await presale.register(
-          accounts[0],
+          accounts[ 0 ],
           excessivePresaledAmount,
         ).should.be.rejectedWith(EVMThrow);
 
         await presale.register(
-          accounts[0],
+          accounts[ 0 ],
           presaledAmount,
         ).should.be.fulfilled;
 
         const balanceBeforeInvest = await eth.getBalance(investor);
-        const balanceBeforeInvest2 = await eth.getBalance(accounts[0]);
+        const balanceBeforeInvest2 = await eth.getBalance(accounts[ 0 ]);
 
         const buyPresaleTx = await presale.buyPresale(investor, {
           value: investedAmount,
           from: investor,
         }).should.be.fulfilled;
 
-        await presale.buyPresale(accounts[0], {
+        await presale.buyPresale(accounts[ 0 ], {
           value: investedAmount,
-          from: accounts[0],
+          from: accounts[ 0 ],
         }).should.be.fulfilled;
 
         const balanceAfterInvest = await eth.getBalance(investor);
-        const balanceAfterInvest2 = await eth.getBalance(accounts[0]);
+        const balanceAfterInvest2 = await eth.getBalance(accounts[ 0 ]);
 
         const expectedTokenAmount = presaledAmount.mul(rate);
         const totalExpectedTokenAmount = expectedTokenAmount.mul(2);
 
         (await token.balanceOf(investor))
           .should.be.bignumber.equal(expectedTokenAmount);
-        (await token.balanceOf(accounts[0]))
+        (await token.balanceOf(accounts[ 0 ]))
           .should.be.bignumber.equal(expectedTokenAmount);
 
         (await token.totalSupply())
@@ -306,28 +321,27 @@ now:\t\t\t${ now }
         const vaultEtherAmount = await eth.getBalance(vault.address);
         vaultEtherAmount.should.be.bignumber.equal(maxEtherCap);
 
-        await token.transfer(accounts[1], 100, {from: investor})
+        await token.transfer(accounts[ 1 ], 100, { from: investor })
           .should.be.rejectedWith(EVMThrow);
 
         console.log("buyPresale Gas Used :", buyPresaleTx.receipt.gasUsed);
-      }); //end "should buy presaled amount"
+      }); // end "should buy presaled amount"
 
       it("not registered investor should be rejected", async () => {
         const investedAmount = ether(5000);
 
-        await presale.buyPresale(accounts[0], {
+        await presale.buyPresale(accounts[ 0 ], {
           value: investedAmount,
-          from: accounts[0],
+          from: accounts[ 0 ],
         }).should.be.rejectedWith(EVMThrow);
-
-      }); //end "not registered investor should be rejected"
+      }); // end "not registered investor should be rejected"
 
       it("unregister already funded investor should be rejected", async () => {
         const registeredAmount = ether(5000);
 
         await presale.register(
           investor,
-          registeredAmount
+          registeredAmount,
         ).should.be.fulfilled;
 
         (await presale.registeredAddress(investor)).should.be.equal(true);
@@ -336,52 +350,50 @@ now:\t\t\t${ now }
           .should.be.bignumber.equal(registeredAmount);
 
         await presale.buyPresale(investor, {
-            value: ether(1),
-            from: investor,
-          }).should.be.fulfilled;
+          value: ether(1),
+          from: investor,
+        }).should.be.fulfilled;
 
         const unregisterPresaleTx = await presale.unregister(investor)
           .should.be.rejectedWith(EVMThrow);
-
-      }); //end "unregister already funded investor should be rejected"
+      }); // end "unregister already funded investor should be rejected"
 
       it("unregister already funded investor by list should be rejected", async () => {
-        var registeredAmounts = new Array(10);
-        const registeredAmount = ether(100)
+        const registeredAmounts = new Array(10);
+        const registeredAmount = ether(100);
 
-        for (var i = 0; i < 10; i++){
-          registeredAmounts[i] = registeredAmount;
+        for (let i = 0; i < 10; i++) {
+          registeredAmounts[ i ] = registeredAmount;
         }
 
         const registerByList10Tx = await presale.registerByList(
           accounts.slice(0, 10),
-          registeredAmounts
+          registeredAmounts,
         ).should.be.fulfilled;
 
         for (const account of accounts.slice(0, 10)) {
-            (await presale.registeredAddress(account)).should.be.equal(true);
-            (await presale.presaleGuaranteedLimit(account))
-              .should.be.bignumber.equal(registeredAmount);
+          (await presale.registeredAddress(account)).should.be.equal(true);
+          (await presale.presaleGuaranteedLimit(account))
+            .should.be.bignumber.equal(registeredAmount);
         }
 
-        await presale.buyPresale(accounts[1], {
-            value: ether(1),
-            from: accounts[1],
-          }).should.be.fulfilled;
+        await presale.buyPresale(accounts[ 1 ], {
+          value: ether(1),
+          from: accounts[ 1 ],
+        }).should.be.fulfilled;
 
         // unregister
         const unregisterByList10Tx = await presale.unregisterByList(accounts.slice(0, 10))
           .should.be.rejectedWith(EVMThrow);
-      }); //end "unregister already funded investor by list should be rejected"
+      }); // end "unregister already funded investor by list should be rejected"
 
       it("finalizePresale should be rejected before endTime", async () => {
         await presale.finalizePresale(newOwner)
-        .should.be.rejectedWith(EVMThrow);
-      }); //end "should finalizePresale"
+          .should.be.rejectedWith(EVMThrow);
+      }); // end "should finalizePresale"
 
-
-      //after end//
-      ///////////////
+      // after end//
+      // /////////////
       it("should finalizePresale", async () => {
         const presaledAmount = ether(5000);
         const investedAmount = ether(5000);
@@ -398,18 +410,17 @@ now:\t\t\t${ now }
 
         await increaseTimeTo(afterEndTime);
         const finalizePresaleTx = await presale.finalizePresale(newOwner)
-        .should.be.fulfilled;
+          .should.be.fulfilled;
 
         (await vault.owner()).should.be.equal(newOwner);
         (await token.controller()).should.be.equal(newOwner);
 
-        await token.enableTransfers(true, {from: newOwner}).should.be.fulfilled;
-        await token.transfer(accounts[1], 100, {from: investor})
+        await token.enableTransfers(true, { from: newOwner }).should.be.fulfilled;
+        await token.transfer(accounts[ 1 ], 100, { from: investor })
           .should.be.fulfilled;
 
         console.log("finalizePresale Gas Used :", finalizePresaleTx.receipt.gasUsed);
-      }); //end "should finalizePresale"
-
+      }); // end "should finalizePresale"
     });
   },
 );

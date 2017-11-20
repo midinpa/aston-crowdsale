@@ -17,7 +17,7 @@ contract PresaleKYC is Ownable, SafeMath {
   mapping (address => uint256) public presaleGuaranteedLimit;
   uint256 public totalPresaleGuaranteedLimit;
 
-  event Registered(address indexed _addr);
+  event Registered(address indexed _addr, uint256 _amount);
   event Unregistered(address indexed _addr);
 
   /**
@@ -44,7 +44,7 @@ contract PresaleKYC is Ownable, SafeMath {
 
     totalPresaleGuaranteedLimit = add(totalPresaleGuaranteedLimit, _maxGuaranteedLimit);
 
-    Registered(_addr);
+    Registered(_addr, _maxGuaranteedLimit);
   }
 
   /**
@@ -63,7 +63,7 @@ contract PresaleKYC is Ownable, SafeMath {
 
       totalPresaleGuaranteedLimit = add(totalPresaleGuaranteedLimit, _maxGuaranteedLimits[i]);
 
-      Registered(_addrs[i]);
+      Registered(_addrs[i], _maxGuaranteedLimits[i]);
     }
   }
 

@@ -1,4 +1,4 @@
-pragma solidity^0.4.18;
+pragma solidity ^0.4.18;
 
 import './kyc/KYC.sol';
 import './ATC.sol';
@@ -7,7 +7,7 @@ import './ownership/Ownable.sol';
 import './math/SafeMath.sol';
 import './lifecycle/Pausable.sol';
 
-contract ATCCrowdSale is Ownable, SafeMath, Pausable{
+contract ATCCrowdSale is Ownable, SafeMath, Pausable {
   KYC public kyc;
   ATC public token;
   RefundVault public vault;
@@ -27,7 +27,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable{
 
   Period[] public periods;
   uint256 public currentPeriod;
-  uint8 constant public MAX_PERIOD_COUNT = 6;
+  uint8 constant public MAX_PERIOD_COUNT = 7;
 
   uint256 public weiRaised;
   uint256 public maxEtherCap;
@@ -49,6 +49,8 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable{
   event CrowdSaleTokenPurchase(address indexed investor, address indexed beneficiary, uint256 toFund, uint256 tokens);
   event StartPeriod(uint64 _startTime, uint64 _endTime, uint8 _rate);
   event Finalized();
+  event Log(string messgae); // for dev
+
 
   function ATCCrowdSale (
     address _kyc,
@@ -59,6 +61,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable{
     address _bountyAndCommunityAddressesMultiSig,
     address _reserveAddress,
     address _teamAddress,
+    address _tokenController,
     uint256 _maxEtherCap,
     uint256 _minEtherCap
     ) {
@@ -67,23 +70,27 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable{
       token = ATC(_token);
       vault = RefundVault(_vault);
       presale = _presale;
+
       bountyAndCommunityAddresses = _bountyAndCommunityAddresses;
       bountyAndCommunityAddressesMultiSig = _bountyAndCommunityAddressesMultiSig;
       reserveAddress = _reserveAddress;
       teamAddress = _teamAddress;
+      ATCController = _tokenController;
+
       maxEtherCap = _maxEtherCap;
       minEtherCap = _minEtherCap;
     }
 
-  function () payable {
+  function () public payable {
     buy(msg.sender);
   }
 
-  function presaleFallBack(uint256 _presaleWeiRaised) public {
+  function presaleFallBack(uint256 _presaleWeiRaised) public returns (bool) {
     require(!presaleFallBackCalled);
     require(msg.sender == presale);
     weiRaised = _presaleWeiRaised;
     presaleFallBackCalled = true;
+    return true;
   }
 
   function buy(address beneficiary)
@@ -98,6 +105,8 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable{
       require(!periodFinished(currentPeriod));
       require(beneficiary != 0x00);
       require(validPurchase());
+
+      Log("buy condition check");
 
       // calculate eth amount
       uint256 weiAmount = msg.value;
@@ -156,14 +165,13 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable{
     vault.deposit.value(toFund)(msg.sender);
   }
 
-  function nonZeroPeriod() internal constant returns (bool) {
+  function nonZeroPeriod() public constant returns (bool) {
     return periods.length > 0;
   }
 
   function periodFinished(uint256 period) public constant returns (bool) {
-    require(nonZeroPeriod());
-    require(periods.length-1 >= period);
-    return now > periods[period].endTime;
+    require(sub(periods.length, 1) >= period);
+    return nonZeroPeriod() && now > periods[period].endTime;
   }
 
   /**
@@ -187,18 +195,17 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable{
 
   function startPeriod(uint64 _startTime, uint64 _endTime, uint8 _rate) public onlyOwner returns (bool) {
     require(periods.length < MAX_PERIOD_COUNT);
-    require(now > periods[currentPeriod].endTime);
     require(!maxReached());
     require(now < _startTime && _startTime < _endTime);
     require(_rate > 0);
 
-    // TOOD: check working correctly
     Period memory newPeriod;
     newPeriod.startTime = _startTime;
     newPeriod.endTime = _endTime;
     newPeriod.rate = _rate;
 
     if (nonZeroPeriod()) {
+      require(now > periods[currentPeriod].endTime);
       currentPeriod = add (currentPeriod, 1);
     }
 
@@ -237,6 +244,8 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable{
       uint256 teamAmount = div(mul(totalToken, 15), 50);
 
       distributeToken(bountyAndCommunityAmount, reserveAmount, teamAmount);
+
+      token.enableTransfers(true);
 
     } else {
       vault.enableRefunds();

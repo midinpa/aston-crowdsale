@@ -17,8 +17,6 @@ contract RefundVault is Ownable, SafeMath{
   mapping (address => uint256) public refunded;
   State public state;
 
-  address public devMultisig;
-
   address[] public reserveWallet;
 
   event Closed();
@@ -26,15 +24,13 @@ contract RefundVault is Ownable, SafeMath{
   event Refunded(address indexed beneficiary, uint256 weiAmount);
 
   /**
-   * @dev This constructor sets the addresses of multi-signature wallet and
-   * 5 reserve wallets.
+   * @dev This constructor sets the addresses of
+   * 10 reserve wallets.
    * and forwarding it if crowdsale is successful.
-   * @param _devMultiSig address The address of multi-signature wallet.
    * @param _reserveWallet address[5] The addresses of reserve wallet.
    */
-  function RefundVault(address _devMultiSig, address[] _reserveWallet) {
+  function RefundVault(address[] _reserveWallet) {
     state = State.Active;
-    devMultisig = _devMultiSig;
     reserveWallet = _reserveWallet;
   }
 
@@ -60,12 +56,7 @@ contract RefundVault is Ownable, SafeMath{
 
     uint256 balance = this.balance;
 
-    uint256 devAmount = div(balance, 10);
-    devMultisig.transfer(devAmount);
-    Transferred(devMultisig, devAmount);
-
-    uint256 reserveAmount = div(mul(balance, 9), 10);
-    uint256 reserveAmountForEach = div(reserveAmount, reserveWallet.length);
+    uint256 reserveAmountForEach = div(balance, reserveWallet.length);
 
     for(uint8 i = 0; i < reserveWallet.length; i++){
       reserveWallet[i].transfer(reserveAmountForEach);
