@@ -13,17 +13,16 @@ module.exports = async function (deployer, network, accounts) {
   accounts.forEach((account, i) => console.log(`[${ i }]  ${ account }`));
 
   try {
-
     let maxEtherCap;
     let startTime, endTime;
     let reserveWallet;
 
     if (network === "mainnet") {
-      maxEtherCap = 10000 * 10**18;
+      maxEtherCap = 10000 * 10 ** 18;
       startTime = moment.utc("2017-12-06").unix();
       endTime = moment.utc("2017-12-10").unix();
     } else {
-      maxEtherCap = 1 * 10**18;
+      maxEtherCap = 1 * 10 ** 18;
       startTime = moment().add(10, "minutes").unix();
       endTime = moment().add(25, "minutes").unix();
 
@@ -36,7 +35,7 @@ module.exports = async function (deployer, network, accounts) {
 
     const rate = 200;
 
-    const multiSig = await MultiSig.new(reserveWallet, reserveWallet.length - 1)
+    const multiSig = await MultiSig.new(reserveWallet, reserveWallet.length - 1);
     console.log("multiSig deployed at", multiSig.address);
 
     const tokenFactory = await MiniMeTokenFactory.new();
@@ -52,7 +51,6 @@ module.exports = async function (deployer, network, accounts) {
     const presale = await ATCPresale.new(
       token.address,
       vault.address,
-      reserveWallet,
       startTime,
       endTime,
       maxEtherCap,

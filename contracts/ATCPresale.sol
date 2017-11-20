@@ -1,5 +1,6 @@
 pragma solidity ^0.4.18;
 
+import './ownership/Ownable.sol';
 import './crowdsale/RefundVault.sol';
 import './ATC.sol';
 import './kyc/PresaleKYC.sol';
@@ -10,11 +11,9 @@ contract PresaleFallbackReceiver {
     function presaleFallBack(uint256 _presaleWeiRaised) public returns (bool);
 }
 
-contract ATCPresale is PresaleKYC, Pausable {
+contract ATCPresale is Ownable, PresaleKYC, Pausable {
   ATC public token;
   RefundVault public vault;
-
-  address[] reserveWallet;
 
   uint256 public rate;
   uint256 public weiRaised;
@@ -30,24 +29,18 @@ contract ATCPresale is PresaleKYC, Pausable {
   function ATCPresale(
     address _token,
     address _vault,
-    address[] _reserveWallet,
     uint64 _startTime,
     uint64 _endTime,
     uint256 _maxEtherCap,
     uint256 _rate
     ) {
       require(_token != 0x00 && _vault != 0x00);
-      for(uint256 i = 0; i < _reserveWallet.length; i++){
-        require(_reserveWallet[i] != 0x00);
-      }
-
       require(now < _startTime && _startTime < _endTime);
       require(_maxEtherCap > 0);
       require(_rate > 0);
 
       token = ATC(_token);
       vault = RefundVault(_vault);
-      reserveWallet = _reserveWallet;
       startTime = _startTime;
       endTime = _endTime;
       maxEtherCap = _maxEtherCap;
@@ -166,19 +159,29 @@ contract ATCPresale is PresaleKYC, Pausable {
     vault.deposit.value(toFund)(msg.sender);
   }
 
+  event Log(string messgae);
+
   function finalizePresale(
     address newOwner
     ) onlyOwner {
+      Log("before require");
       require(!isFinalized);
       require(now > endTime);
-
+      Log("after require");
       PresaleFallbackReceiver crowdsale = PresaleFallbackReceiver(newOwner);
-      crowdsale.presaleFallBack(weiRaised);
+      Log("after initialize");
+
+      require(crowdsale.presaleFallBack(weiRaised));
+      Log("after fallback");
 
       changeTokenController(newOwner);
       changeVaultOwner(newOwner);
 
+      Log("after change ownership");
+
       isFinalized = true;
+      Log("Finalized");
+
   }
   function changeTokenController(address newOwner) onlyOwner internal {
     token.changeController(newOwner);
