@@ -26,15 +26,29 @@ contract(
     [
       owner,
       investor,
+      _,
+      _,
+      _,
+      _,
+      _,
       reserveWallet0,
       reserveWallet1,
       reserveWallet2,
+      reserveWallet3,
+      reserveWallet4,
+      reserveWallet5,
+      reserveWallet6,
+      reserveWallet7,
+      reserveWallet8,
+      reserveWallet9,
+      _,
+      _,
       ...accounts
     ],
   ) => {
     let snapshotId;
 
-    let multiSig, tokenFactory, presale, token, vault;
+    let tokenFactory, presale, token, vault;
 
     let now, startTime, endTime;
     let beforeStartTime, afterEndTime, afterStartTime;
@@ -52,6 +66,13 @@ contract(
         reserveWallet0,
         reserveWallet1,
         reserveWallet2,
+        reserveWallet3,
+        reserveWallet4,
+        reserveWallet5,
+        reserveWallet6,
+        reserveWallet7,
+        reserveWallet8,
+        reserveWallet9,
       ];
 
       startTime = moment().add(5, "minutes").unix();
@@ -60,16 +81,13 @@ contract(
       rate = 200;
       maxEtherCap = ether(10000);
 
-      multiSig = await MultiSig.new(reserveWallet, reserveWallet.length - 1);
-      console.log("multiSig deployed at", multiSig.address);
-
       tokenFactory = await MiniMeTokenFactory.new();
       console.log("tokenFactory deployed at", tokenFactory.address);
 
       token = await ATC.new(tokenFactory.address);
       console.log("token deployed at", token.address);
 
-      vault = await RefundVault.new(multiSig.address, reserveWallet);
+      vault = await RefundVault.new(reserveWallet);
       console.log("vault deployed at", vault.address);
 
       /*eslint-disable */

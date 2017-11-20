@@ -35,13 +35,22 @@ contract(
   async (
     [
       owner,
-      investor,
-      bountyAddress0,
-      bountyAddress1,
-      bountyAddress2,
-      reserveAddress0,
-      reserveAddress1,
-      reserveAddress2,
+      investor1,
+      investor2,
+      ATCBountyAddress0,
+      ATCBountyAddress1,
+      ATCBountyAddress2,
+      ATCReserveAddress,
+      vaultOwner0,
+      vaultOwner1,
+      vaultOwner2,
+      vaultOwner3,
+      vaultOwner4,
+      vaultOwner5,
+      vaultOwner6,
+      vaultOwner7,
+      vaultOwner8,
+      vaultOwner9,
       teamAddress,
       ATCController,
       ...accounts
@@ -57,8 +66,11 @@ contract(
     let periods, presaleRate;
 
     let maxEtherCap, minEtherCap, presaleMaxEtherCap;
+    let maxGuaranteedLimit;
 
-    let bountyAddresses, reserveAddresses;
+    let bountyAddresses, vaultOwner;
+
+    let cumulativeWeiRaised;
 
     let registeredAddresses, unregisteredAddresses;
 
@@ -68,16 +80,25 @@ contract(
       const logger = (...args) => (logging ? console.log(...args) : null);
 
       bountyAddresses = [
-        bountyAddress0,
-        bountyAddress1,
-        bountyAddress2,
+        ATCBountyAddress0,
+        ATCBountyAddress1,
+        ATCBountyAddress2,
       ];
 
-      reserveAddresses = [
-        reserveAddress0,
-        reserveAddress1,
-        reserveAddress2,
+      vaultOwner = [
+        vaultOwner0,
+        vaultOwner1,
+        vaultOwner2,
+        vaultOwner3,
+        vaultOwner4,
+        vaultOwner5,
+        vaultOwner6,
+        vaultOwner7,
+        vaultOwner8,
+        vaultOwner9,
       ];
+
+      cumulativeWeiRaised = new BigNumber(0);
 
       registeredAddresses = accounts.slice(0, 10);
       unregisteredAddresses = accounts.slice(10, 20);
@@ -130,6 +151,8 @@ contract(
       maxEtherCap = ether(286000);
       minEtherCap = ether(28600);
       presaleMaxEtherCap = maxEtherCap.mul(15).div(100);
+      maxGuaranteedLimit = ether(5000);
+
       presaleRate = 200;
 
       multiSig = await MultiSig.new(bountyAddresses, bountyAddresses.length - 1);
@@ -141,14 +164,13 @@ contract(
       token = await ATC.new(tokenFactory.address);
       logger("token deployed at", token.address);
 
-      vault = await RefundVault.new(multiSig.address, bountyAddresses);
+      vault = await RefundVault.new(vaultOwner);
       logger("vault deployed at", vault.address);
 
       /*eslint-disable */
       presale = await ATCPresale.new(
         token.address,
         vault.address,
-        reserveAddresses,
         presaleStartTime,
         presaleEndTime,
         presaleMaxEtherCap,
@@ -169,9 +191,12 @@ contract(
         token.address,
         vault.address,
         presale.address,
+
         bountyAddresses,
         multiSig.address,
+        ATCReserveAddress,
         teamAddress,
+
         ATCController,
         maxEtherCap,
         minEtherCap,
@@ -184,7 +209,7 @@ contract(
 
       beforePresaleStartTime = presaleStartTime - duration.seconds(100);
       afterPresaleStartTime = presaleStartTime + duration.seconds(1);
-      afterPresaleEndTime = presaleEndTime + duration.seconds(10);
+      afterPresaleEndTime = presaleEndTime + duration.seconds(100);
 
       logger(`
 ------------------------------
@@ -220,20 +245,26 @@ now:\t\t\t\t${ now }
 
     describe("ATCCrowdSale Test", async () => {
       it("Sequential Test", async () => {
-        await contractDeploy(false);
         await increaseTimeTo(beforePresaleStartTime);
 
-        const registerTx = await presale.register(investor, presaleMaxEtherCap)
+        const registerTx = await presale.register(investor1, presaleMaxEtherCap)
           .should.be.fulfilled;
         console.log("presale registered");
 
-        (await presale.registeredAddress(investor))
+        (await presale.registeredAddress(investor1))
           .should.be.equal(true);
 
         await increaseTimeTo(afterPresaleStartTime);
 
-        const purchaseTx = await presale.buyPresale(investor, { value: presaleMaxEtherCap, from: investor })
-          .should.be.fulfilled;
+        const purchaseTx = await presale.buyPresale(investor1, {
+          value: presaleMaxEtherCap,
+          from: investor1,
+        }).should.be.fulfilled;
+
+        cumulativeWeiRaised = cumulativeWeiRaised.add(presaleMaxEtherCap);
+
+        (await token.balanceOf(investor1))
+          .should.be.bignumber.equal(presaleMaxEtherCap.mul(presaleRate));
         console.log("presale purchase");
 
         await increaseTimeTo(afterPresaleEndTime);
@@ -243,42 +274,109 @@ now:\t\t\t\t${ now }
         (await crowdsale.presaleFallBackCalled())
           .should.be.equal(true);
         console.log("presale finalize");
-        //
-        // let period,
-        //   periodIndex = 0;
-        //
-        // period = periods[ periodIndex++ ];
-        // await increaseTimeTo(period.startTime - 1);
-        // await crowdsale.startPeriod(period.startTime, period.endTime, period.rate);
-        //   .should.be.fulfilled;
-        //
-        // period = periods[ 1 ];
-        // await crowdsale.startPeriod(period.startTime, period.endTime, period.rate)
-        //   .should.be.fulfilled;
-        //
-        // period = periods[ 2 ];
-        // await crowdsale.startPeriod(period.startTime, period.endTime, period.rate)
-        //   .should.be.fulfilled;
-        //
-        // period = periods[ 3 ];
-        // await crowdsale.startPeriod(period.startTime, period.endTime, period.rate)
-        //   .should.be.fulfilled;
-        //
-        // period = periods[ 4 ];
-        // await crowdsale.startPeriod(period.startTime, period.endTime, period.rate)
-        //   .should.be.fulfilled;
-        //
-        // period = periods[ 5 ];
-        // await crowdsale.startPeriod(period.startTime, period.endTime, period.rate)
-        //   .should.be.fulfilled;
-        //
-        // period = periods[ 6 ];
-        // await crowdsale.startPeriod(period.startTime, period.endTime, period.rate)
-        //   .should.be.fulfilled;
-        //
-        // period = periods[ 7 ];
-        // await crowdsale.startPeriod(period.startTime, period.endTime, period.rate)
-        //   .should.be.rejectedWith(EVMThrow);
+
+        await kyc.registerByList([ investor1, investor2 ])
+          .should.be.fulfilled;
+        console.log("kyc register");
+
+        // reject purchase before period started
+        await crowdsale.buy(investor1, {
+          from: investor1,
+          value: ether(1),
+        }).should.be.rejectedWith(EVMThrow);
+        console.log("reject purchase before period");
+
+        let period,
+          periodIndex = 0;
+
+        period = periods[ periodIndex++ ];
+        await increaseTimeTo(period.startTime - duration.seconds(100));
+
+        await crowdsale.startPeriod(period.startTime, period.endTime, period.rate)
+          .should.be.fulfilled;
+        console.log("period 0 startred");
+
+        await increaseTimeTo(period.startTime + duration.seconds(100));
+
+        await crowdsale.buy(investor2, {
+          from: investor2,
+          value: maxGuaranteedLimit,
+        }).should.be.fulfilled;
+        cumulativeWeiRaised = cumulativeWeiRaised.add(maxGuaranteedLimit);
+        console.log("investor2 buy tokens");
+
+        period = periods[ periodIndex++ ];
+        await increaseTimeTo(period.startTime - duration.seconds(100));
+
+        await crowdsale.startPeriod(period.startTime, period.endTime, period.rate)
+          .should.be.fulfilled;
+        console.log("period 1 startred");
+
+        await increaseTimeTo(period.startTime + duration.seconds(100));
+
+        // // accept purchase by many investors
+        const investors = accounts.slice(0, 10);
+        await kyc.registerByList(investors)
+          .should.be.fulfilled;
+
+        for (const investor of investors) {
+          if (await crowdsale.maxReached()) {
+            break;
+          }
+
+          const investAmount = maxGuaranteedLimit;
+
+          await crowdsale.buy(investor, {
+            from: investor,
+            value: investAmount,
+          }).should.be.fulfilled;
+          cumulativeWeiRaised = cumulativeWeiRaised.add(investAmount);
+
+          (await token.balanceOf(investor))
+            .should.be.bignumber.equal(investAmount.mul(period.rate));
+        }
+
+        console.log("many investors purchased");
+
+        await token.transfer(investor2, 100, { from: investor1 }).should.be.rejectedWith(EVMThrow);
+
+        console.log("token transfer rejected");
+
+        await increaseTimeTo(period.endTime + duration.seconds(100));
+
+        await crowdsale.finalize()
+          .should.be.fulfilled;
+
+        console.log("finalized");
+
+        const totalSupply = await token.totalSupply();
+        const bountyAndCommunityAmountForEach = totalSupply.mul(5).div(100);
+        const reserverAmount = totalSupply.mul(15).div(100);
+        const teamAmount = totalSupply.mul(15).div(100);
+
+        for (const address of [ ATCBountyAddress0, ATCBountyAddress1, ATCBountyAddress2, multiSig.address ]) {
+          (await token.balanceOf(address)).should.be.bignumber.equal(bountyAndCommunityAmountForEach);
+        }
+
+        (await token.balanceOf(ATCReserveAddress)).should.be.bignumber.equal(reserverAmount);
+
+        (await token.balanceOf(teamAddress)).should.be.bignumber.equal(teamAmount);
+
+        (await token.controller()).should.be.equal(ATCController);
+
+        const weiRaised = await crowdsale.weiRaised();
+        weiRaised
+          .should.be.bignumber.equal(cumulativeWeiRaised);
+
+        for (const address of vaultOwner) {
+          (await eth.getBalance(address)).should.be.bignumber.equal(weiRaised.div(10));
+        }
+
+        console.log("token & ether distribution checked");
+
+        await token.transfer(investor2, 100, { from: investor1 }).should.be.fulfilled;
+
+        console.log("token transfer accepted");
       });
     });
   },

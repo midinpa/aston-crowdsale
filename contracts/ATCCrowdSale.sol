@@ -49,6 +49,8 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
   event CrowdSaleTokenPurchase(address indexed investor, address indexed beneficiary, uint256 toFund, uint256 tokens);
   event StartPeriod(uint64 _startTime, uint64 _endTime, uint8 _rate);
   event Finalized();
+  event Log(string messgae); // for dev
+
 
   function ATCCrowdSale (
     address _kyc,
@@ -59,7 +61,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     address _bountyAndCommunityAddressesMultiSig,
     address _reserveAddress,
     address _teamAddress,
-    address _ATCController,
+    address _tokenController,
     uint256 _maxEtherCap,
     uint256 _minEtherCap
     ) {
@@ -73,13 +75,13 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
       bountyAndCommunityAddressesMultiSig = _bountyAndCommunityAddressesMultiSig;
       reserveAddress = _reserveAddress;
       teamAddress = _teamAddress;
-      ATCController = _ATCController;
+      ATCController = _tokenController;
 
       maxEtherCap = _maxEtherCap;
       minEtherCap = _minEtherCap;
     }
 
-  function () payable {
+  function () public payable {
     buy(msg.sender);
   }
 
@@ -103,6 +105,8 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
       require(!periodFinished(currentPeriod));
       require(beneficiary != 0x00);
       require(validPurchase());
+
+      Log("buy condition check");
 
       // calculate eth amount
       uint256 weiAmount = msg.value;
@@ -161,14 +165,13 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     vault.deposit.value(toFund)(msg.sender);
   }
 
-  function nonZeroPeriod() internal constant returns (bool) {
+  function nonZeroPeriod() public constant returns (bool) {
     return periods.length > 0;
   }
 
   function periodFinished(uint256 period) public constant returns (bool) {
-    require(nonZeroPeriod());
-    require(periods.length-1 >= period);
-    return now > periods[period].endTime;
+    require(sub(periods.length, 1) >= period);
+    return nonZeroPeriod() && now > periods[period].endTime;
   }
 
   /**
@@ -192,18 +195,17 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
 
   function startPeriod(uint64 _startTime, uint64 _endTime, uint8 _rate) public onlyOwner returns (bool) {
     require(periods.length < MAX_PERIOD_COUNT);
-    require(now > periods[currentPeriod].endTime);
     require(!maxReached());
     require(now < _startTime && _startTime < _endTime);
     require(_rate > 0);
 
-    // TOOD: check working correctly
     Period memory newPeriod;
     newPeriod.startTime = _startTime;
     newPeriod.endTime = _endTime;
     newPeriod.rate = _rate;
 
     if (nonZeroPeriod()) {
+      require(now > periods[currentPeriod].endTime);
       currentPeriod = add (currentPeriod, 1);
     }
 
@@ -242,6 +244,8 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
       uint256 teamAmount = div(mul(totalToken, 15), 50);
 
       distributeToken(bountyAndCommunityAmount, reserveAmount, teamAmount);
+
+      token.enableTransfers(true);
 
     } else {
       vault.enableRefunds();

@@ -15,7 +15,7 @@ module.exports = async function (deployer, network, accounts) {
   try {
     let maxEtherCap;
     let startTime, endTime;
-    let reserveWallet;
+    let vaultOwners;
 
     if (network === "mainnet") {
       maxEtherCap = 10000 * 10 ** 18;
@@ -26,17 +26,21 @@ module.exports = async function (deployer, network, accounts) {
       startTime = moment().add(10, "minutes").unix();
       endTime = moment().add(25, "minutes").unix();
 
-      reserveWallet = [
+      vaultOwners = [
         "0xb7aa50eb5e42c74076ea1b902a6142539f654796",
         "0x922aa0d0e720caf10bcd7a02be187635a6f36ab0",
         "0x6267901dbb0055e12ea895fc768b68486d57dcf8",
+        "0x6267901dbb0055e12ea895fc768b68486d57dcf1",
+        "0x6267901dbb0055e12ea895fc768b68486d57dcf2",
+        "0x6267901dbb0055e12ea895fc768b68486d57dcf3",
+        "0x6267901dbb0055e12ea895fc768b68486d57dcf4",
+        "0x6267901dbb0055e12ea895fc768b68486d57dcf5",
+        "0x6267901dbb0055e12ea895fc768b68486d57dcf6",
+        "0x6267901dbb0055e12ea895fc768b68486d57dcf7",
       ];
     }
 
     const rate = 200;
-
-    const multiSig = await MultiSig.new(reserveWallet, reserveWallet.length - 1);
-    console.log("multiSig deployed at", multiSig.address);
 
     const tokenFactory = await MiniMeTokenFactory.new();
     console.log("tokenFactory deployed at", tokenFactory.address);
@@ -44,7 +48,7 @@ module.exports = async function (deployer, network, accounts) {
     const token = await ATC.new(tokenFactory.address);
     console.log("token deployed at", token.address);
 
-    const vault = await RefundVault.new(multiSig.address, reserveWallet);
+    const vault = await RefundVault.new(vaultOwners);
     console.log("vault deployed at", vault.address);
 
     /*eslint-disable */

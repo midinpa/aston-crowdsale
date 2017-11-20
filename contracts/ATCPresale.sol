@@ -159,29 +159,22 @@ contract ATCPresale is Ownable, PresaleKYC, Pausable {
     vault.deposit.value(toFund)(msg.sender);
   }
 
-  event Log(string messgae);
+  event Log(string messgae); // for dev
 
   function finalizePresale(
     address newOwner
     ) onlyOwner {
-      Log("before require");
       require(!isFinalized);
       require(now > endTime);
-      Log("after require");
+
       PresaleFallbackReceiver crowdsale = PresaleFallbackReceiver(newOwner);
-      Log("after initialize");
 
       require(crowdsale.presaleFallBack(weiRaised));
-      Log("after fallback");
 
       changeTokenController(newOwner);
       changeVaultOwner(newOwner);
 
-      Log("after change ownership");
-
       isFinalized = true;
-      Log("Finalized");
-
   }
   function changeTokenController(address newOwner) onlyOwner internal {
     token.changeController(newOwner);
