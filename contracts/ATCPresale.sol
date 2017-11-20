@@ -5,6 +5,7 @@ import './ATC.sol';
 import './kyc/PresaleKYC.sol';
 import './lifecycle/Pausable.sol';
 import './math/SafeMath.sol';
+import './ATCCrowdSale.sol';
 
 contract ATCPresale is PresaleKYC, Pausable {
   ATC public token;
@@ -18,8 +19,8 @@ contract ATCPresale is PresaleKYC, Pausable {
   uint64 public startTime;
   uint64 public endTime;
 
-
-  mapping (address => uint256) public buyerFunded;
+  bool public isFinalized;
+  mapping (address => uint256) public beneficiaryFunded;
 
   event PresaleTokenPurchase(address indexed buyer, address indexed beneficiary, uint256 toFund, uint256 tokens);
 
@@ -82,7 +83,7 @@ contract ATCPresale is PresaleKYC, Pausable {
     onlyOwner
     onlyRegistered(_addr)
   {
-    require(buyerFunded[_addr] == 0);
+    require(beneficiaryFunded[_addr] == 0);
     super.unregister(_addr);
   }
 
@@ -94,11 +95,11 @@ contract ATCPresale is PresaleKYC, Pausable {
     public
     onlyOwner
   {
-    uint256 totalBuyerFunded;
+    uint256 totalbeneficiaryFunded;
     for(uint256 i = 0; i < _addrs.length; i++) {
-      totalBuyerFunded = add(totalBuyerFunded, buyerFunded[_addrs[i]]);
+      totalbeneficiaryFunded = add(totalbeneficiaryFunded, beneficiaryFunded[_addrs[i]]);
     }
-    require(totalBuyerFunded == 0);
+    require(totalbeneficiaryFunded == 0);
     super.unregisterByList(_addrs);
   }
 
@@ -115,12 +116,12 @@ contract ATCPresale is PresaleKYC, Pausable {
 
     // calculate eth amount
     uint256 weiAmount = msg.value;
-    uint256 totalAmount = add(buyerFunded[beneficiary], weiAmount);
+    uint256 totalAmount = add(beneficiaryFunded[beneficiary], weiAmount);
 
     uint256 toFund;
 
     if (totalAmount > guaranteedLimit) {
-      toFund = sub(guaranteedLimit, buyerFunded[beneficiary]);
+      toFund = sub(guaranteedLimit, beneficiaryFunded[beneficiary]);
     } else {
       toFund = weiAmount;
     }
@@ -132,7 +133,7 @@ contract ATCPresale is PresaleKYC, Pausable {
     uint256 toReturn = sub(weiAmount, toFund);
 
     weiRaised = add(weiRaised, toFund);
-    buyerFunded[beneficiary] = add(buyerFunded[beneficiary], toFund);
+    beneficiaryFunded[beneficiary] = add(beneficiaryFunded[beneficiary], toFund);
 
     //TODO: Error check
     token.generateTokens(beneficiary, tokens);
@@ -165,9 +166,16 @@ contract ATCPresale is PresaleKYC, Pausable {
   function finalizePresale(
     address newOwner
     ) onlyOwner {
-    require(now > endTime);
-    changeTokenController(newOwner);
-    changeVaultOwner(newOwner);
+      require(!isFinalized);
+      require(now > endTime);
+
+      ATCCrowdSale crowdsale = ATCCrowdSale(newOwner);
+      crowdsale.presaleFallBack(weiRaised);
+
+      changeTokenController(newOwner);
+      changeVaultOwner(newOwner);
+
+      isFinalized = true;
   }
   function changeTokenController(address newOwner) onlyOwner internal {
     token.changeController(newOwner);
