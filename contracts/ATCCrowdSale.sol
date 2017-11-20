@@ -7,7 +7,7 @@ import './ownership/Ownable.sol';
 import './math/SafeMath.sol';
 import './lifecycle/Pausable.sol';
 
-contract ATCCrowdSale is Ownable, SafeMath, Pausable{
+contract ATCCrowdSale is Ownable, SafeMath, Pausable {
   KYC public kyc;
   ATC public token;
   RefundVault public vault;

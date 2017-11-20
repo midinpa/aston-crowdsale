@@ -238,19 +238,19 @@ now:\t\t\t\t${ now }
 
         await increaseTimeTo(afterPresaleEndTime);
 
-        const finalizeTx = await presale.finalizePresale(crowdsale.address)
-          .should.be.fulfilled;
-        // (await crowdsale.presaleFallBackCalled())
-        //   .should.be.equal(true);
-
-        console.log("presale finalize");
-
-        let period,
-          periodIndex = 0;
-
-        period = periods[ periodIndex++ ];
-        await increaseTimeTo(period.startTime - 1);
-        await crowdsale.startPeriod(period.startTime, period.endTime, period.rate);
+        // const finalizeTx = await presale.finalizePresale(crowdsale.address)
+        //   .should.be.fulfilled;
+        // // (await crowdsale.presaleFallBackCalled())
+        // //   .should.be.equal(true);
+        //
+        // console.log("presale finalize");
+        //
+        // let period,
+        //   periodIndex = 0;
+        //
+        // period = periods[ periodIndex++ ];
+        // await increaseTimeTo(period.startTime - 1);
+        // await crowdsale.startPeriod(period.startTime, period.endTime, period.rate);
         //   .should.be.fulfilled;
         //
         // period = periods[ 1 ];
