@@ -1,4 +1,4 @@
-pragma solidity^0.4.18;
+pragma solidity ^0.4.18;
 
 import './kyc/KYC.sol';
 import './ATC.sol';
@@ -27,7 +27,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable{
 
   Period[] public periods;
   uint256 public currentPeriod;
-  uint8 constant public MAX_PERIOD_COUNT = 6;
+  uint8 constant public MAX_PERIOD_COUNT = 7;
 
   uint256 public weiRaised;
   uint256 public maxEtherCap;
@@ -59,6 +59,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable{
     address _bountyAndCommunityAddressesMultiSig,
     address _reserveAddress,
     address _teamAddress,
+    address _ATCController,
     uint256 _maxEtherCap,
     uint256 _minEtherCap
     ) {
@@ -67,10 +68,13 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable{
       token = ATC(_token);
       vault = RefundVault(_vault);
       presale = _presale;
+
       bountyAndCommunityAddresses = _bountyAndCommunityAddresses;
       bountyAndCommunityAddressesMultiSig = _bountyAndCommunityAddressesMultiSig;
       reserveAddress = _reserveAddress;
       teamAddress = _teamAddress;
+      ATCController = _ATCController;
+
       maxEtherCap = _maxEtherCap;
       minEtherCap = _minEtherCap;
     }
