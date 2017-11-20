@@ -12,6 +12,8 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable{
   ATC public token;
   RefundVault public vault;
 
+  address public presale;
+
   address[] public bountyAndCommunityAddresses; //5% for bounty, 15% for community groups & partners
   address public bountyAndCommunityAddressesMultiSig; //5% for bounty, 15% for community groups & partners
   address public reserveAddress; //15% with 2 years lock
@@ -52,6 +54,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable{
     address _kyc,
     address _token,
     address _vault,
+    address _presale,
     address[] _bountyAndCommunityAddresses,
     address _bountyAndCommunityAddressesMultiSig,
     address _reserveAddress,
@@ -59,9 +62,11 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable{
     uint256 _maxEtherCap,
     uint256 _minEtherCap
     ) {
+      // TODO: check conditions
       kyc = KYC(_kyc);
       token = ATC(_token);
       vault = RefundVault(_vault);
+      presale = _presale;
       bountyAndCommunityAddresses = _bountyAndCommunityAddresses;
       bountyAndCommunityAddressesMultiSig = _bountyAndCommunityAddressesMultiSig;
       reserveAddress = _reserveAddress;
@@ -74,20 +79,22 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable{
     buy(msg.sender);
   }
 
-  function presaleFallBack(uint256 _presaleWeiRaised) {
+  function presaleFallBack(uint256 _presaleWeiRaised) public {
     require(!presaleFallBackCalled);
+    require(msg.sender == presale);
     weiRaised = _presaleWeiRaised;
     presaleFallBackCalled = true;
   }
 
   function buy(address beneficiary)
+    public
     payable
     whenNotPaused
   {
       // check validity
       require(kyc.registeredAddress(beneficiary));
       require(presaleFallBackCalled);
-      require(firstPeriodPushed());
+      require(nonZeroPeriod());
       require(!periodFinished(currentPeriod));
       require(beneficiary != 0x00);
       require(validPurchase());
@@ -149,12 +156,12 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable{
     vault.deposit.value(toFund)(msg.sender);
   }
 
-  function firstPeriodPushed() internal constant returns (bool) {
+  function nonZeroPeriod() internal constant returns (bool) {
     return periods.length > 0;
   }
 
-  function periodFinished(uint256 period) returns (bool) {
-    require(firstPeriodPushed());
+  function periodFinished(uint256 period) public constant returns (bool) {
+    require(nonZeroPeriod());
     require(periods.length-1 >= period);
     return now > periods[period].endTime;
   }
@@ -174,25 +181,27 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable{
     return weiRaised == maxEtherCap;
   }
 
-  function getRate() returns (uint8) {
+  function getRate() public constant returns (uint8) {
     return periods[currentPeriod].rate;
   }
 
-  function startPeriod(uint64 _startTime, uint64 _endTime, uint8 _rate) onlyOwner returns (bool) {
+  function startPeriod(uint64 _startTime, uint64 _endTime, uint8 _rate) public onlyOwner returns (bool) {
     require(periods.length < MAX_PERIOD_COUNT);
     require(now > periods[currentPeriod].endTime);
     require(!maxReached());
     require(now < _startTime && _startTime < _endTime);
     require(_rate > 0);
 
+    // TOOD: check working correctly
     Period memory newPeriod;
     newPeriod.startTime = _startTime;
     newPeriod.endTime = _endTime;
     newPeriod.rate = _rate;
 
-    if (firstPeriodPushed()) {
+    if (nonZeroPeriod()) {
       currentPeriod = add (currentPeriod, 1);
     }
+
     periods.push(newPeriod);
 
     StartPeriod(_startTime, _endTime, _rate);
@@ -237,7 +246,10 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable{
   }
 
   function distributeToken(uint256 bountyAndCommunityAmount, uint256 reserveAmount, uint256 teamAmount) internal {
-    uint256 bountyAndCommunityAmountForEach = div(bountyAndCommunityAmount, 4);
+    // TODO: check bountyAndCommunityAmount distribution ratio
+    // 3 wallets, 1 multisig
+    uint256 bountyAndCommunityAmountForEach = div(bountyAndCommunityAmount, bountyAndCommunityAddresses.length + 1);
+
     for (uint256 i = 0; i < bountyAndCommunityAddresses.length; i++) {
         token.generateTokens(bountyAndCommunityAddresses[i], bountyAndCommunityAmountForEach);
     }
