@@ -678,7 +678,7 @@
       },
       {
         "attributes": {
-          "SourceUnit": 3740,
+          "SourceUnit": 3763,
           "absolutePath": "/Users/PJH/workspace/aston-crowdsale/contracts/token/MiniMeToken.sol",
           "file": "./token/MiniMeToken.sol",
           "scope": 130,
@@ -694,16 +694,16 @@
       {
         "attributes": {
           "contractDependencies": [
-            2668,
-            3698
+            2691,
+            3721
           ],
           "contractKind": "contract",
           "documentation": null,
           "fullyImplemented": true,
           "linearizedBaseContracts": [
             129,
-            3698,
-            2668
+            3721,
+            2691
           ],
           "name": "ATC",
           "scope": 130
@@ -720,7 +720,7 @@
                 "attributes": {
                   "contractScope": null,
                   "name": "MiniMeToken",
-                  "referencedDeclaration": 3698,
+                  "referencedDeclaration": 3721,
                   "type": "contract MiniMeToken"
                 },
                 "id": 3,
@@ -868,7 +868,7 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 3698,
+                      "referencedDeclaration": 3721,
                       "type": "type(contract MiniMeToken)",
                       "value": "MiniMeToken"
                     },
@@ -1022,7 +1022,7 @@
               "payable": false,
               "scope": 129,
               "stateMutability": "nonpayable",
-              "superFunction": 3319,
+              "superFunction": 3342,
               "visibility": "public"
             },
             "children": [
@@ -1131,7 +1131,7 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 2644,
+                      "referencedDeclaration": 2667,
                       "type": "modifier ()",
                       "value": "onlyController"
                     },
@@ -1174,7 +1174,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 3786,
+                              "referencedDeclaration": 3809,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -1277,7 +1277,7 @@
                               "isPure": false,
                               "lValueRequested": false,
                               "member_name": "generateTokens",
-                              "referencedDeclaration": 3319,
+                              "referencedDeclaration": 3342,
                               "type": "function (address,uint256) returns (bool)"
                             },
                             "children": [
@@ -1287,7 +1287,7 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 3805,
+                                  "referencedDeclaration": 3828,
                                   "type": "contract super ATC",
                                   "value": "super"
                                 },
@@ -1360,7 +1360,7 @@
               "payable": false,
               "scope": 129,
               "stateMutability": "nonpayable",
-              "superFunction": 2959,
+              "superFunction": 2982,
               "visibility": "internal"
             },
             "children": [
@@ -1512,7 +1512,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 3786,
+                              "referencedDeclaration": 3809,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -1648,7 +1648,7 @@
                               "isPure": false,
                               "lValueRequested": false,
                               "member_name": "doTransfer",
-                              "referencedDeclaration": 2959,
+                              "referencedDeclaration": 2982,
                               "type": "function (address,address,uint256) returns (bool)"
                             },
                             "children": [
@@ -1658,7 +1658,7 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 3805,
+                                  "referencedDeclaration": 3828,
                                   "type": "contract super ATC",
                                   "value": "super"
                                 },
@@ -1803,7 +1803,7 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 2644,
+                      "referencedDeclaration": 2667,
                       "type": "modifier ()",
                       "value": "onlyController"
                     },
@@ -2001,7 +2001,7 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 2644,
+                      "referencedDeclaration": 2667,
                       "type": "modifier ()",
                       "value": "onlyController"
                     },
@@ -2228,7 +2228,7 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 2644,
+                      "referencedDeclaration": 2667,
                       "type": "modifier ()",
                       "value": "onlyController"
                     },
@@ -2379,5 +2379,5 @@
   },
   "networks": {},
   "schemaVersion": "1.0.1",
-  "updatedAt": "2017-11-20T07:44:50.859Z"
+  "updatedAt": "2017-11-20T18:38:44.897Z"
 }

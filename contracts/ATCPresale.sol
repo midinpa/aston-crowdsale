@@ -5,7 +5,10 @@ import './ATC.sol';
 import './kyc/PresaleKYC.sol';
 import './lifecycle/Pausable.sol';
 import './math/SafeMath.sol';
-import './ATCCrowdSale.sol';
+
+contract ATCCrowdSale {
+    function presaleFallBack(uint256 _presaleWeiRaised) public returns (bool);
+}
 
 contract ATCPresale is PresaleKYC, Pausable {
   ATC public token;

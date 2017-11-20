@@ -64,7 +64,9 @@ contract(
 
     const newOwner = accounts[ 25 ];
 
-    const contractDeploy = async () => {
+    const contractDeploy = async (logging = true) => {
+      const logger = (...args) => (logging ? console.log(...args) : null);
+
       bountyAddresses = [
         bountyAddress0,
         bountyAddress1,
@@ -131,16 +133,16 @@ contract(
       presaleRate = 200;
 
       multiSig = await MultiSig.new(bountyAddresses, bountyAddresses.length - 1);
-      console.log("multiSig deployed at", multiSig.address);
+      logger("multiSig deployed at", multiSig.address);
 
       tokenFactory = await MiniMeTokenFactory.new();
-      console.log("tokenFactory deployed at", tokenFactory.address);
+      logger("tokenFactory deployed at", tokenFactory.address);
 
       token = await ATC.new(tokenFactory.address);
-      console.log("token deployed at", token.address);
+      logger("token deployed at", token.address);
 
       vault = await RefundVault.new(multiSig.address, bountyAddresses);
-      console.log("vault deployed at", vault.address);
+      logger("vault deployed at", vault.address);
 
       /*eslint-disable */
       presale = await ATCPresale.new(
@@ -153,13 +155,13 @@ contract(
         presaleRate
       );
       /* eslint-enable */
-      console.log("presale deployed at", presale.address);
+      logger("presale deployed at", presale.address);
 
       await token.changeController(presale.address);
       await vault.transferOwnership(presale.address);
 
       kyc = await KYC.new();
-      console.log("kyc deployed at", kyc.address);
+      logger("kyc deployed at", kyc.address);
 
       /*eslint-disable */
       crowdsale = await ATCCrowdSale.new(
@@ -175,7 +177,7 @@ contract(
         minEtherCap,
       );
       /* eslint-enable */
-      console.log("crowdsale deployed at", crowdsale.address);
+      logger("crowdsale deployed at", crowdsale.address);
 
       // backup
       snapshotId = await capture();
@@ -184,7 +186,7 @@ contract(
       afterPresaleStartTime = presaleStartTime + duration.seconds(1);
       afterPresaleEndTime = presaleEndTime + duration.seconds(1);
 
-      console.log(`
+      logger(`
 ------------------------------
 
 \t[TIME]
@@ -216,39 +218,68 @@ now:\t\t\t\t${ now }
       }
     });
 
-    // Helper functions
-    const register = async () => {
-      for (const address of [ investor, ...registeredAddresses ]) {
-        await kyc.register(address)
-          .should.be.fulfilled;
-      }
-    };
-
-    const finalize = async () => {
-      await presale.send({ value: presaleMaxEtherCap, from: investor });
-      await presale.finalizePresale(crowdsale.addresses);
-    };
-
     describe("ATCCrowdSale Test", async () => {
-      it("should not start period when presale is not finished", async () => {
-        const period = periods[ 0 ];
-        await crowdsale.startPeriod(period.startTime, period.endTime, period.rate)
-          .should.be.rejectedWith(EVMThrow);
-      });
+      it("Sequential Test", async () => {
+        await contractDeploy(false);
+        await increaseTimeTo(beforePresaleStartTime);
 
-      it("After presale finalized", async () => {
-        await contractDeploy();
-        await register();
+        const registerTx = await presale.register(investor, presaleMaxEtherCap)
+          .should.be.fulfilled;
+        console.log("presale registered");
 
-        await presale.send({ value: presaleMaxEtherCap, from: investor });
+        (await presale.registeredAddress(investor))
+          .should.be.equal(true);
 
-        // it("should start period 0", async () => {
+        await increaseTimeTo(afterPresaleStartTime);
+
+        const purchaseTx = await presale.buyPresale(investor, { value: presaleMaxEtherCap, from: investor })
+          .should.be.fulfilled;
+        console.log("presale purchase");
+
+        await increaseTimeTo(afterPresaleEndTime);
+
+        const finalizeTx = await presale.finalizePresale(crowdsale.address)
+          .should.be.fulfilled;
+        // (await crowdsale.presaleFallBackCalled())
+        //   .should.be.equal(true);
+
+        console.log("presale finalize");
+
+        let period,
+          periodIndex = 0;
+
+        period = periods[ periodIndex++ ];
+        await increaseTimeTo(period.startTime - 1);
+        await crowdsale.startPeriod(period.startTime, period.endTime, period.rate);
+        //   .should.be.fulfilled;
         //
-        // });
+        // period = periods[ 1 ];
+        // await crowdsale.startPeriod(period.startTime, period.endTime, period.rate)
+        //   .should.be.fulfilled;
         //
-        // it("should accept token purchase by registered accounts", async () => {
-        //   await register();
-        // });
+        // period = periods[ 2 ];
+        // await crowdsale.startPeriod(period.startTime, period.endTime, period.rate)
+        //   .should.be.fulfilled;
+        //
+        // period = periods[ 3 ];
+        // await crowdsale.startPeriod(period.startTime, period.endTime, period.rate)
+        //   .should.be.fulfilled;
+        //
+        // period = periods[ 4 ];
+        // await crowdsale.startPeriod(period.startTime, period.endTime, period.rate)
+        //   .should.be.fulfilled;
+        //
+        // period = periods[ 5 ];
+        // await crowdsale.startPeriod(period.startTime, period.endTime, period.rate)
+        //   .should.be.fulfilled;
+        //
+        // period = periods[ 6 ];
+        // await crowdsale.startPeriod(period.startTime, period.endTime, period.rate)
+        //   .should.be.fulfilled;
+        //
+        // period = periods[ 7 ];
+        // await crowdsale.startPeriod(period.startTime, period.endTime, period.rate)
+        //   .should.be.rejectedWith(EVMThrow);
       });
     });
   },

@@ -83,11 +83,12 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable{
     buy(msg.sender);
   }
 
-  function presaleFallBack(uint256 _presaleWeiRaised) public {
+  function presaleFallBack(uint256 _presaleWeiRaised) public returns (bool) {
     require(!presaleFallBackCalled);
     require(msg.sender == presale);
     weiRaised = _presaleWeiRaised;
     presaleFallBackCalled = true;
+    return true;
   }
 
   function buy(address beneficiary)
