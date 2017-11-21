@@ -33,7 +33,6 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
   uint256 public maxEtherCap;
   uint256 public minEtherCap;
 
-  uint256 constant public maxGuaranteedLimit = 5000 ether;
   mapping (address => uint256) public beneficiaryFunded;
 
   address[] investorList;
@@ -111,19 +110,14 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
       // calculate eth amount
       uint256 weiAmount = msg.value;
       uint256 totalAmount = add(beneficiaryFunded[beneficiary], weiAmount);
-
       uint256 toFund;
-
-      if (totalAmount > maxGuaranteedLimit) {
-        toFund = sub(maxGuaranteedLimit, beneficiaryFunded[beneficiary]);
-      } else {
-        toFund = weiAmount;
-      }
 
       uint256 postWeiRaised = add(weiRaised, toFund);
 
       if (postWeiRaised > maxEtherCap) {
         toFund = sub(maxEtherCap, weiRaised);
+      } else {
+        toFund = weiAmount;
       }
 
       require(toFund > 0);
