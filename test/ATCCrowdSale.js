@@ -18,7 +18,7 @@ const ATCPresale = artifacts.require("ATCPresale.sol");
 const ATCCrowdSale = artifacts.require("ATCCrowdSale.sol");
 const ATC = artifacts.require("ATC.sol");
 const KYC = artifacts.require("KYC.sol");
-const RefundVault = artifacts.require("crowdsale/RefundVault.sol");
+const RefundVault = artifacts.require("vault/RefundVault.sol");
 const MultiSig = artifacts.require("wallet/MultiSigWallet.sol");
 const MiniMeTokenFactory = artifacts.require("token/MiniMeTokenFactory.sol");
 
@@ -40,7 +40,7 @@ contract(
       ATCBountyAddress0,
       ATCBountyAddress1,
       ATCBountyAddress2,
-      ATCReserveAddress,
+      _,
       vaultOwner0,
       vaultOwner1,
       vaultOwner2,
@@ -51,7 +51,7 @@ contract(
       vaultOwner7,
       vaultOwner8,
       vaultOwner9,
-      teamAddress,
+      _,
       ATCController,
       ...accounts
     ],
@@ -191,12 +191,10 @@ contract(
         token.address,
         vault.address,
         presale.address,
-
         bountyAddresses,
         multiSig.address,
-        ATCReserveAddress,
-        teamAddress,
-
+        ATCReserveLocker,
+        teamLocker,
         ATCController,
         maxEtherCap,
         minEtherCap,
@@ -358,9 +356,9 @@ now:\t\t\t\t${ now }
           (await token.balanceOf(address)).should.be.bignumber.equal(bountyAndCommunityAmountForEach);
         }
 
-        (await token.balanceOf(ATCReserveAddress)).should.be.bignumber.equal(reserverAmount);
+        (await token.balanceOf(ATCReserveLocker)).should.be.bignumber.equal(reserverAmount);
 
-        (await token.balanceOf(teamAddress)).should.be.bignumber.equal(teamAmount);
+        (await token.balanceOf(teamLocker)).should.be.bignumber.equal(teamAmount);
 
         (await token.controller()).should.be.equal(ATCController);
 

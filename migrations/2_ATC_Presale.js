@@ -4,8 +4,7 @@ const moment = require("moment");
 
 const ATCPresale = artifacts.require("ATCPresale.sol");
 const ATC = artifacts.require("ATC.sol");
-const RefundVault = artifacts.require("crowdsale/RefundVault.sol");
-const MultiSig = artifacts.require("wallet/MultiSigWallet.sol");
+const RefundVault = artifacts.require("vault/RefundVault.sol");
 const MiniMeTokenFactory = artifacts.require("token/MiniMeTokenFactory.sol");
 
 module.exports = async function (deployer, network, accounts) {
@@ -13,20 +12,24 @@ module.exports = async function (deployer, network, accounts) {
   accounts.forEach((account, i) => console.log(`[${ i }]  ${ account }`));
 
   try {
-    let maxEtherCap;
+    let tokenFactory, presale, token, vault;
     let startTime, endTime;
-    let vaultOwners;
+    let rate;
+    let maxEtherCap;
+    let vaultOwner;
 
     if (network === "mainnet") {
-      maxEtherCap = 10000 * 10 ** 18;
       startTime = moment.utc("2017-12-06").unix();
       endTime = moment.utc("2017-12-10").unix();
+      maxEtherCap = 286000 * 10 ** 18;
+      rate = 1950;
     } else {
-      maxEtherCap = 1 * 10 ** 18;
       startTime = moment().add(10, "minutes").unix();
       endTime = moment().add(25, "minutes").unix();
+      maxEtherCap = 1 * 10 ** 18;
+      rate = 1950;
 
-      vaultOwners = [
+      vaultOwner = [
         "0xb7aa50eb5e42c74076ea1b902a6142539f654796",
         "0x922aa0d0e720caf10bcd7a02be187635a6f36ab0",
         "0x6267901dbb0055e12ea895fc768b68486d57dcf8",
@@ -40,19 +43,17 @@ module.exports = async function (deployer, network, accounts) {
       ];
     }
 
-    const rate = 200;
-
-    const tokenFactory = await MiniMeTokenFactory.new();
+    tokenFactory = await MiniMeTokenFactory.new();
     console.log("tokenFactory deployed at", tokenFactory.address);
 
-    const token = await ATC.new(tokenFactory.address);
+    token = await ATC.new(tokenFactory.address);
     console.log("token deployed at", token.address);
 
-    const vault = await RefundVault.new(vaultOwners);
+    vault = await RefundVault.new(vaultOwner);
     console.log("vault deployed at", vault.address);
 
     /*eslint-disable */
-    const presale = await ATCPresale.new(
+    presale = await ATCPresale.new(
       token.address,
       vault.address,
       startTime,
@@ -67,7 +68,6 @@ module.exports = async function (deployer, network, accounts) {
     await vault.transferOwnership(presale.address);
 
     fs.writeFileSync(path.join(__dirname, "../addresses.json"), JSON.stringify({
-      multiSig: multiSig.address,
       token: token.address,
       vault: vault.address,
       presale: presale.address,

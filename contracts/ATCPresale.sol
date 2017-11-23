@@ -1,7 +1,7 @@
 pragma solidity ^0.4.18;
 
 import './ownership/Ownable.sol';
-import './crowdsale/RefundVault.sol';
+import './vault/RefundVault.sol';
 import './ATC.sol';
 import './kyc/PresaleKYC.sol';
 import './lifecycle/Pausable.sol';

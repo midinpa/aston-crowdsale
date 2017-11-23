@@ -16,7 +16,7 @@ const should = require("chai")
 
 const ATCPresale = artifacts.require("ATCPresale.sol");
 const ATC = artifacts.require("ATC.sol");
-const RefundVault = artifacts.require("crowdsale/RefundVault.sol");
+const RefundVault = artifacts.require("vault/RefundVault.sol");
 const MultiSig = artifacts.require("wallet/MultiSigWallet.sol");
 const MiniMeTokenFactory = artifacts.require("token/MiniMeTokenFactory.sol");
 
@@ -31,16 +31,16 @@ contract(
       _,
       _,
       _,
-      reserveWallet0,
-      reserveWallet1,
-      reserveWallet2,
-      reserveWallet3,
-      reserveWallet4,
-      reserveWallet5,
-      reserveWallet6,
-      reserveWallet7,
-      reserveWallet8,
-      reserveWallet9,
+      vaultOwner0,
+      vaultOwner1,
+      vaultOwner2,
+      vaultOwner3,
+      vaultOwner4,
+      vaultOwner5,
+      vaultOwner6,
+      vaultOwner7,
+      vaultOwner8,
+      vaultOwner9,
       _,
       _,
       ...accounts
@@ -57,22 +57,22 @@ contract(
 
     let maxEtherCap;
 
-    let reserveWallet;
+    let vaultOwner;
 
     const newOwner = accounts[ 25 ];
 
     before(async () => {
-      reserveWallet = [
-        reserveWallet0,
-        reserveWallet1,
-        reserveWallet2,
-        reserveWallet3,
-        reserveWallet4,
-        reserveWallet5,
-        reserveWallet6,
-        reserveWallet7,
-        reserveWallet8,
-        reserveWallet9,
+      vaultOwner = [
+        vaultOwner0,
+        vaultOwner1,
+        vaultOwner2,
+        vaultOwner3,
+        vaultOwner4,
+        vaultOwner5,
+        vaultOwner6,
+        vaultOwner7,
+        vaultOwner8,
+        vaultOwner9,
       ];
 
       startTime = moment().add(5, "minutes").unix();
@@ -87,7 +87,7 @@ contract(
       token = await ATC.new(tokenFactory.address);
       console.log("token deployed at", token.address);
 
-      vault = await RefundVault.new(reserveWallet);
+      vault = await RefundVault.new(vaultOwner);
       console.log("vault deployed at", vault.address);
 
       /*eslint-disable */

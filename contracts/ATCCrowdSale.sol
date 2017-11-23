@@ -2,7 +2,7 @@ pragma solidity ^0.4.18;
 
 import './kyc/KYC.sol';
 import './ATC.sol';
-import './crowdsale/RefundVault.sol';
+import './vault/RefundVault.sol';
 import './ownership/Ownable.sol';
 import './math/SafeMath.sol';
 import './lifecycle/Pausable.sol';
@@ -16,18 +16,18 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
 
   address[] public bountyAndCommunityAddresses; //5% for bounty, 15% for community groups & partners
   address public bountyAndCommunityAddressesMultiSig; //5% for bounty, 15% for community groups & partners
-  address public reserveAddress; //15% with 2 years lock
-  address public teamAddress; // 15% with 2 years vesting
+  address public reserverLocker; //15% with 2 years lock
+  address public teamLocker; // 15% with 2 years vesting
 
   struct Period {
     uint64 startTime;
     uint64 endTime;
-    uint8 rate;
+    uint256 bonusRate;
   }
 
   Period[] public periods;
   uint256 public currentPeriod;
-  uint8 constant public MAX_PERIOD_COUNT = 7;
+  uint8 constant public MAX_PERIOD_COUNT = 8;
 
   uint256 public weiRaised;
   uint256 public maxEtherCap;
@@ -40,15 +40,20 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
 
   address public ATCController;
 
+  uint256 public additionalBonusAmount1 = 300 * 10 ** 18;
+  uint256 public additionalBonusAmount2 = 6000 * 10 ** 18;
+
   bool public isFinalized;
   uint256 public refundCompleted;
   bool public presaleFallBackCalled;
 
 
-  event CrowdSaleTokenPurchase(address indexed investor, address indexed beneficiary, uint256 toFund, uint256 tokens);
-  event StartPeriod(uint64 _startTime, uint64 _endTime, uint8 _rate);
+  event CrowdSaleTokenPurchase(address indexed _investor, address indexed _beneficiary, uint256 _toFund, uint256 _tokens);
+  event StartPeriod(uint64 _startTime, uint64 _endTime, uint256 _bonusRate);
   event Finalized();
-  event Log(string messgae); // for dev
+  event PresaleFallBack(uint256 _presaleWeiRaised);
+  event PushInvestorList(address _investor);
+  event RefundAll(uint256 _numToRefund);
 
 
   function ATCCrowdSale (
@@ -58,13 +63,22 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     address _presale,
     address[] _bountyAndCommunityAddresses,
     address _bountyAndCommunityAddressesMultiSig,
-    address _reserveAddress,
-    address _teamAddress,
+    address _reserverLocker,
+    address _teamLocker,
     address _tokenController,
     uint256 _maxEtherCap,
     uint256 _minEtherCap
     ) {
-      // TODO: check conditions
+      require(_kyc != 0x00 && _token != 0x00 && _vault != 0x00 && _presale != 0x00);
+      require(_bountyAndCommunityAddressesMultiSig != 0x00);
+      require(_reserverLocker != 0x00 && _teamLocker != 0x00);
+      require(_tokenController != 0x00);
+
+      for (uint i = 0 ; i < _bountyAndCommunityAddresses.length; i++) {
+        require(_bountyAndCommunityAddresses[i] != 0x00);
+      }
+      require(0 < _minEtherCap && _minEtherCap < _maxEtherCap);
+
       kyc = KYC(_kyc);
       token = ATC(_token);
       vault = RefundVault(_vault);
@@ -72,8 +86,8 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
 
       bountyAndCommunityAddresses = _bountyAndCommunityAddresses;
       bountyAndCommunityAddressesMultiSig = _bountyAndCommunityAddressesMultiSig;
-      reserveAddress = _reserveAddress;
-      teamAddress = _teamAddress;
+      reserverLocker = _reserverLocker;
+      teamLocker = _teamLocker;
       ATCController = _tokenController;
 
       maxEtherCap = _maxEtherCap;
@@ -90,6 +104,8 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     weiRaised = _presaleWeiRaised;
     presaleFallBackCalled = true;
     return true;
+
+    PresaleFallBack(_presaleWeiRaised);
   }
 
   function buy(address beneficiary)
@@ -104,8 +120,6 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
       require(!periodFinished(currentPeriod));
       require(beneficiary != 0x00);
       require(validPurchase());
-
-      Log("buy condition check");
 
       // calculate eth amount
       uint256 weiAmount = msg.value;
@@ -123,8 +137,18 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
       require(toFund > 0);
       require(weiAmount >= toFund);
 
-      uint256 currentRate = getRate();
-      uint256 tokens = mul(toFund, currentRate);
+      //TODO
+      uint256 myBonusRate = getBonusRate();
+
+      if (additionalBonusAmount1 <= toFund) {
+        myBonusRate = add(getBonusRate(), 5);
+      }
+      if (additionalBonusAmount2 < toFund) {
+        myBonusRate = add(getBonusRate(), 10);
+      }
+
+      uint256 myRate = div(mul(1500, add(myBonusRate, 100)), 100);
+      uint256 tokens = mul(toFund, myRate);
       uint256 toReturn = sub(weiAmount, toFund);
 
       pushInvestorList(msg.sender);
@@ -132,7 +156,6 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
       weiRaised = add(weiRaised, toFund);
       beneficiaryFunded[beneficiary] = add(beneficiaryFunded[beneficiary], toFund);
 
-      //TODO: Error check
       token.generateTokens(beneficiary, tokens);
 
       if (toReturn > 0) {
@@ -147,6 +170,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
       inInvestorList[investor] = true;
       investorList.push(investor);
     }
+    PushInvestorList(investor);
   }
 
   function validPurchase() internal constant returns (bool) {
@@ -183,20 +207,29 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     return weiRaised == maxEtherCap;
   }
 
-  function getRate() public constant returns (uint8) {
-    return periods[currentPeriod].rate;
+  function getBonusRate() public constant returns (uint256) {
+    return periods[currentPeriod].bonusRate;
   }
 
-  function startPeriod(uint64 _startTime, uint64 _endTime, uint8 _rate) public onlyOwner returns (bool) {
+  function startPeriod(uint64 _startTime, uint64 _endTime) public onlyOwner returns (bool) {
     require(periods.length < MAX_PERIOD_COUNT);
     require(!maxReached());
     require(now < _startTime && _startTime < _endTime);
-    require(_rate > 0);
 
+    if (periods.length != 0) {
+      require(sub(_endTime, _startTime) <= 7 days);
+    }
+
+    //1650 -> 1575 -> 1500
     Period memory newPeriod;
     newPeriod.startTime = _startTime;
     newPeriod.endTime = _endTime;
-    newPeriod.rate = _rate;
+
+    if(periods.length < 4) {
+      newPeriod.bonusRate = sub(15, mul(5, periods.length));
+    } else {
+      newPeriod.bonusRate = 0;
+    }
 
     if (nonZeroPeriod()) {
       require(now > periods[currentPeriod].endTime);
@@ -205,7 +238,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
 
     periods.push(newPeriod);
 
-    StartPeriod(_startTime, _endTime, _rate);
+    StartPeriod(_startTime, _endTime, newPeriod.bonusRate);
 
     return true;
   }
@@ -258,8 +291,8 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     }
 
     token.generateTokens(bountyAndCommunityAddressesMultiSig, bountyAndCommunityAmountForEach);
-    token.generateTokens(reserveAddress, reserveAmount);
-    token.generateTokens(teamAddress, teamAmount);
+    token.generateTokens(reserverLocker, reserveAmount);
+    token.generateTokens(teamLocker, teamAmount);
   }
 
   /**
@@ -282,6 +315,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     }
 
     refundCompleted = limit;
+    RefundAll(numToRefund);
   }
 
   /**
