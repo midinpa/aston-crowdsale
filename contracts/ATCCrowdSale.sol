@@ -50,7 +50,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
   bool public presaleFallBackCalled;
 
 
-  event CrowdSaleTokenPurchase(address indexed _investor, address indexed _beneficiary, uint256 _toFund, uint256 _tokens, uint256 _bonus);
+  event CrowdSaleTokenPurchase(address indexed _investor, address indexed _beneficiary, uint256 _toFund, uint256 _tokens);
   event StartPeriod(uint64 _startTime, uint64 _endTime, uint256 _bonus);
   event Finalized();
   event PresaleFallBack(uint256 _presaleWeiRaised);
@@ -112,8 +112,6 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     return true;
   }
 
-  event Log(string msg);
-
   function buy(address beneficiary)
     public
     payable
@@ -149,12 +147,10 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
       // bonus for eth amount
       if (additionalBonusAmount1 <= toFund) {
         bonus = add(bonus, 5); // 5% amount bonus for more than 300 ETH
-        Log("300 ETH + : 5% bonus");
       }
 
       if (additionalBonusAmount2 <= toFund) {
         bonus = add(bonus, 5); // 10% amount bonus for more than 6000 ETH
-        Log("6000 ETH + : 10% bonus");
       }
 
       uint256 rate = calculateRate(bonus);
@@ -173,7 +169,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
       }
 
       forwardFunds(toFund);
-      CrowdSaleTokenPurchase(msg.sender, beneficiary, toFund, tokens, bonus);
+      CrowdSaleTokenPurchase(msg.sender, beneficiary, toFund, tokens);
   }
 
   function pushInvestorList(address investor) internal {
