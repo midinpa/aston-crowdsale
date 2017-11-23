@@ -23,10 +23,10 @@ const MultiSig = artifacts.require("wallet/MultiSigWallet.sol");
 const MiniMeTokenFactory = artifacts.require("token/MiniMeTokenFactory.sol");
 
 class Period {
-  constructor(startTime, endTime, rate) {
+  constructor(startTime, endTime, bonus) {
     this.startTime = startTime;
     this.endTime = endTime;
-    this.rate = rate;
+    this.bonus = bonus;
   }
 }
 
@@ -40,7 +40,7 @@ contract(
       ATCBountyAddress0,
       ATCBountyAddress1,
       ATCBountyAddress2,
-      _,
+      ,
       vaultOwner0,
       vaultOwner1,
       vaultOwner2,
@@ -51,7 +51,8 @@ contract(
       vaultOwner7,
       vaultOwner8,
       vaultOwner9,
-      _,
+      ATCReserveLocker,
+      teamLocker,
       ATCController,
       ...accounts
     ],
@@ -63,7 +64,9 @@ contract(
     let baseTime = moment();
     let now, presaleStartTime, presaleEndTime;
     let beforePresaleStartTime, afterPresaleEndTime, afterPresaleStartTime;
-    let periods, presaleRate;
+    let periods, baseRate, presaleRate;
+    let additionalBonus1, additionalBonus2;
+    let getAdditionalBonus, getRate, period, periodIndex;
 
     let maxEtherCap, minEtherCap, presaleMaxEtherCap;
     let maxGuaranteedLimit;
@@ -108,52 +111,71 @@ contract(
       presaleStartTime = baseTime.add(5, "minutes").unix();
       presaleEndTime = baseTime.add(5, "minutes").unix();
 
-      /*eslint-disable */
-      periods = [
-        new Period(
-          baseTime.add(5, "minutes").unix(),
-          baseTime.add(5, "minutes").unix(),
-          240
-        ),
-        new Period(
-          baseTime.add(5, "minutes").unix(),
-          baseTime.add(5, "minutes").unix(),
-          230
-        ),
-        new Period(
-          baseTime.add(5, "minutes").unix(),
-          baseTime.add(5, "minutes").unix(),
-          220
-        ),
-        new Period(
-          baseTime.add(5, "minutes").unix(),
-          baseTime.add(5, "minutes").unix(),
-          210
-        ),
-        new Period(
-          baseTime.add(5, "minutes").unix(),
-          baseTime.add(5, "minutes").unix(),
-          200
-        ),
-        new Period(
-          baseTime.add(5, "minutes").unix(),
-          baseTime.add(5, "minutes").unix(),
-          200
-        ),
-        new Period(
-          baseTime.add(5, "minutes").unix(),
-          baseTime.add(5, "minutes").unix(),
-          200
-        ),
-      ];
-      /* eslint-enable */
-
       maxEtherCap = ether(286000);
       minEtherCap = ether(28600);
       presaleMaxEtherCap = maxEtherCap.mul(15).div(100);
       maxGuaranteedLimit = ether(5000);
 
-      presaleRate = 200;
+      baseRate = new BigNumber(1500);
+      presaleRate = baseRate.mul(1.30); // 30% bonus for presale
+      additionalBonus1 = new BigNumber(5); // 5% bonus for more than 300 ETH
+      additionalBonus2 = new BigNumber(10); // 10% bonus for more than 6000 ETH
+
+      getAdditionalBonus = (amount) => {
+        if (amount.gte(ether(6000))) return additionalBonus2;
+        else if (amount.gte(ether(300))) return additionalBonus1;
+        return new BigNumber(0);
+      };
+
+      getRate = (amount) => {
+        const bonus = period.bonus.add(getAdditionalBonus(amount));
+        return baseRate.mul(bonus.add(100).div(100));
+      };
+
+      /*eslint-disable */
+      periods = [
+        new Period( // 1
+          baseTime.add(5, "minutes").unix(),
+          baseTime.add(5, "minutes").unix(),
+          new BigNumber(15)
+        ),
+        new Period( // 2
+          baseTime.add(5, "minutes").unix(),
+          baseTime.add(5, "minutes").unix(),
+          new BigNumber(10)
+        ),
+        new Period( // 3
+          baseTime.add(5, "minutes").unix(),
+          baseTime.add(5, "minutes").unix(),
+          new BigNumber(5)
+        ),
+        new Period( // 4
+          baseTime.add(5, "minutes").unix(),
+          baseTime.add(5, "minutes").unix(),
+          new BigNumber(0)
+        ),
+        new Period( // 5
+          baseTime.add(5, "minutes").unix(),
+          baseTime.add(5, "minutes").unix(),
+          new BigNumber(0)
+        ),
+        new Period( // 6
+          baseTime.add(5, "minutes").unix(),
+          baseTime.add(5, "minutes").unix(),
+          new BigNumber(0)
+        ),
+        new Period( // 7
+          baseTime.add(5, "minutes").unix(),
+          baseTime.add(5, "minutes").unix(),
+          new BigNumber(0)
+        ),
+        new Period( // 8
+          baseTime.add(5, "minutes").unix(),
+          baseTime.add(5, "minutes").unix(),
+          new BigNumber(0)
+        ),
+      ];
+      /* eslint-enable */
 
       multiSig = await MultiSig.new(bountyAddresses, bountyAddresses.length - 1);
       logger("multiSig deployed at", multiSig.address);
@@ -243,6 +265,8 @@ now:\t\t\t\t${ now }
 
     describe("ATCCrowdSale Test", async () => {
       it("Sequential Test", async () => {
+        let investAmount;
+
         await increaseTimeTo(beforePresaleStartTime);
 
         const registerTx = await presale.register(investor1, presaleMaxEtherCap)
@@ -280,39 +304,62 @@ now:\t\t\t\t${ now }
         // reject purchase before period started
         await crowdsale.buy(investor1, {
           from: investor1,
-          value: ether(1),
+          value: ether(10),
         }).should.be.rejectedWith(EVMThrow);
         console.log("reject purchase before period");
 
-        let period,
-          periodIndex = 0;
-
+        periodIndex = 0;
         period = periods[ periodIndex++ ];
+
         await increaseTimeTo(period.startTime - duration.seconds(100));
 
-        await crowdsale.startPeriod(period.startTime, period.endTime, period.rate)
+        await crowdsale.startPeriod(period.startTime, period.endTime)
           .should.be.fulfilled;
+
         console.log("period 0 startred");
 
         await increaseTimeTo(period.startTime + duration.seconds(100));
 
+        (await crowdsale.getBonus())
+          .should.be.bignumber.equal(period.bonus);
+
+        investAmount = ether(1);
+
         await crowdsale.buy(investor2, {
           from: investor2,
-          value: maxGuaranteedLimit,
+          value: investAmount,
         }).should.be.fulfilled;
-        cumulativeWeiRaised = cumulativeWeiRaised.add(maxGuaranteedLimit);
+        cumulativeWeiRaised = cumulativeWeiRaised.add(investAmount);
+
+        (await token.balanceOf(investor2))
+          .should.be.bignumber.equal(
+            investAmount.mul(getRate(investAmount)));
+        // investAmount.mul(baseRate.mul(period.bonus.add(100).div(100))));
+
+        investAmount = ether(300);
+
+        await crowdsale.buy(investor2, {
+          from: investor2,
+          value: investAmount,
+        }).should.be.fulfilled;
+        cumulativeWeiRaised = cumulativeWeiRaised.add(investAmount);
+
         console.log("investor2 buy tokens");
 
         period = periods[ periodIndex++ ];
         await increaseTimeTo(period.startTime - duration.seconds(100));
 
-        await crowdsale.startPeriod(period.startTime, period.endTime, period.rate)
+        await crowdsale.startPeriod(period.startTime, period.endTime)
           .should.be.fulfilled;
+
         console.log("period 1 startred");
+
+        (await crowdsale.getBonus())
+          .should.be.bignumber.equal(period.bonus);
 
         await increaseTimeTo(period.startTime + duration.seconds(100));
 
-        // // accept purchase by many investors
+        // accept purchase by many investors
         const investors = accounts.slice(0, 10);
         await kyc.registerByList(investors)
           .should.be.fulfilled;
@@ -322,7 +369,7 @@ now:\t\t\t\t${ now }
             break;
           }
 
-          const investAmount = maxGuaranteedLimit;
+          investAmount = ether(5000);
 
           await crowdsale.buy(investor, {
             from: investor,
@@ -331,12 +378,40 @@ now:\t\t\t\t${ now }
           cumulativeWeiRaised = cumulativeWeiRaised.add(investAmount);
 
           (await token.balanceOf(investor))
-            .should.be.bignumber.equal(investAmount.mul(period.rate));
+            .should.be.bignumber.equal(investAmount.mul(getRate(investAmount)));
         }
 
         console.log("many investors purchased");
 
-        await token.transfer(investor2, 100, { from: investor1 }).should.be.rejectedWith(EVMThrow);
+        period = periods[ periodIndex++ ];
+        await increaseTimeTo(period.startTime - duration.seconds(100));
+        await crowdsale.startPeriod(period.startTime, period.endTime)
+          .should.be.fulfilled;
+
+        console.log("period 2 startred");
+
+        (await crowdsale.getBonus())
+          .should.be.bignumber.equal(period.bonus);
+
+        await increaseTimeTo(period.startTime + duration.seconds(100));
+
+        const investor3 = accounts[ 11 ];
+        const investAmount3 = ether(100);
+
+        await kyc.register(investor3)
+          .should.be.fulfilled;
+
+        await crowdsale.buy(investor3, {
+          from: investor3,
+          value: investAmount3,
+        }).should.be.fulfilled;
+        cumulativeWeiRaised = cumulativeWeiRaised.add(investAmount3);
+
+        (await token.balanceOf(investor3))
+          .should.be.bignumber.equal(investAmount3.mul(getRate(investAmount3)));
+
+        await token.transfer(investor2, 100, { from: investor1 })
+          .should.be.rejectedWith(EVMThrow);
 
         console.log("token transfer rejected");
 
@@ -353,21 +428,27 @@ now:\t\t\t\t${ now }
         const teamAmount = totalSupply.mul(15).div(100);
 
         for (const address of [ ATCBountyAddress0, ATCBountyAddress1, ATCBountyAddress2, multiSig.address ]) {
-          (await token.balanceOf(address)).should.be.bignumber.equal(bountyAndCommunityAmountForEach);
+          (await token.balanceOf(address))
+            .should.be.bignumber.equal(bountyAndCommunityAmountForEach);
         }
 
-        (await token.balanceOf(ATCReserveLocker)).should.be.bignumber.equal(reserverAmount);
+        (await token.balanceOf(ATCReserveLocker))
+          .should.be.bignumber.equal(reserverAmount);
 
-        (await token.balanceOf(teamLocker)).should.be.bignumber.equal(teamAmount);
+        (await token.balanceOf(teamLocker))
+          .should.be.bignumber.equal(teamAmount);
 
-        (await token.controller()).should.be.equal(ATCController);
+        (await token.controller())
+          .should.be.equal(ATCController);
 
         const weiRaised = await crowdsale.weiRaised();
+
         weiRaised
           .should.be.bignumber.equal(cumulativeWeiRaised);
 
         for (const address of vaultOwner) {
-          (await eth.getBalance(address)).should.be.bignumber.equal(weiRaised.div(10));
+          (await eth.getBalance(address))
+            .should.be.bignumber.equal(weiRaised.div(10));
         }
 
         console.log("token & ether distribution checked");

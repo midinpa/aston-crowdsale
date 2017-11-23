@@ -26,11 +26,11 @@ contract(
     [
       owner,
       investor,
-      _,
-      _,
-      _,
-      _,
-      _,
+      ,
+      ,
+      ,
+      ,
+      ,
       vaultOwner0,
       vaultOwner1,
       vaultOwner2,
@@ -41,8 +41,8 @@ contract(
       vaultOwner7,
       vaultOwner8,
       vaultOwner9,
-      _,
-      _,
+      ,
+      ,
       ...accounts
     ],
   ) => {

@@ -2,7 +2,6 @@ const fs = require("fs");
 const path = require("path");
 const moment = require("moment");
 
-
 const ATCPresale = artifacts.require("ATCPresale.sol");
 const ATC = artifacts.require("ATC.sol");
 const RefundVault = artifacts.require("vault/RefundVault.sol");
@@ -37,16 +36,13 @@ module.exports = async function (deployer, network, accounts) {
     let ATCReserveReleaseTime;
     let teamReleaseTimelines;
 
-
     if (network === "mainnet") {
-
       firstPeriodStartTime = moment.utc("2017-12-11").unix();
       firstPeriodEndTime = moment.utc("2017-12-17").unix();
       maxEtherCap = 286000 * 10 ** 18;
       minEtherCap = 28600 * 10 ** 18;
     } else {
-
-      const presaleStartTime = moment().add(5, "minutes").unix();;
+      const presaleStartTime = moment().add(5, "minutes").unix();
       const presaleEndTime = moment().add(10, "minutes").unix();
       const presaleMaxEtherCap = 1 * 10 ** 18;
       const presaleRate = 1950;
@@ -88,9 +84,9 @@ module.exports = async function (deployer, network, accounts) {
       await token.changeController(presale.address);
       await vault.transferOwnership(presale.address);
 
-      ////////////////
-      //PRESALE DONE//
-      ////////////////
+      // //////////////
+      // PRESALE DONE//
+      // //////////////
 
       firstPeriodStartTime = moment().add(15, "minutes").unix();
       firstPeriodEndTime = moment().add(30, "minutes").unix();
@@ -110,21 +106,21 @@ module.exports = async function (deployer, network, accounts) {
       teamReleaseTimelines = [
         moment().add(35, "minutes").unix(),
         moment().add(40, "minutes").unix(),
-        moment().add(45, "minutes").unix()
+        moment().add(45, "minutes").unix(),
       ];
       teamReleaseRatios = [
         20,
         30,
-        50
+        50,
       ];
 
-      //TODO: ATCPLACEHOLDER ?
+      // TODO: ATCPLACEHOLDER ?
       ATCController = "0xb7aa50eb5e42c74076ea1b902a6142539f654796";
 
       ATCReserveLocker = await TokenTimelock1.new(
         token.address,
         ATCReserveBeneficiary,
-        ATCReserveReleaseTime
+        ATCReserveReleaseTime,
       );
       console.log("ATCReserveLocker deployed at", ATCReserveLocker.address);
 
@@ -132,7 +128,7 @@ module.exports = async function (deployer, network, accounts) {
         token.address,
         teamBeneficiary,
         teamReleaseTimelines,
-        teamReleaseRatios
+        teamReleaseRatios,
       );
       console.log("teamLocker deployed at", teamLocker.address);
 

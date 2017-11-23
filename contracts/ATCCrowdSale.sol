@@ -22,8 +22,10 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
   struct Period {
     uint64 startTime;
     uint64 endTime;
-    uint256 bonusRate;
+    uint256 bonus; // used to calculate rate with bonus. ragne 0 ~ 15 (0% ~ 15%)
   }
+
+  uint256 public baseRate = 1500; // 1 ETH = 1500 ATC
 
   Period[] public periods;
   uint256 public currentPeriod;
@@ -40,16 +42,16 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
 
   address public ATCController;
 
-  uint256 public additionalBonusAmount1 = 300 * 10 ** 18;
-  uint256 public additionalBonusAmount2 = 6000 * 10 ** 18;
+  uint256 public additionalBonusAmount1 = 300 ether;
+  uint256 public additionalBonusAmount2 = 6000 ether;
 
   bool public isFinalized;
   uint256 public refundCompleted;
   bool public presaleFallBackCalled;
 
 
-  event CrowdSaleTokenPurchase(address indexed _investor, address indexed _beneficiary, uint256 _toFund, uint256 _tokens);
-  event StartPeriod(uint64 _startTime, uint64 _endTime, uint256 _bonusRate);
+  event CrowdSaleTokenPurchase(address indexed _investor, address indexed _beneficiary, uint256 _toFund, uint256 _tokens, uint256 _bonus);
+  event StartPeriod(uint64 _startTime, uint64 _endTime, uint256 _bonus);
   event Finalized();
   event PresaleFallBack(uint256 _presaleWeiRaised);
   event PushInvestorList(address _investor);
@@ -101,12 +103,16 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
   function presaleFallBack(uint256 _presaleWeiRaised) public returns (bool) {
     require(!presaleFallBackCalled);
     require(msg.sender == presale);
+
     weiRaised = _presaleWeiRaised;
     presaleFallBackCalled = true;
-    return true;
 
     PresaleFallBack(_presaleWeiRaised);
+
+    return true;
   }
+
+  event Log(string msg);
 
   function buy(address beneficiary)
     public
@@ -137,18 +143,22 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
       require(toFund > 0);
       require(weiAmount >= toFund);
 
-      //TODO
-      uint256 myBonusRate = getBonusRate();
+      // TODO: test bonus
+      uint256 bonus = getBonus();
 
+      // bonus for eth amount
       if (additionalBonusAmount1 <= toFund) {
-        myBonusRate = add(getBonusRate(), 5);
-      }
-      if (additionalBonusAmount2 < toFund) {
-        myBonusRate = add(getBonusRate(), 10);
+        bonus = add(bonus, 5); // 5% amount bonus for more than 300 ETH
+        Log("300 ETH + : 5% bonus");
       }
 
-      uint256 myRate = div(mul(1500, add(myBonusRate, 100)), 100);
-      uint256 tokens = mul(toFund, myRate);
+      if (additionalBonusAmount2 <= toFund) {
+        bonus = add(bonus, 5); // 10% amount bonus for more than 6000 ETH
+        Log("6000 ETH + : 10% bonus");
+      }
+
+      uint256 rate = calculateRate(bonus);
+      uint256 tokens = mul(toFund, rate);
       uint256 toReturn = sub(weiAmount, toFund);
 
       pushInvestorList(msg.sender);
@@ -161,8 +171,9 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
       if (toReturn > 0) {
         msg.sender.transfer(toReturn);
       }
+
       forwardFunds(toFund);
-      CrowdSaleTokenPurchase(msg.sender, beneficiary, toFund, tokens);
+      CrowdSaleTokenPurchase(msg.sender, beneficiary, toFund, tokens, bonus);
   }
 
   function pushInvestorList(address investor) internal {
@@ -170,6 +181,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
       inInvestorList[investor] = true;
       investorList.push(investor);
     }
+
     PushInvestorList(investor);
   }
 
@@ -207,8 +219,15 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     return weiRaised == maxEtherCap;
   }
 
-  function getBonusRate() public constant returns (uint256) {
-    return periods[currentPeriod].bonusRate;
+  function getBonus() public constant returns (uint256) {
+    return periods[currentPeriod].bonus;
+  }
+
+  /**
+   * @dev rate = baseRate * (100 + bonus) / 100
+   */
+  function calculateRate(uint256 bonus) internal returns (uint256)  {
+    return div(mul(baseRate, add(bonus, 100)), 100);
   }
 
   function startPeriod(uint64 _startTime, uint64 _endTime) public onlyOwner returns (bool) {
@@ -220,15 +239,15 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
       require(sub(_endTime, _startTime) <= 7 days);
     }
 
-    //1650 -> 1575 -> 1500
+    // 15% -> 10% -> 5% -> 0%
     Period memory newPeriod;
     newPeriod.startTime = _startTime;
     newPeriod.endTime = _endTime;
 
     if(periods.length < 4) {
-      newPeriod.bonusRate = sub(15, mul(5, periods.length));
+      newPeriod.bonus = sub(15, mul(5, periods.length));
     } else {
-      newPeriod.bonusRate = 0;
+      newPeriod.bonus = 0;
     }
 
     if (nonZeroPeriod()) {
@@ -238,7 +257,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
 
     periods.push(newPeriod);
 
-    StartPeriod(_startTime, _endTime, newPeriod.bonusRate);
+    StartPeriod(_startTime, _endTime, newPeriod.bonus);
 
     return true;
   }
