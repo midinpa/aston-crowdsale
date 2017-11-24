@@ -24,12 +24,12 @@ contract ATC is MiniMeToken {
         require(generateFinished == false);
 
         //check msg.sender (controller ??)
-        super.generateTokens(_owner, _amount);
+        return super.generateTokens(_owner, _amount);
       }
   function doTransfer(address _from, address _to, uint _amount
       ) internal returns(bool) {
         require(blacklisted[_from] == false);
-        super.doTransfer(_from, _to, _amount);
+        return super.doTransfer(_from, _to, _amount);
       }
 
   function finishGenerating() public onlyController returns (bool success) {

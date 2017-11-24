@@ -50,18 +50,17 @@ contract TokenTimelock2 is SafeMath{
    */
   function release() public {
 
-    require(now >= timelines[0]);
     uint256 balance = token.balanceOf(address(this));
     uint256 total = add(balance, collectedTokens);
     uint256 currentRatio = releaseRatios[0];
 
     for (uint i = 0; i < timelines.length - 1; i++) {
-      if (now > timelines[i]) {
+      if (now >= timelines[i]) {
         currentRatio = releaseRatios[i+1];
       }
     }
 
-    if (now > timelines[timelines.length - 1]) {
+    if (now >= timelines[timelines.length - 1]) {
       currentRatio = 100;
     }
 
