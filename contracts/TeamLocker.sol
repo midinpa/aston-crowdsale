@@ -1,23 +1,23 @@
 pragma solidity ^0.4.18;
 
 
-import "../token/ERC20Basic.sol";
-import "../token/SafeERC20.sol";
-import "../math/SafeMath.sol";
+import "./token/ERC20Basic.sol";
+import "./token/SafeERC20.sol";
+import "./math/SafeMath.sol";
 
 /**
  * @title TokenTimelock
  * @dev TokenTimelock is a token holder contract that will allow a
  * beneficiary to extract the tokens after a given release time
  */
-contract TokenTimelock2 is SafeMath{
+contract TeamLocker is SafeMath{
   using SafeERC20 for ERC20Basic;
 
   // ERC20 basic token contract being held
   ERC20Basic public token;
 
   // beneficiary of tokens after they are released
-  address public beneficiary;
+  address[] public beneficiaries;
 
   // timestamp when token release level changes
   uint64[] public timelines;
@@ -26,10 +26,14 @@ contract TokenTimelock2 is SafeMath{
 
   uint256 public collectedTokens;
 
-  function TokenTimelock2(ERC20Basic _token, address _beneficiary, uint64[] _timelines, uint256[] _releaseRatios) {
+  function TeamLocker(ERC20Basic _token, address[] _beneficiaries, uint64[] _timelines, uint256[] _releaseRatios) {
+
+    for (uint i = 0; i < _beneficiaries.length - 1; i++) {
+      require(_beneficiaries[i] != 0x00);
+    }
 
     require(now < _timelines[0]);
-    for (uint i = 0; i < _timelines.length - 1; i++) {
+    for (i = 0; i < _timelines.length - 1; i++) {
       require(_timelines[i] < _timelines[i+1]);
     }
     require(0 < _releaseRatios[0]);
@@ -37,10 +41,10 @@ contract TokenTimelock2 is SafeMath{
       require(_releaseRatios[i] < _releaseRatios[i+1]);
     }
     require(_timelines.length == _releaseRatios.length);
-    require(_beneficiary != 0x00);
+
 
     token = _token;
-    beneficiary = _beneficiary;
+    beneficiaries = _beneficiaries;
     timelines = _timelines;
     releaseRatios = _releaseRatios;
   }
@@ -69,7 +73,25 @@ contract TokenTimelock2 is SafeMath{
 
     uint256 grantAmount = sub(releasedAmount, collectedTokens);
     collectedTokens = add(collectedTokens, grantAmount);
+    uint256 grantAmountForEach = div(grantAmount, 3);
 
-    token.safeTransfer(beneficiary, grantAmount);
+    for (i = 0; i < beneficiaries.length; i++) {
+        token.safeTransfer(beneficiaries[i], grantAmountForEach);
+    }
   }
+
+  function setToken(ERC20Basic newToken) public {
+    bool isBeneficiary;
+
+    for (uint i = 0; i < beneficiaries.length; i++) {
+      if (msg.sender == beneficiaries[i]) {
+        isBeneficiary = true;
+      }
+    }
+    require(isBeneficiary);
+    require(newToken != 0x00);
+
+    token = newToken;
+  }
+
 }

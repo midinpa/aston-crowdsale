@@ -14,8 +14,8 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
 
   address public presale;
 
-  address[] public bountyAndCommunityAddresses; //5% for bounty, 15% for community groups & partners
-  address public bountyAndCommunityAddressesMultiSig; //5% for bounty, 15% for community groups & partners
+  address public bountyAddress; //5% for bounty
+  address public partnersAddress; //15% for community groups & partners
   address public reserverLocker; //15% with 2 years lock
   address public teamLocker; // 15% with 2 years vesting
 
@@ -63,8 +63,8 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     address _token,
     address _vault,
     address _presale,
-    address[] _bountyAndCommunityAddresses,
-    address _bountyAndCommunityAddressesMultiSig,
+    address _bountyAddress,
+    address _partnersAddress,
     address _reserverLocker,
     address _teamLocker,
     address _tokenController,
@@ -72,13 +72,9 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     uint256 _minEtherCap
     ) {
       require(_kyc != 0x00 && _token != 0x00 && _vault != 0x00 && _presale != 0x00);
-      require(_bountyAndCommunityAddressesMultiSig != 0x00);
+      require(_bountyAddress != 0x00 && _partnersAddress != 0x00);
       require(_reserverLocker != 0x00 && _teamLocker != 0x00);
       require(_tokenController != 0x00);
-
-      for (uint i = 0 ; i < _bountyAndCommunityAddresses.length; i++) {
-        require(_bountyAndCommunityAddresses[i] != 0x00);
-      }
       require(0 < _minEtherCap && _minEtherCap < _maxEtherCap);
 
       kyc = KYC(_kyc);
@@ -86,8 +82,8 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
       vault = RefundVault(_vault);
       presale = _presale;
 
-      bountyAndCommunityAddresses = _bountyAndCommunityAddresses;
-      bountyAndCommunityAddressesMultiSig = _bountyAndCommunityAddressesMultiSig;
+      bountyAddress = _bountyAddress;
+      partnersAddress = _partnersAddress;
       reserverLocker = _reserverLocker;
       teamLocker = _teamLocker;
       ATCController = _tokenController;
@@ -280,12 +276,13 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
 
       uint256 totalToken = token.totalSupply();
 
-      // token distribution : 50% for sale, 20% for bounty and community, 15% for reserve, 15% for team
-      uint256 bountyAndCommunityAmount = div(mul(totalToken, 20), 50);
+      // token distribution : 50% for sale, 5% for bounty, 15% for partners, 15% for reserve, 15% for team
+      uint256 bountyAmount = div(mul(totalToken, 5), 50);
+      uint256 partnersAmount = div(mul(totalToken, 15), 50);
       uint256 reserveAmount = div(mul(totalToken, 15), 50);
       uint256 teamAmount = div(mul(totalToken, 15), 50);
 
-      distributeToken(bountyAndCommunityAmount, reserveAmount, teamAmount);
+      distributeToken(bountyAmount, partnersAmount, reserveAmount, teamAmount);
 
       token.enableTransfers(true);
 
@@ -296,16 +293,9 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     token.changeController(ATCController);
   }
 
-  function distributeToken(uint256 bountyAndCommunityAmount, uint256 reserveAmount, uint256 teamAmount) internal {
-    // TODO: check bountyAndCommunityAmount distribution ratio
-    // 3 wallets, 1 multisig
-    uint256 bountyAndCommunityAmountForEach = div(bountyAndCommunityAmount, bountyAndCommunityAddresses.length + 1);
-
-    for (uint256 i = 0; i < bountyAndCommunityAddresses.length; i++) {
-        token.generateTokens(bountyAndCommunityAddresses[i], bountyAndCommunityAmountForEach);
-    }
-
-    token.generateTokens(bountyAndCommunityAddressesMultiSig, bountyAndCommunityAmountForEach);
+  function distributeToken(uint256 bountyAmount, uint256 partnersAmount, uint256 reserveAmount, uint256 teamAmount) internal {
+    token.generateTokens(bountyAddress, bountyAmount);
+    token.generateTokens(partnersAddress, partnersAmount);
     token.generateTokens(reserverLocker, reserveAmount);
     token.generateTokens(teamLocker, teamAmount);
   }

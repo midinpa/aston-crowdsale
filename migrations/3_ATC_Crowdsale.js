@@ -7,11 +7,10 @@ const ATC = artifacts.require("ATC.sol");
 const RefundVault = artifacts.require("vault/RefundVault.sol");
 const MiniMeTokenFactory = artifacts.require("token/MiniMeTokenFactory.sol");
 
-const MultiSig = artifacts.require("wallet/MultiSigWallet.sol");
 const ATCCrowdSale = artifacts.require("ATCCrowdSale.sol");
 const KYC = artifacts.require("kyc/KYC.sol");
-const TokenTimelock1 = artifacts.require("tokenlock/TokenTimelock.sol");
-const TokenTimelock2 = artifacts.require("tokenlock/TokenTimelock2.sol");
+const ReserveLocker = artifacts.require("ReserveLocker.sol");
+const TeamLocker = artifacts.require("TeamLocker.sol");
 
 module.exports = async function (deployer, network, accounts) {
   console.log("[accounts]");
@@ -25,14 +24,15 @@ module.exports = async function (deployer, network, accounts) {
     let tokenFactory, token, vault, presale;
     let kyc, crowdsale;
 
-    let bountyAddresses;
+    let bountyAddress;
+    let partnersAddress;
     let vaultOwners;
     let ATCReserveLocker;
     let teamLocker;
     let ATCController;
 
     let ATCReserveBeneficiary;
-    let teamBeneficiary;
+    let teamBeneficiaries;
     let ATCReserveReleaseTime;
     let teamReleaseTimelines;
 
@@ -82,16 +82,17 @@ module.exports = async function (deployer, network, accounts) {
       maxEtherCap = 1 * 10 ** 18;
       minEtherCap = 5 * 10 ** 17;
 
-      bountyAddresses = [
-        "0xb7aa50eb5e42c74076ea1b902a6142539f654796",
-        "0xb7aa50eb5e42c74076ea1b902a6142539f654797",
-        "0xb7aa50eb5e42c74076ea1b902a6142539f654798",
-      ];
+      bountyAddress = "0xb7aa50eb5e42c74076ea1b902a6142539f654796";
+      partnersAddress = "0xb7aa50eb5e42c74076ea1b902a6142539f654797";
 
       ATCReserveBeneficiary = "0xb7aa50eb5e42c74076ea1b902a6142539f654799";
       ATCReserveReleaseTime = moment().add(45, "minutes").unix();
 
-      teamBeneficiary = "0xb7aa50eb5e42c74076ea1b902a6142539f654799";
+      teamBeneficiaries = [
+          "0xb7aa50eb5e42c74076ea1b902a6142539f654799",
+          "0xb7aa50eb5e42c74076ea1b902a6142539f654798",
+          "0xb7aa50eb5e42c74076ea1b902a6142539f654797"
+      ];
       teamReleaseTimelines = [
         moment().add(35, "minutes").unix(),
         moment().add(40, "minutes").unix(),
@@ -106,23 +107,21 @@ module.exports = async function (deployer, network, accounts) {
       // TODO: ATCPLACEHOLDER ?
       ATCController = "0xb7aa50eb5e42c74076ea1b902a6142539f654796";
 
-      ATCReserveLocker = await TokenTimelock1.new(
+      ATCReserveLocker = await ReserveLocker.new(
         token.address,
         ATCReserveBeneficiary,
         ATCReserveReleaseTime,
       );
       console.log("ATCReserveLocker deployed at", ATCReserveLocker.address);
 
-      teamLocker = await TokenTimelock2.new(
+      teamLocker = await TeamLocker.new(
         token.address,
-        teamBeneficiary,
+        teamBeneficiaries,
         teamReleaseTimelines,
         teamReleaseRatios,
       );
       console.log("teamLocker deployed at", teamLocker.address);
 
-      multiSig = await MultiSig.new(bountyAddresses, bountyAddresses.length - 1);
-      console.log("multiSig deployed at", multiSig.address);
 
       kyc = await KYC.new();
       console.log("kyc deployed at", kyc.address);
@@ -133,8 +132,8 @@ module.exports = async function (deployer, network, accounts) {
         token.address,
         vault.address,
         presale.address,
-        bountyAddresses,
-        multiSig.address,
+        bountyAddress,
+        partnersAddress,
         ATCReserveLocker.address,
         teamLocker.address,
         ATCController,
@@ -152,7 +151,6 @@ module.exports = async function (deployer, network, accounts) {
       token: token.address,
       vault: vault.address,
       presale: presale.address,
-      multiSig: multiSig.address
     }, undefined, 2));
   } catch (e) {
     console.error(e);

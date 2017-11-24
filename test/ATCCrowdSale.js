@@ -19,11 +19,10 @@ const should = require("chai")
   const RefundVault = artifacts.require("vault/RefundVault.sol");
   const MiniMeTokenFactory = artifacts.require("token/MiniMeTokenFactory.sol");
 
-  const MultiSig = artifacts.require("wallet/MultiSigWallet.sol");
   const ATCCrowdSale = artifacts.require("ATCCrowdSale.sol");
   const KYC = artifacts.require("kyc/KYC.sol");
-  const TokenTimelock1 = artifacts.require("tokenlock/TokenTimelock.sol");
-  const TokenTimelock2 = artifacts.require("tokenlock/TokenTimelock2.sol");
+  const ReserveLocker = artifacts.require("ReserveLocker.sol");
+  const TeamLocker = artifacts.require("TeamLocker.sol");
 
 
 class Period {
@@ -44,9 +43,9 @@ contract(
       investor3,
       investor4,
       investor5,
-      ATCBountyAddress0,
-      ATCBountyAddress1,
-      ATCBountyAddress2,
+      bountyAddress,
+      partnersAddress,
+      ,
       ,
       vaultOwner0,
       vaultOwner1,
@@ -59,14 +58,16 @@ contract(
       vaultOwner8,
       vaultOwner9,
       ATCReserveBeneficiary,
-      teamBeneficiary,
+      teamBeneficiary0,
+      teamBeneficiary1,
+      teamBeneficiary2,
       ATCController,
       ...accounts
     ],
   ) => {
     let snapshotId;
 
-    let presale, crowdsale, token, kyc, vault, multiSig, tokenFactory;
+    let presale, crowdsale, token, kyc, vault, tokenFactory;
 
     let baseTime = moment();
     let now, presaleStartTime, presaleEndTime;
@@ -85,17 +86,12 @@ contract(
 
     let ATCReserveLocker, teamLocker;
     let ATCReserveReleaseTime, teamReleaseTimelines, teamReleaseRatios;
+    let teamBeneficiaries;
 
     const newOwner = accounts[ 25 ];
 
     const contractDeploy = async (logging = true) => {
       const logger = (...args) => (logging ? console.log(...args) : null);
-
-      bountyAddresses = [
-        ATCBountyAddress0,
-        ATCBountyAddress1,
-        ATCBountyAddress2,
-      ];
 
       vaultOwner = [
         vaultOwner0,
@@ -206,6 +202,12 @@ contract(
         50
       ];
 
+      teamBeneficiaries = [
+        teamBeneficiary0,
+        teamBeneficiary1,
+        teamBeneficiary2
+      ]
+
       /* eslint-enable */
       tokenFactory = await MiniMeTokenFactory.new();
       logger("tokenFactory deployed at", tokenFactory.address);
@@ -235,26 +237,20 @@ contract(
       // PRESALE DONE//
       // //////////////
 
-      ATCReserveLocker = await TokenTimelock1.new(
+      ATCReserveLocker = await ReserveLocker.new(
         token.address,
         ATCReserveBeneficiary,
         ATCReserveReleaseTime
       );
       logger("ATCReserveLocker deployed at", ATCReserveLocker.address);
 
-      teamLocker = await TokenTimelock2.new(
+      teamLocker = await TeamLocker.new(
         token.address,
-        teamBeneficiary,
+        teamBeneficiaries,
         teamReleaseTimelines,
         teamReleaseRatios
       );
       logger("teamLocker deployed at", teamLocker.address);
-
-      // ATCReserveLocker = "0xb7aa50eb5e42c74076ea1b902a6142539f654796";
-      // teamLocker = "0xb7aa50eb5e42c74076ea1b902a6142539f654796";
-
-      multiSig = await MultiSig.new(bountyAddresses, bountyAddresses.length - 1);
-      logger("multiSig deployed at", multiSig.address);
 
       kyc = await KYC.new();
       logger("kyc deployed at", kyc.address);
@@ -265,8 +261,8 @@ contract(
         token.address,
         vault.address,
         presale.address,
-        bountyAddresses,
-        multiSig.address,
+        bountyAddress,
+        partnersAddress,
         ATCReserveLocker.address,
         teamLocker.address,
         ATCController,
@@ -576,14 +572,15 @@ now:\t\t\t\t${ now }
         console.log("finalized");
 
         const totalSupply = await token.totalSupply();
-        const bountyAndCommunityAmountForEach = totalSupply.mul(5).div(100);
+        const bountyAmount = totalSupply.mul(5).div(100);
+        const partnersAmount = totalSupply.mul(15).div(100);
         const reserveAmount = totalSupply.mul(15).div(100);
         const teamAmount = totalSupply.mul(15).div(100);
 
-        for (const address of [ ATCBountyAddress0, ATCBountyAddress1, ATCBountyAddress2, multiSig.address ]) {
-          (await token.balanceOf(address))
-            .should.be.bignumber.equal(bountyAndCommunityAmountForEach);
-        }
+        (await token.balanceOf(bountyAddress))
+          .should.be.bignumber.equal(bountyAmount);
+        (await token.balanceOf(partnersAddress))
+          .should.be.bignumber.equal(partnersAmount);
         (await token.balanceOf(ATCReserveLocker.address))
           .should.be.bignumber.equal(reserveAmount);
 
@@ -614,8 +611,11 @@ now:\t\t\t\t${ now }
           await increaseTimeTo(teamReleaseTimelines[i] - duration.seconds(100));
           await teamLocker.release()
             .should.be.fulfilled;
-          (await token.balanceOf(teamBeneficiary))
-            .should.be.bignumber.equal(teamAmount.mul(teamReleaseRatios[i]).div(100))
+
+          for (var j = 0; j < teamBeneficiaries.length; j++) {
+            (await token.balanceOf(teamBeneficiaries[j]))
+              .should.be.bignumber.equal(teamAmount.mul(teamReleaseRatios[i]).div(100).div(3))
+          }
 
           console.log("teamLocker release %d (%d %)", i, teamReleaseRatios[i]);
         }
@@ -623,8 +623,11 @@ now:\t\t\t\t${ now }
         await increaseTimeTo(teamReleaseTimelines[teamReleaseTimelines.length - 1] + duration.seconds(100));
         await teamLocker.release()
           .should.be.fulfilled;
-        (await token.balanceOf(teamBeneficiary))
-          .should.be.bignumber.equal(teamAmount)
+
+        for (var j = 0; j < teamBeneficiaries.length; j++) {
+          (await token.balanceOf(teamBeneficiaries[j]))
+            .should.be.bignumber.equal(teamAmount.div(3))
+        }
 
         console.log("teamLocker release 3 (100 %)");
 
