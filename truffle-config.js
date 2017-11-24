@@ -1,5 +1,6 @@
 require("babel-register");
 require("babel-polyfill");
+require("./setup");
 
 // SNT
 const HDWalletProvider = require("truffle-hdwallet-provider");
