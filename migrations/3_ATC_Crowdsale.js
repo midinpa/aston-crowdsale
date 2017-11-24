@@ -26,7 +26,7 @@ module.exports = async function (deployer, network, accounts) {
     let kyc, crowdsale;
 
     let bountyAddresses;
-    let vaultOwner;
+    let vaultOwners;
     let ATCReserveLocker;
     let teamLocker;
     let ATCController;
@@ -47,18 +47,7 @@ module.exports = async function (deployer, network, accounts) {
       const presaleMaxEtherCap = 1 * 10 ** 18;
       const presaleRate = 1950;
 
-      vaultOwner = [
-        "0xb7aa50eb5e42c74076ea1b902a6142539f654796",
-        "0x922aa0d0e720caf10bcd7a02be187635a6f36ab0",
-        "0x6267901dbb0055e12ea895fc768b68486d57dcf8",
-        "0x6267901dbb0055e12ea895fc768b68486d57dcf1",
-        "0x6267901dbb0055e12ea895fc768b68486d57dcf2",
-        "0x6267901dbb0055e12ea895fc768b68486d57dcf3",
-        "0x6267901dbb0055e12ea895fc768b68486d57dcf4",
-        "0x6267901dbb0055e12ea895fc768b68486d57dcf5",
-        "0x6267901dbb0055e12ea895fc768b68486d57dcf6",
-        "0x6267901dbb0055e12ea895fc768b68486d57dcf7",
-      ];
+      vaultOwners = accounts.slice(7, 7 + 10);
 
       tokenFactory = await MiniMeTokenFactory.new();
       console.log("tokenFactory deployed at", tokenFactory.address);
@@ -66,7 +55,7 @@ module.exports = async function (deployer, network, accounts) {
       token = await ATC.new(tokenFactory.address);
       console.log("token deployed at", token.address);
 
-      vault = await RefundVault.new(vaultOwner);
+      vault = await RefundVault.new(vaultOwners);
       console.log("vault deployed at", vault.address);
 
       /*eslint-disable */
