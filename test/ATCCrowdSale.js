@@ -191,14 +191,12 @@ contract(
 
       teamReleaseTimelines = [
         baseTime.add(5, "minutes").unix(),
-        baseTime.add(5, "minutes").unix(),
         baseTime.add(5, "minutes").unix()
       ];
       ATCReserveReleaseTime = baseTime.unix();
 
       teamReleaseRatios = [
         20,
-        30,
         50
       ];
 

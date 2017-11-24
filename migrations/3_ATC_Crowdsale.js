@@ -94,13 +94,11 @@ module.exports = async function (deployer, network, accounts) {
           "0xb7aa50eb5e42c74076ea1b902a6142539f654797"
       ];
       teamReleaseTimelines = [
-        moment().add(35, "minutes").unix(),
         moment().add(40, "minutes").unix(),
         moment().add(45, "minutes").unix(),
       ];
       teamReleaseRatios = [
         20,
-        30,
         50,
       ];
 

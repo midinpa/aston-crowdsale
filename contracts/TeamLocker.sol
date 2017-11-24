@@ -1,6 +1,5 @@
 pragma solidity ^0.4.18;
 
-
 import "./token/ERC20Basic.sol";
 import "./token/SafeERC20.sol";
 import "./math/SafeMath.sol";
@@ -36,12 +35,13 @@ contract TeamLocker is SafeMath{
     for (i = 0; i < _timelines.length - 1; i++) {
       require(_timelines[i] < _timelines[i+1]);
     }
+
     require(0 < _releaseRatios[0]);
     for (i = 0; i < _releaseRatios.length - 1; i++) {
       require(_releaseRatios[i] < _releaseRatios[i+1]);
     }
-    require(_timelines.length == _releaseRatios.length);
 
+    require(_timelines.length == _releaseRatios.length);
 
     token = _token;
     beneficiaries = _beneficiaries;
@@ -89,7 +89,6 @@ contract TeamLocker is SafeMath{
       }
     }
     require(isBeneficiary);
-    require(newToken != 0x00);
 
     token = newToken;
   }
