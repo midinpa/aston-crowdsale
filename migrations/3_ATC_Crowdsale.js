@@ -60,7 +60,7 @@ module.exports = async function (deployer, network, accounts) {
         "0x6267901dbb0055e12ea895fc768b68486d57dcf7",
       ];
 
-      tokenFactory = MiniMeTokenFactory.new();
+      tokenFactory = await MiniMeTokenFactory.new();
       console.log("tokenFactory deployed at", tokenFactory.address);
 
       token = await ATC.new(tokenFactory.address);
