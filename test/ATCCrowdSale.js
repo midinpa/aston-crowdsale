@@ -14,13 +14,17 @@ const should = require("chai")
   .use(require("chai-bignumber")(BigNumber))
   .should();
 
-const ATCPresale = artifacts.require("ATCPresale.sol");
-const ATCCrowdSale = artifacts.require("ATCCrowdSale.sol");
-const ATC = artifacts.require("ATC.sol");
-const KYC = artifacts.require("KYC.sol");
-const RefundVault = artifacts.require("vault/RefundVault.sol");
-const MultiSig = artifacts.require("wallet/MultiSigWallet.sol");
-const MiniMeTokenFactory = artifacts.require("token/MiniMeTokenFactory.sol");
+  const ATCPresale = artifacts.require("ATCPresale.sol");
+  const ATC = artifacts.require("ATC.sol");
+  const RefundVault = artifacts.require("vault/RefundVault.sol");
+  const MiniMeTokenFactory = artifacts.require("token/MiniMeTokenFactory.sol");
+
+  const MultiSig = artifacts.require("wallet/MultiSigWallet.sol");
+  const ATCCrowdSale = artifacts.require("ATCCrowdSale.sol");
+  const KYC = artifacts.require("kyc/KYC.sol");
+  const TokenTimelock1 = artifacts.require("tokenlock/TokenTimelock.sol");
+  const TokenTimelock2 = artifacts.require("tokenlock/TokenTimelock2.sol");
+
 
 class Period {
   constructor(startTime, endTime, bonus) {
@@ -51,8 +55,8 @@ contract(
       vaultOwner7,
       vaultOwner8,
       vaultOwner9,
-      ATCReserveLocker,
-      teamLocker,
+      ATCReserveBeneficiary,
+      teamBeneficiary,
       ATCController,
       ...accounts
     ],
@@ -68,14 +72,16 @@ contract(
     let additionalBonus1, additionalBonus2;
     let getAdditionalBonus, getRate, period, periodIndex;
 
-    let maxEtherCap, minEtherCap, presaleMaxEtherCap;
-    let maxGuaranteedLimit;
+    let maxEtherCap, minEtherCap;
 
     let bountyAddresses, vaultOwner;
 
     let cumulativeWeiRaised;
 
     let registeredAddresses, unregisteredAddresses;
+
+    let ATCReserveLocker, teamLocker;
+    let ATCReserveReleaseTime, teamReleaseTimelines, teamReleaseRatios;
 
     const newOwner = accounts[ 25 ];
 
@@ -113,8 +119,6 @@ contract(
 
       maxEtherCap = ether(286000);
       minEtherCap = ether(28600);
-      presaleMaxEtherCap = maxEtherCap.mul(15).div(100);
-      maxGuaranteedLimit = ether(5000);
 
       baseRate = new BigNumber(1500);
       presaleRate = baseRate.mul(1.30); // 30% bonus for presale
@@ -134,20 +138,25 @@ contract(
 
       /*eslint-disable */
       periods = [
-        new Period( // 1
+        new Period( // 0
           baseTime.add(5, "minutes").unix(),
           baseTime.add(5, "minutes").unix(),
           new BigNumber(15)
         ),
-        new Period( // 2
+        new Period( // 1
           baseTime.add(5, "minutes").unix(),
           baseTime.add(5, "minutes").unix(),
           new BigNumber(10)
         ),
-        new Period( // 3
+        new Period( // 2
           baseTime.add(5, "minutes").unix(),
           baseTime.add(5, "minutes").unix(),
           new BigNumber(5)
+        ),
+        new Period( // 3
+          baseTime.add(5, "minutes").unix(),
+          baseTime.add(5, "minutes").unix(),
+          new BigNumber(0)
         ),
         new Period( // 4
           baseTime.add(5, "minutes").unix(),
@@ -175,11 +184,23 @@ contract(
           new BigNumber(0)
         ),
       ];
+
+
+
+      teamReleaseTimelines = [
+        baseTime.add(5, "minutes").unix(),
+        baseTime.add(5, "minutes").unix(),
+        baseTime.add(5, "minutes").unix()
+      ];
+      ATCReserveReleaseTime = baseTime.unix();
+
+      teamReleaseRatios = [
+        20,
+        30,
+        50
+      ];
+
       /* eslint-enable */
-
-      multiSig = await MultiSig.new(bountyAddresses, bountyAddresses.length - 1);
-      logger("multiSig deployed at", multiSig.address);
-
       tokenFactory = await MiniMeTokenFactory.new();
       logger("tokenFactory deployed at", tokenFactory.address);
 
@@ -195,7 +216,7 @@ contract(
         vault.address,
         presaleStartTime,
         presaleEndTime,
-        presaleMaxEtherCap,
+        maxEtherCap,
         presaleRate
       );
       /* eslint-enable */
@@ -203,6 +224,31 @@ contract(
 
       await token.changeController(presale.address);
       await vault.transferOwnership(presale.address);
+
+      // //////////////
+      // PRESALE DONE//
+      // //////////////
+
+      ATCReserveLocker = await TokenTimelock1.new(
+        token.address,
+        ATCReserveBeneficiary,
+        ATCReserveReleaseTime
+      );
+      logger("ATCReserveLocker deployed at", ATCReserveLocker.address);
+
+      teamLocker = await TokenTimelock2.new(
+        token.address,
+        teamBeneficiary,
+        teamReleaseTimelines,
+        teamReleaseRatios
+      );
+      logger("teamLocker deployed at", teamLocker.address);
+
+      // ATCReserveLocker = "0xb7aa50eb5e42c74076ea1b902a6142539f654796";
+      // teamLocker = "0xb7aa50eb5e42c74076ea1b902a6142539f654796";
+
+      multiSig = await MultiSig.new(bountyAddresses, bountyAddresses.length - 1);
+      logger("multiSig deployed at", multiSig.address);
 
       kyc = await KYC.new();
       logger("kyc deployed at", kyc.address);
@@ -215,8 +261,8 @@ contract(
         presale.address,
         bountyAddresses,
         multiSig.address,
-        ATCReserveLocker,
-        teamLocker,
+        ATCReserveLocker.address,
+        teamLocker.address,
         ATCController,
         maxEtherCap,
         minEtherCap,
@@ -269,7 +315,8 @@ now:\t\t\t\t${ now }
 
         await increaseTimeTo(beforePresaleStartTime);
 
-        const registerTx = await presale.register(investor1, presaleMaxEtherCap)
+        investAmount = ether(1000);
+        const registerTx = await presale.register(investor1, investAmount)
           .should.be.fulfilled;
         console.log("presale registered");
 
@@ -279,14 +326,14 @@ now:\t\t\t\t${ now }
         await increaseTimeTo(afterPresaleStartTime);
 
         const purchaseTx = await presale.buyPresale(investor1, {
-          value: presaleMaxEtherCap,
+          value: investAmount,
           from: investor1,
         }).should.be.fulfilled;
 
-        cumulativeWeiRaised = cumulativeWeiRaised.add(presaleMaxEtherCap);
+        cumulativeWeiRaised = cumulativeWeiRaised.add(investAmount);
 
         (await token.balanceOf(investor1))
-          .should.be.bignumber.equal(presaleMaxEtherCap.mul(presaleRate));
+          .should.be.bignumber.equal(investAmount.mul(presaleRate));
         console.log("presale purchase");
 
         await increaseTimeTo(afterPresaleEndTime);
@@ -415,6 +462,47 @@ now:\t\t\t\t${ now }
 
         console.log("token transfer rejected");
 
+        period = periods[ periodIndex++ ];
+        await increaseTimeTo(period.startTime - duration.seconds(100));
+        await crowdsale.startPeriod(period.startTime, period.endTime)
+          .should.be.fulfilled;
+
+        console.log("period 3 startred");
+
+        period = periods[ periodIndex++ ];
+        await increaseTimeTo(period.startTime - duration.seconds(100));
+        await crowdsale.startPeriod(period.startTime, period.endTime)
+          .should.be.fulfilled;
+
+        console.log("period 4 startred");
+        period = periods[ periodIndex++ ];
+        await increaseTimeTo(period.startTime - duration.seconds(100));
+        await crowdsale.startPeriod(period.startTime, period.endTime)
+          .should.be.fulfilled;
+
+        console.log("period 5 startred");
+
+        period = periods[ periodIndex++ ];
+        await increaseTimeTo(period.startTime - duration.seconds(100));
+        await crowdsale.startPeriod(period.startTime, period.endTime)
+          .should.be.fulfilled;
+
+        console.log("period 6 startred");
+
+        period = periods[ periodIndex++ ];
+        await increaseTimeTo(period.startTime - duration.seconds(100));
+        await crowdsale.startPeriod(period.startTime, period.endTime)
+          .should.be.fulfilled;
+
+        console.log("period 7 startred");
+
+        period = periods[ periodIndex++ ];
+        await increaseTimeTo(period.startTime - duration.seconds(100));
+        await crowdsale.startPeriod(period.startTime, period.endTime)
+          .should.be.rejectedWith(EVMThrow);
+
+        console.log("period 8 reverted (maximum 7 additional period!!!)");
+
         await increaseTimeTo(period.endTime + duration.seconds(100));
 
         await crowdsale.finalize()
@@ -432,10 +520,10 @@ now:\t\t\t\t${ now }
             .should.be.bignumber.equal(bountyAndCommunityAmountForEach);
         }
 
-        (await token.balanceOf(ATCReserveLocker))
+        (await token.balanceOf(ATCReserveLocker.address))
           .should.be.bignumber.equal(reserverAmount);
 
-        (await token.balanceOf(teamLocker))
+        (await token.balanceOf(teamLocker.address))
           .should.be.bignumber.equal(teamAmount);
 
         (await token.controller())
