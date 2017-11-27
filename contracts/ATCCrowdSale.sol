@@ -28,7 +28,6 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
   uint256 public baseRate = 1500; // 1 ETH = 1500 ATC
 
   Period[] public periods;
-  uint256 public currentPeriod;
   uint8 constant public MAX_PERIOD_COUNT = 8;
 
   uint256 public weiRaised;
@@ -56,7 +55,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
   event PresaleFallBack(uint256 _presaleWeiRaised);
   event PushInvestorList(address _investor);
   event RefundAll(uint256 _numToRefund);
-  event ClaimedTokens(address _token, address owner, uint256 balance);
+  event ClaimedTokens(address _claimToken, address owner, uint256 balance);
 
   function ATCCrowdSale (
     address _kyc,
@@ -114,12 +113,12 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     whenNotPaused
   {
       // check validity
-      require(kyc.registeredAddress(beneficiary));
       require(presaleFallBackCalled);
-      require(nonZeroPeriod());
-      require(!periodFinished(currentPeriod));
       require(beneficiary != 0x00);
+      require(kyc.registeredAddress(beneficiary));
+      require(onSale());
       require(validPurchase());
+      require(!isFinalized);
 
       // calculate eth amount
       uint256 weiAmount = msg.value;
@@ -179,21 +178,11 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
 
   function validPurchase() internal constant returns (bool) {
     bool nonZeroPurchase = msg.value != 0;
-    bool validTime = now >= periods[currentPeriod].startTime && now <= periods[currentPeriod].endTime;
-    return nonZeroPurchase && !maxReached() && validTime;
+    return nonZeroPurchase && !maxReached();
   }
 
   function forwardFunds(uint256 toFund) internal {
     vault.deposit.value(toFund)(msg.sender);
-  }
-
-  function nonZeroPeriod() public constant returns (bool) {
-    return periods.length > 0;
-  }
-
-  function periodFinished(uint256 period) public constant returns (bool) {
-    require(sub(periods.length, 1) >= period);
-    return nonZeroPeriod() && now > periods[period].endTime;
   }
 
   /**
@@ -212,6 +201,17 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
   }
 
   function getBonus() public constant returns (uint256) {
+    bool nowOnSale;
+    uint256 currentPeriod;
+
+    for (uint i = 0; i < periods.length; i++) {
+      if (periods[i].startTime <= now && now <= periods[i].endTime) {
+        nowOnSale = true;
+        currentPeriod = i;
+      }
+    }
+
+    require(nowOnSale);
     return periods[currentPeriod].bonus;
   }
 
@@ -224,7 +224,6 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
 
   function startPeriod(uint64 _startTime, uint64 _endTime) public onlyOwner returns (bool) {
     require(periods.length < MAX_PERIOD_COUNT);
-    require(!maxReached());
     require(now < _startTime && _startTime < _endTime);
 
     if (periods.length != 0) {
@@ -236,30 +235,35 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     newPeriod.startTime = _startTime;
     newPeriod.endTime = _endTime;
 
-    if(periods.length < 4) {
+    if(periods.length < 3) {
       newPeriod.bonus = sub(15, mul(5, periods.length));
     } else {
       newPeriod.bonus = 0;
     }
 
-    if (nonZeroPeriod()) {
-      require(now > periods[currentPeriod].endTime);
-      currentPeriod = add (currentPeriod, 1);
-    }
-
     periods.push(newPeriod);
-
     StartPeriod(_startTime, _endTime, newPeriod.bonus);
 
     return true;
   }
 
+  function onSale() public returns (bool) {
+    bool nowOnSale;
+
+    for (uint i = 0; i < periods.length; i++) {
+      if (periods[i].startTime <= now && now <= periods[i].endTime) {
+        nowOnSale = true;
+      }
+    }
+
+    return nowOnSale;
+  }
   /**
    * @dev should be called after crowdsale ends, to do
    */
   function finalize() onlyOwner {
     require(!isFinalized);
-    require(periodFinished(currentPeriod) || maxReached());
+    require(!onSale() || maxReached());
 
     finalization();
     Finalized();
@@ -334,21 +338,21 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     return vault.refund(investor);
   }
 
-  function claimTokens(address _token) public onlyOwner {
+  function claimTokens(address _claimToken) public onlyOwner {
 
-    if (ATC.controller() == address(this)) {
-         ATC.claimTokens(_token);
+    if (token.controller() == address(this)) {
+         token.claimTokens(_claimToken);
     }
 
-    if (_token == 0x0) {
+    if (_claimToken == 0x0) {
         owner.transfer(this.balance);
         return;
     }
 
-    ERC20Basic token = ERC20Basic(_token);
-    uint256 balance = token.balanceOf(this);
-    token.transfer(owner, balance);
+    ERC20Basic claimToken = ERC20Basic(_claimToken);
+    uint256 balance = claimToken.balanceOf(this);
+    claimToken.transfer(owner, balance);
 
-    ClaimedTokens(_token, owner, balance);
+    ClaimedTokens(_claimToken, owner, balance);
   }
 }
