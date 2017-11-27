@@ -6,15 +6,16 @@ const ATCPresale = artifacts.require("ATCPresale.sol");
 const ATC = artifacts.require("ATC.sol");
 const RefundVault = artifacts.require("vault/RefundVault.sol");
 const MiniMeTokenFactory = artifacts.require("token/MiniMeTokenFactory.sol");
+const KYC = artifacts.require("kyc/KYC.sol");
 
 module.exports = async function (deployer, network, accounts) {
   console.log("[accounts]");
   accounts.forEach((account, i) => console.log(`[${ i }]  ${ account }`));
 
   try {
-    let tokenFactory, presale, token, vault;
+    let tokenFactory, presale, token, vault, kyc;
     let startTime, endTime;
-    let rate;
+    let rate, publicRate;
     let maxEtherCap;
     let vaultOwners;
 
@@ -23,11 +24,13 @@ module.exports = async function (deployer, network, accounts) {
       endTime = moment.utc("2017-12-10").unix();
       maxEtherCap = 286000 * 10 ** 18;
       rate = 1950;
+      publicRate = 1875;
     } else {
       startTime = moment().add(10, "minutes").unix();
       endTime = moment().add(25, "minutes").unix();
       maxEtherCap = 1 * 10 ** 18;
       rate = 1950;
+      publicRate = 1875;
 
       vaultOwners = accounts.slice(7, 7 + 10);
     }
@@ -41,14 +44,19 @@ module.exports = async function (deployer, network, accounts) {
     vault = await RefundVault.new(vaultOwners);
     console.log("vault deployed at", vault.address);
 
+    kyc = await KYC.new();
+    console.log("kyc deployed at", kyc.address);
+
     /*eslint-disable */
     presale = await ATCPresale.new(
       token.address,
       vault.address,
+      kyc.address,
       startTime,
       endTime,
       maxEtherCap,
-      rate
+      rate,
+      publicRate
     );
     /*eslint-enable */
     console.log("presale deployed at", presale.address);

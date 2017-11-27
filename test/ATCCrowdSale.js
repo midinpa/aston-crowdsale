@@ -72,7 +72,7 @@ contract(
     let baseTime = moment();
     let now, presaleStartTime, presaleEndTime;
     let beforePresaleStartTime, afterPresaleEndTime, afterPresaleStartTime;
-    let periods, baseRate, presaleRate;
+    let periods, baseRate, presaleRate, presalePublicRate;
     let additionalBonus1, additionalBonus2;
     let getAdditionalBonus, getRate, period, periodIndex;
 
@@ -121,6 +121,7 @@ contract(
 
       baseRate = new BigNumber(1500);
       presaleRate = baseRate.mul(1.30); // 30% bonus for presale
+      presalePublicRate = baseRate.mul(1.25); // 30% bonus for presale
       additionalBonus1 = new BigNumber(5); // 5% bonus for more than 300 ETH
       additionalBonus2 = new BigNumber(10); // 10% bonus for more than 6000 ETH
 
@@ -216,14 +217,19 @@ contract(
       vault = await RefundVault.new(vaultOwner);
       logger("vault deployed at", vault.address);
 
+      kyc = await KYC.new();
+      logger("kyc deployed at", kyc.address);
+
       /*eslint-disable */
       presale = await ATCPresale.new(
         token.address,
         vault.address,
+        kyc.address,
         presaleStartTime,
         presaleEndTime,
         maxEtherCap,
-        presaleRate
+        presaleRate,
+        presalePublicRate
       );
       /* eslint-enable */
       logger("presale deployed at", presale.address);
@@ -249,9 +255,6 @@ contract(
         teamReleaseRatios
       );
       logger("teamLocker deployed at", teamLocker.address);
-
-      kyc = await KYC.new();
-      logger("kyc deployed at", kyc.address);
 
       /*eslint-disable */
       crowdsale = await ATCCrowdSale.new(

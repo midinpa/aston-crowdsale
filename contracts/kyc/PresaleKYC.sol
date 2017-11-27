@@ -15,7 +15,6 @@ contract PresaleKYC is Ownable, SafeMath {
 
   // guaranteedlimit for each presale investor
   mapping (address => uint256) public presaleGuaranteedLimit;
-  uint256 public totalPresaleGuaranteedLimit;
 
   event Registered(address indexed _addr, uint256 _amount);
   event Unregistered(address indexed _addr);
@@ -42,8 +41,6 @@ contract PresaleKYC is Ownable, SafeMath {
     registeredAddress[_addr] = true;
     presaleGuaranteedLimit[_addr] = _maxGuaranteedLimit;
 
-    totalPresaleGuaranteedLimit = add(totalPresaleGuaranteedLimit, _maxGuaranteedLimit);
-
     Registered(_addr, _maxGuaranteedLimit);
   }
 
@@ -61,8 +58,6 @@ contract PresaleKYC is Ownable, SafeMath {
       registeredAddress[_addrs[i]] = true;
       presaleGuaranteedLimit[_addrs[i]] = _maxGuaranteedLimits[i];
 
-      totalPresaleGuaranteedLimit = add(totalPresaleGuaranteedLimit, _maxGuaranteedLimits[i]);
-
       Registered(_addrs[i], _maxGuaranteedLimits[i]);
     }
   }
@@ -76,8 +71,6 @@ contract PresaleKYC is Ownable, SafeMath {
     onlyOwner
     onlyRegistered(_addr)
   {
-
-    totalPresaleGuaranteedLimit = sub(totalPresaleGuaranteedLimit, presaleGuaranteedLimit[_addr]);
 
     registeredAddress[_addr] = false;
     presaleGuaranteedLimit[_addr] = 0;
@@ -95,8 +88,6 @@ contract PresaleKYC is Ownable, SafeMath {
   {
     for(uint256 i = 0; i < _addrs.length; i++) {
       require(registeredAddress[_addrs[i]]);
-
-      totalPresaleGuaranteedLimit = sub(totalPresaleGuaranteedLimit, presaleGuaranteedLimit[_addrs[i]]);
 
       registeredAddress[_addrs[i]] = false;
       presaleGuaranteedLimit[_addrs[i]] = 0;

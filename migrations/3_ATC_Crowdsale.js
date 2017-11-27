@@ -46,6 +46,7 @@ module.exports = async function (deployer, network, accounts) {
       const presaleEndTime = moment().add(10, "minutes").unix();
       const presaleMaxEtherCap = 1 * 10 ** 18;
       const presaleRate = 1950;
+      const presalePublicRate = 1875;
 
       vaultOwners = accounts.slice(7, 7 + 10);
 
@@ -58,14 +59,19 @@ module.exports = async function (deployer, network, accounts) {
       vault = await RefundVault.new(vaultOwners);
       console.log("vault deployed at", vault.address);
 
+      kyc = await KYC.new();
+      console.log("kyc deployed at", kyc.address);
+
       /*eslint-disable */
       presale = await ATCPresale.new(
         token.address,
         vault.address,
+        kyc.address,
         presaleStartTime,
         presaleEndTime,
         presaleMaxEtherCap,
-        presaleRate
+        presaleRate,
+        presalePublicRate
       );
       /* eslint-enable */
       console.log("presale deployed at", presale.address);
@@ -119,10 +125,6 @@ module.exports = async function (deployer, network, accounts) {
         teamReleaseRatios,
       );
       console.log("teamLocker deployed at", teamLocker.address);
-
-
-      kyc = await KYC.new();
-      console.log("kyc deployed at", kyc.address);
 
       /*eslint-disable */
       crowdsale = await ATCCrowdSale.new(

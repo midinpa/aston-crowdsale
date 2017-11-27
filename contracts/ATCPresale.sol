@@ -6,6 +6,7 @@ import './ATC.sol';
 import './kyc/PresaleKYC.sol';
 import './lifecycle/Pausable.sol';
 import './math/SafeMath.sol';
+import './kyc/KYC.sol';
 
 contract PresaleFallbackReceiver {
     function presaleFallBack(uint256 _presaleWeiRaised) public returns (bool);
@@ -14,8 +15,10 @@ contract PresaleFallbackReceiver {
 contract ATCPresale is Ownable, PresaleKYC, Pausable {
   ATC public token;
   RefundVault public vault;
+  KYC public kyc;
 
   uint256 public rate;
+  uint256 public publicRate;
   uint256 public weiRaised;
   uint256 public maxEtherCap;
   uint64 public startTime;
@@ -29,74 +32,30 @@ contract ATCPresale is Ownable, PresaleKYC, Pausable {
   function ATCPresale(
     address _token,
     address _vault,
+    address _kyc,
     uint64 _startTime,
     uint64 _endTime,
     uint256 _maxEtherCap,
-    uint256 _rate
+    uint256 _rate,
+    uint256 _publicRate
     ) {
-      require(_token != 0x00 && _vault != 0x00);
+      require(_token != 0x00 && _vault != 0x00 && _kyc != 0x00);
       require(now < _startTime && _startTime < _endTime);
       require(_maxEtherCap > 0);
-      require(_rate > 0);
+      require(_rate > 0 && _publicRate > 0);
 
       token = ATC(_token);
       vault = RefundVault(_vault);
+      kyc = KYC(_kyc);
       startTime = _startTime;
       endTime = _endTime;
       maxEtherCap = _maxEtherCap;
       rate = _rate;
+      publicRate = _publicRate;
     }
 
   function () payable {
     buyPresale(msg.sender);
-  }
-
-  function register(address _addr, uint256 _maxGuaranteedLimit)
-    public
-    onlyOwner
-  {
-    uint256 postTotalPresaleGuaranteedLimit = add(totalPresaleGuaranteedLimit, _maxGuaranteedLimit);
-    require(maxEtherCap >= postTotalPresaleGuaranteedLimit);
-
-    super.register(_addr, _maxGuaranteedLimit);
-  }
-
-  function registerByList(address[] _addrs, uint256[] _maxGuaranteedLimits)
-    public
-    onlyOwner
-  {
-    uint256 postTotalPresaleGuaranteedLimit = totalPresaleGuaranteedLimit;
-    for(uint256 i = 0; i < _addrs.length; i++) {
-      postTotalPresaleGuaranteedLimit = add(postTotalPresaleGuaranteedLimit, _maxGuaranteedLimits[i]);
-    }
-    require(maxEtherCap >= postTotalPresaleGuaranteedLimit);
-
-    super.registerByList(_addrs, _maxGuaranteedLimits);
-  }
-
-  function unregister(address _addr)
-    public
-    onlyOwner
-    onlyRegistered(_addr)
-  {
-    require(beneficiaryFunded[_addr] == 0);
-    super.unregister(_addr);
-  }
-
-  /**
-   * @dev unregister the registered addresses
-   * @param _addrs address[] The addresses to unregister for token sale
-   */
-  function unregisterByList(address[] _addrs)
-    public
-    onlyOwner
-  {
-    uint256 totalbeneficiaryFunded;
-    for(uint256 i = 0; i < _addrs.length; i++) {
-      totalbeneficiaryFunded = add(totalbeneficiaryFunded, beneficiaryFunded[_addrs[i]]);
-    }
-    require(totalbeneficiaryFunded == 0);
-    super.unregisterByList(_addrs);
   }
 
   function buyPresale(address beneficiary)
@@ -107,25 +66,37 @@ contract ATCPresale is Ownable, PresaleKYC, Pausable {
     // check validity
     require(beneficiary != 0x00);
     require(validPurchase());
-    uint guaranteedLimit = presaleGuaranteedLimit[beneficiary];
-    require(guaranteedLimit > 0);
 
-    // calculate eth amount
+    require(registeredAddress[beneficiary] || kyc.registeredAddress(beneficiary));
+
+    uint256 myRate;
     uint256 weiAmount = msg.value;
-    uint256 totalAmount = add(beneficiaryFunded[beneficiary], weiAmount);
+    uint256 toFund = weiAmount;
 
-    uint256 toFund;
+    if (registeredAddress[beneficiary]) {
+      uint256 guaranteedLimit = presaleGuaranteedLimit[beneficiary];
+      require(guaranteedLimit > 0);
 
-    if (totalAmount > guaranteedLimit) {
-      toFund = sub(guaranteedLimit, beneficiaryFunded[beneficiary]);
-    } else {
-      toFund = weiAmount;
+      uint256 totalAmount = add(beneficiaryFunded[beneficiary], weiAmount);
+      if (totalAmount > guaranteedLimit) {
+        toFund = sub(guaranteedLimit, beneficiaryFunded[beneficiary]);
+      }
+      myRate = rate;
+
+    } else if (kyc.registeredAddress(beneficiary)) {
+      myRate = publicRate;
+    }
+
+    uint256 postWeiRaised = add(weiRaised, toFund);
+    if (postWeiRaised > maxEtherCap) {
+      toFund = sub(maxEtherCap, weiRaised);
     }
 
     require(toFund > 0);
     require(weiAmount >= toFund);
+    require(myRate > 0);
 
-    uint256 tokens = mul(toFund, rate);
+    uint256 tokens = mul(toFund, myRate);
     uint256 toReturn = sub(weiAmount, toFund);
 
     weiRaised = add(weiRaised, toFund);
