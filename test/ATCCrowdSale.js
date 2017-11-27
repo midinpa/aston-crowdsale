@@ -6,6 +6,7 @@ import EVMThrow from "./helpers/EVMThrow";
 import { capture, restore } from "./helpers/snapshot";
 import moment from "moment";
 
+
 const BigNumber = web3.BigNumber;
 const eth = web3.eth;
 

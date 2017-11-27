@@ -62,7 +62,6 @@ contract ATCPresale is Ownable, PresaleKYC, Pausable {
 
   function buyPresale(address beneficiary)
     payable
-    onlyRegistered(beneficiary)
     whenNotPaused
   {
     // check validity

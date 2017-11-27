@@ -17,6 +17,7 @@
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "chai-bignumber": "^2.0.2",
+    "command-line-args": "^4.0.7",
     "dotenv": "^4.0.0",
     "eslint": "^4.5.0",
     "eslint-config-airbnb": "^15.1.0",
