@@ -1,6 +1,7 @@
 pragma solidity ^0.4.18;
 
 import '../ownership/Ownable.sol';
+import '../token/ERC20Basic.sol';
 
 /**
  * @title KYC
@@ -18,6 +19,7 @@ contract KYC is Ownable {
   event Registered(address indexed _addr);
   event Unregistered(address indexed _addr);
   event NewAdmin(address indexed _addr);
+  event ClaimedTokens(address _token, address owner, uint256 balance);
 
   /**
    * @dev check whether the address is registered for token sale or not.
@@ -115,6 +117,19 @@ contract KYC is Ownable {
 
       Unregistered(_addrs[i]);
     }
+  }
 
+  function claimTokens(address _token) public onlyOwner {
+
+    if (_token == 0x0) {
+        owner.transfer(this.balance);
+        return;
+    }
+
+    ERC20Basic token = ERC20Basic(_token);
+    uint256 balance = token.balanceOf(this);
+    token.transfer(owner, balance);
+
+    ClaimedTokens(_token, owner, balance);
   }
 }

@@ -26,49 +26,49 @@ module.exports = async function (deployer, network, accounts) {
       rate = 1950;
       publicRate = 1875;
     } else {
-      startTime = moment().add(10, "minutes").unix();
-      endTime = moment().add(25, "minutes").unix();
-      maxEtherCap = 1 * 10 ** 18;
-      rate = 1950;
-      publicRate = 1875;
-
-      vaultOwners = accounts.slice(7, 7 + 10);
-    }
-
-    tokenFactory = await MiniMeTokenFactory.new();
-    console.log("tokenFactory deployed at", tokenFactory.address);
-
-    token = await ATC.new(tokenFactory.address);
-    console.log("token deployed at", token.address);
-
-    vault = await RefundVault.new(vaultOwners);
-    console.log("vault deployed at", vault.address);
-
-    kyc = await KYC.new();
-    console.log("kyc deployed at", kyc.address);
-
-    /*eslint-disable */
-    presale = await ATCPresale.new(
-      token.address,
-      vault.address,
-      kyc.address,
-      startTime,
-      endTime,
-      maxEtherCap,
-      rate,
-      publicRate
-    );
-    /*eslint-enable */
-    console.log("presale deployed at", presale.address);
-
-    await token.changeController(presale.address);
-    await vault.transferOwnership(presale.address);
-
-    fs.writeFileSync(path.join(__dirname, "../addresses.json"), JSON.stringify({
-      token: token.address,
-      vault: vault.address,
-      presale: presale.address,
-    }, undefined, 2));
+    //   startTime = moment().add(10, "minutes").unix();
+    //   endTime = moment().add(25, "minutes").unix();
+    //   maxEtherCap = 1 * 10 ** 18;
+    //   rate = 1950;
+    //   publicRate = 1875;
+    //
+    //   vaultOwners = accounts.slice(7, 7 + 10);
+    // }
+    //
+    // tokenFactory = await MiniMeTokenFactory.new();
+    // console.log("tokenFactory deployed at", tokenFactory.address);
+    //
+    // token = await ATC.new(tokenFactory.address);
+    // console.log("token deployed at", token.address);
+    //
+    // vault = await RefundVault.new(vaultOwners);
+    // console.log("vault deployed at", vault.address);
+    //
+    // kyc = await KYC.new();
+    // console.log("kyc deployed at", kyc.address);
+    //
+    // /*eslint-disable */
+    // presale = await ATCPresale.new(
+    //   token.address,
+    //   vault.address,
+    //   kyc.address,
+    //   startTime,
+    //   endTime,
+    //   maxEtherCap,
+    //   rate,
+    //   publicRate
+    // );
+    // /*eslint-enable */
+    // console.log("presale deployed at", presale.address);
+    //
+    // await token.changeController(presale.address);
+    // await vault.transferOwnership(presale.address);
+    //
+    // fs.writeFileSync(path.join(__dirname, "../addresses.json"), JSON.stringify({
+    //   token: token.address,
+    //   vault: vault.address,
+    //   presale: presale.address,
+    // }, undefined, 2));
   } catch (e) {
     console.error(e);
   }

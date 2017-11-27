@@ -7,6 +7,7 @@ import './kyc/PresaleKYC.sol';
 import './lifecycle/Pausable.sol';
 import './math/SafeMath.sol';
 import './kyc/KYC.sol';
+import './token/ERC20Basic.sol';
 
 contract PresaleFallbackReceiver {
     function presaleFallBack(uint256 _presaleWeiRaised) public returns (bool);
@@ -28,6 +29,7 @@ contract ATCPresale is Ownable, PresaleKYC, Pausable {
   mapping (address => uint256) public beneficiaryFunded;
 
   event PresaleTokenPurchase(address indexed buyer, address indexed beneficiary, uint256 toFund, uint256 tokens);
+  event ClaimedTokens(address _token, address owner, uint256 balance);
 
   function ATCPresale(
     address _token,
@@ -152,5 +154,23 @@ contract ATCPresale is Ownable, PresaleKYC, Pausable {
   }
   function changeVaultOwner(address newOwner) onlyOwner internal {
     vault.transferOwnership(newOwner);
+  }
+
+  function claimTokens(address _token) public onlyOwner {
+
+    if (ATC.controller() == address(this)) {
+         ATC.claimTokens(_token);
+    }
+
+    if (_token == 0x0) {
+        owner.transfer(this.balance);
+        return;
+    }
+
+    ERC20Basic token = ERC20Basic(_token);
+    uint256 balance = token.balanceOf(this);
+    token.transfer(owner, balance);
+
+    ClaimedTokens(_token, owner, balance);
   }
 }

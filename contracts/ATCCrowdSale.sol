@@ -56,7 +56,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
   event PresaleFallBack(uint256 _presaleWeiRaised);
   event PushInvestorList(address _investor);
   event RefundAll(uint256 _numToRefund);
-
+  event ClaimedTokens(address _token, address owner, uint256 balance);
 
   function ATCCrowdSale (
     address _kyc,
@@ -332,5 +332,23 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     require(!minReached());
 
     return vault.refund(investor);
+  }
+
+  function claimTokens(address _token) public onlyOwner {
+
+    if (ATC.controller() == address(this)) {
+         ATC.claimTokens(_token);
+    }
+
+    if (_token == 0x0) {
+        owner.transfer(this.balance);
+        return;
+    }
+
+    ERC20Basic token = ERC20Basic(_token);
+    uint256 balance = token.balanceOf(this);
+    token.transfer(owner, balance);
+
+    ClaimedTokens(_token, owner, balance);
   }
 }

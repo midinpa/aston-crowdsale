@@ -43,7 +43,7 @@ module.exports = async function (deployer, network, accounts) {
       minEtherCap = 28600 * 10 ** 18;
     } else {
       const presaleStartTime = moment().add(5, "minutes").unix();
-      const presaleEndTime = moment().add(10, "minutes").unix();
+      const presaleEndTime = moment().add(20, "minutes").unix();
       const presaleMaxEtherCap = 1 * 10 ** 18;
       const presaleRate = 1950;
       const presalePublicRate = 1875;
