@@ -112,15 +112,15 @@ module.exports = async function (deployer, network, accounts) {
         additionalPeriodStartTime7 = moment().add(115, "minutes").unix();
         additionalPeriodEndTime7 = moment().add(120, "minutes").unix();
 
-        maxEtherCap = 1 * 10 ** 18; //mainnet : 286000 ether
-        minEtherCap = 5 * 10 ** 17; //mainnet : 28600
+        maxEtherCap = 10 * 10 ** 18; //mainnet : 286000 ether
+        minEtherCap = 5 * 10 ** 18; //mainnet : 28600
 
         baseRate = 1500;
         additionalBonusAmounts = [
-          300 * 10 * 15,
-          6000 * 10 ** 15,
-          8000 * 10 ** 15,
-          10000 * 10 ** 15
+          300 * 10 * 14,
+          6000 * 10 ** 14,
+          8000 * 10 ** 14,
+          10000 * 10 ** 14
         ];
 
         bountyAddress = "0x922aa0d0e720caf10bcd7a02be187635a6f36ab0";
