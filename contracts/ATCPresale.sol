@@ -6,7 +6,6 @@ import './ATC.sol';
 import './kyc/PresaleKYC.sol';
 import './lifecycle/Pausable.sol';
 import './math/SafeMath.sol';
-import './kyc/KYC.sol';
 import './token/ERC20Basic.sol';
 
 contract PresaleFallbackReceiver {
@@ -16,7 +15,6 @@ contract PresaleFallbackReceiver {
 contract ATCPresale is Ownable, PresaleKYC, Pausable {
   ATC public token;
   RefundVault public vault;
-  KYC public kyc;
 
   uint256 public rate;
   uint256 public publicRate;
@@ -34,26 +32,22 @@ contract ATCPresale is Ownable, PresaleKYC, Pausable {
   function ATCPresale(
     address _token,
     address _vault,
-    address _kyc,
     uint64 _startTime,
     uint64 _endTime,
     uint256 _maxEtherCap,
-    uint256 _rate,
-    uint256 _publicRate
+    uint256 _rate
     ) {
-      require(_token != 0x00 && _vault != 0x00 && _kyc != 0x00);
+      require(_token != 0x00 && _vault != 0x00);
       require(now < _startTime && _startTime < _endTime);
       require(_maxEtherCap > 0);
-      require(_rate > 0 && _publicRate > 0);
+      require(_rate > 0);
 
       token = ATC(_token);
       vault = RefundVault(_vault);
-      kyc = KYC(_kyc);
       startTime = _startTime;
       endTime = _endTime;
       maxEtherCap = _maxEtherCap;
       rate = _rate;
-      publicRate = _publicRate;
     }
 
   function () payable {
@@ -62,30 +56,24 @@ contract ATCPresale is Ownable, PresaleKYC, Pausable {
 
   function buyPresale(address beneficiary)
     payable
+    onlyRegistered(beneficiary)
     whenNotPaused
   {
     // check validity
     require(beneficiary != 0x00);
     require(validPurchase());
 
-    require(registeredAddress[beneficiary] || kyc.registeredAddress(beneficiary));
-
-    uint256 myRate;
     uint256 weiAmount = msg.value;
-    uint256 toFund = weiAmount;
+    uint256 toFund;
 
-    if (registeredAddress[beneficiary]) {
-      uint256 guaranteedLimit = presaleGuaranteedLimit[beneficiary];
-      require(guaranteedLimit > 0);
+    uint256 guaranteedLimit = presaleGuaranteedLimit[beneficiary];
+    require(guaranteedLimit > 0);
 
-      uint256 totalAmount = add(beneficiaryFunded[beneficiary], weiAmount);
-      if (totalAmount > guaranteedLimit) {
-        toFund = sub(guaranteedLimit, beneficiaryFunded[beneficiary]);
-      }
-      myRate = rate;
-
-    } else if (kyc.registeredAddress(beneficiary)) {
-      myRate = publicRate;
+    uint256 totalAmount = add(beneficiaryFunded[beneficiary], weiAmount);
+    if (totalAmount > guaranteedLimit) {
+      toFund = sub(guaranteedLimit, beneficiaryFunded[beneficiary]);
+    } else {
+      toFund = weiAmount;
     }
 
     uint256 postWeiRaised = add(weiRaised, toFund);
@@ -95,9 +83,8 @@ contract ATCPresale is Ownable, PresaleKYC, Pausable {
 
     require(toFund > 0);
     require(weiAmount >= toFund);
-    require(myRate > 0);
 
-    uint256 tokens = mul(toFund, myRate);
+    uint256 tokens = mul(toFund, rate);
     uint256 toReturn = sub(weiAmount, toFund);
 
     weiRaised = add(weiRaised, toFund);
@@ -140,7 +127,6 @@ contract ATCPresale is Ownable, PresaleKYC, Pausable {
       require(now > endTime);
 
       PresaleFallbackReceiver crowdsale = PresaleFallbackReceiver(newOwner);
-
       require(crowdsale.presaleFallBack(weiRaised));
 
       changeTokenController(newOwner);

@@ -73,23 +73,23 @@ contract(
     let baseTime = moment();
     let now, presaleStartTime, presaleEndTime;
     let beforePresaleStartTime, afterPresaleEndTime, afterPresaleStartTime;
-    let periods, baseRate, presaleRate, presalePublicRate;
-    let additionalBonus1, additionalBonus2;
+    let periods, baseRate, presaleRate;
+    let additionalBonuses;
+    let finalBonuses;
     let getAdditionalBonus, getRate, period, periodIndex;
 
     let maxEtherCap, minEtherCap;
 
-    let bountyAddresses, vaultOwner;
+    let vaultOwner;
 
     let cumulativeWeiRaised;
-
-    let registeredAddresses, unregisteredAddresses;
 
     let ATCReserveLocker, teamLocker;
     let ATCReserveReleaseTime, teamReleaseTimelines, teamReleaseRatios;
     let teamBeneficiaries;
 
-    const newOwner = accounts[ 25 ];
+    let additionalBonusAmounts;
+    let investAmount;
 
     const contractDeploy = async (logging = true) => {
       const logger = (...args) => (logging ? console.log(...args) : null);
@@ -109,9 +109,6 @@ contract(
 
       cumulativeWeiRaised = new BigNumber(0);
 
-      registeredAddresses = accounts.slice(0, 10);
-      unregisteredAddresses = accounts.slice(10, 20);
-
       baseTime = baseTime.add(1, "month");
       now = baseTime.unix();
       presaleStartTime = baseTime.add(5, "minutes").unix();
@@ -122,18 +119,38 @@ contract(
 
       baseRate = new BigNumber(1500);
       presaleRate = baseRate.mul(1.30); // 30% bonus for presale
-      presalePublicRate = baseRate.mul(1.25); // 30% bonus for presale
-      additionalBonus1 = new BigNumber(5); // 5% bonus for more than 300 ETH
-      additionalBonus2 = new BigNumber(10); // 10% bonus for more than 6000 ETH
+
+      additionalBonuses = [
+        new BigNumber(5), // 5% bonus for more than 300 ETH
+        new BigNumber(10) // 10% bonus for more than 6000 ETH
+      ];
+
+      finalBonuses = [
+        new BigNumber(25),
+        new BigNumber(30),
+      ];
+
+      additionalBonusAmounts = [
+        ether(300),
+        ether(6000),
+        ether(8000),
+        ether(10000)
+      ]
 
       getAdditionalBonus = (amount) => {
-        if (amount.gte(ether(6000))) return additionalBonus2;
-        else if (amount.gte(ether(300))) return additionalBonus1;
+        if (amount.gte(ether(6000))) return additionalBonuses[1];
+        else if (amount.gte(ether(300))) return additionalBonuses[0];
         return new BigNumber(0);
       };
 
       getRate = (amount) => {
-        const bonus = period.bonus.add(getAdditionalBonus(amount));
+        let bonus = new BigNumber(0);
+
+        if (amount.gte(additionalBonusAmounts[3])) bonus = finalBonuses[1];
+        else if (amount.gte(additionalBonusAmounts[2])) bonus = finalBonuses[0];
+        else {
+          bonus = period.bonus.add(getAdditionalBonus(amount));
+        }
         return baseRate.mul(bonus.add(100).div(100));
       };
 
@@ -218,19 +235,15 @@ contract(
       vault = await RefundVault.new(vaultOwner);
       logger("vault deployed at", vault.address);
 
-      kyc = await KYC.new();
-      logger("kyc deployed at", kyc.address);
 
       /*eslint-disable */
       presale = await ATCPresale.new(
         token.address,
         vault.address,
-        kyc.address,
         presaleStartTime,
         presaleEndTime,
         maxEtherCap,
         presaleRate,
-        presalePublicRate
       );
       /* eslint-enable */
       logger("presale deployed at", presale.address);
@@ -257,6 +270,9 @@ contract(
       );
       logger("teamLocker deployed at", teamLocker.address);
 
+      kyc = await KYC.new();
+      logger("kyc deployed at", kyc.address);
+
       /*eslint-disable */
       crowdsale = await ATCCrowdSale.new(
         kyc.address,
@@ -270,6 +286,8 @@ contract(
         ATCController,
         maxEtherCap,
         minEtherCap,
+        baseRate,
+        additionalBonusAmounts
       );
       /* eslint-enable */
       logger("crowdsale deployed at", crowdsale.address);
@@ -298,6 +316,104 @@ now:\t\t\t\t${ now }
 `);
     };
 
+    const checkInvestingForEachPeriod = async (period_num) => {
+      period = periods[ period_num ];
+      await increaseTimeTo(period.startTime - duration.seconds(100));
+
+      await crowdsale.startPeriod(period.startTime, period.endTime)
+        .should.be.fulfilled;
+
+      console.log("period %d startred", period_num);
+
+      await increaseTimeTo(period.startTime + duration.seconds(100));
+      (await crowdsale.getPeriodBonus())
+        .should.be.bignumber.equal(period.bonus);
+
+      console.log("period %d bonus checked", period_num);
+
+      investAmount = ether(1);
+
+      let investor1totalToken = await token.balanceOf(investor1);
+
+      await crowdsale.buy(investor1, {
+        from: investor1,
+        value: investAmount,
+      }).should.be.fulfilled;
+
+      cumulativeWeiRaised = cumulativeWeiRaised.add(investAmount);
+
+      (await token.balanceOf(investor1))
+        .should.be.bignumber.equal(
+          investor1totalToken.add(investAmount.mul(getRate(investAmount))));
+
+      console.log("period %d: investor1 buy tokens(1 ether) at rate %d", period_num, getRate(investAmount));
+
+      investAmount = ether(300);
+
+      let investor2totalToken = await token.balanceOf(investor2);
+
+      await crowdsale.buy(investor2, {
+        from: investor2,
+        value: investAmount,
+      }).should.be.fulfilled;
+      cumulativeWeiRaised = cumulativeWeiRaised.add(investAmount);
+
+      (await token.balanceOf(investor2))
+        .should.be.bignumber.equal(
+          investor2totalToken.add(investAmount.mul(getRate(investAmount))));
+
+      console.log("period %d: investor2 buy tokens(300 ether) at rate %d", period_num, getRate(investAmount));
+
+      investAmount = ether(6000);
+
+      let investor3totalToken = await token.balanceOf(investor3);
+
+      await crowdsale.buy(investor3, {
+        from: investor3,
+        value: investAmount,
+      }).should.be.fulfilled;
+      cumulativeWeiRaised = cumulativeWeiRaised.add(investAmount);
+
+      (await token.balanceOf(investor3))
+        .should.be.bignumber.equal(
+          investor3totalToken.add(investAmount.mul(getRate(investAmount))));
+
+      console.log("period %d: investor3 buy tokens(6000 ether) at rate %d", period_num, getRate(investAmount));
+
+      investAmount = ether(8000);
+
+      let investor4totalToken = await token.balanceOf(investor4);
+
+      await crowdsale.buy(investor4, {
+        from: investor4,
+        value: investAmount,
+      }).should.be.fulfilled;
+      cumulativeWeiRaised = cumulativeWeiRaised.add(investAmount);
+
+      (await token.balanceOf(investor4))
+        .should.be.bignumber.equal(
+          investor4totalToken.add(investAmount.mul(getRate(investAmount))));
+
+      console.log("period %d: investor4 buy tokens(8000 ether) at rate %d", period_num, getRate(investAmount));
+
+      investAmount = ether(10000);
+
+      let investor5totalToken = await token.balanceOf(investor5);
+
+      await crowdsale.buy(investor5, {
+        from: investor5,
+        value: investAmount,
+      }).should.be.fulfilled;
+      cumulativeWeiRaised = cumulativeWeiRaised.add(investAmount);
+
+      (await token.balanceOf(investor5))
+        .should.be.bignumber.equal(
+          investor5totalToken.add(investAmount.mul(getRate(investAmount))));
+
+      console.log("period %d: investor5 buy tokens(10000 ether) at rate %d", period_num, getRate(investAmount));
+    }
+
+
     before(contractDeploy);
 
     beforeEach(async () => {
@@ -315,28 +431,28 @@ now:\t\t\t\t${ now }
 
     describe("ATCCrowdSale Test", async () => {
       it("Sequential Test", async () => {
-        let investAmount;
 
         await increaseTimeTo(beforePresaleStartTime);
 
         investAmount = ether(1000);
-        const registerTx = await presale.register(investor1, investAmount)
+        let presaleInvestor = accounts[0];
+        const registerTx = await presale.register(presaleInvestor, investAmount)
           .should.be.fulfilled;
         console.log("presale registered");
 
-        (await presale.registeredAddress(investor1))
+        (await presale.registeredAddress(presaleInvestor))
           .should.be.equal(true);
 
         await increaseTimeTo(afterPresaleStartTime);
 
-        const purchaseTx = await presale.buyPresale(investor1, {
+        const purchaseTx = await presale.buyPresale(presaleInvestor, {
           value: investAmount,
-          from: investor1,
+          from: presaleInvestor,
         }).should.be.fulfilled;
 
         cumulativeWeiRaised = cumulativeWeiRaised.add(investAmount);
 
-        (await token.balanceOf(investor1))
+        (await token.balanceOf(presaleInvestor))
           .should.be.bignumber.equal(investAmount.mul(presaleRate));
         console.log("presale purchase");
 
@@ -359,214 +475,23 @@ now:\t\t\t\t${ now }
         }).should.be.rejectedWith(EVMThrow);
         console.log("reject purchase before period");
 
-        periodIndex = 0;
-        period = periods[ periodIndex++ ];
+        for (let i = 0; i < periods.length; i++) {
+          if (i == 7) {
+            await increaseTimeTo(periods[i].startTime - duration.seconds(100));
+            await crowdsale.startPeriod(periods[i].startTime, period.endTime)
+              .should.be.rejectedWith(EVMThrow);
 
-        await increaseTimeTo(period.startTime - duration.seconds(100));
+            console.log("period 7 (for testing revert 7 days) reverted");
+          } else if (i == 9) {
+            await increaseTimeTo(periods[i].startTime - duration.seconds(100));
+            await crowdsale.startPeriod(periods[i].startTime, period.endTime)
+              .should.be.rejectedWith(EVMThrow);
 
-        await crowdsale.startPeriod(period.startTime, period.endTime)
-          .should.be.fulfilled;
-
-        console.log("period 0 startred");
-
-        await increaseTimeTo(period.startTime + duration.seconds(100));
-
-        (await crowdsale.getBonus())
-          .should.be.bignumber.equal(period.bonus);
-
-        console.log("period 0 bonus checked");
-        investAmount = ether(1);
-
-        await crowdsale.buy(investor5, {
-          from: investor5,
-          value: investAmount,
-        }).should.be.fulfilled;
-        cumulativeWeiRaised = cumulativeWeiRaised.add(investAmount);
-
-        (await token.balanceOf(investor5))
-          .should.be.bignumber.equal(
-            investAmount.mul(getRate(investAmount)));
-        // investAmount.mul(baseRate.mul(period.bonus.add(100).div(100))));
-
-        console.log("period0: investor5 buy tokens(1 ether)");
-
-        investAmount = ether(300);
-
-        await crowdsale.buy(investor2, {
-          from: investor2,
-          value: investAmount,
-        }).should.be.fulfilled;
-        cumulativeWeiRaised = cumulativeWeiRaised.add(investAmount);
-
-        (await token.balanceOf(investor2))
-          .should.be.bignumber.equal(
-            investAmount.mul(getRate(investAmount)));
-
-        console.log("period0: investor2 buy tokens(300 ether)");
-
-        investAmount = ether(6000);
-
-        await crowdsale.buy(investor3, {
-          from: investor3,
-          value: investAmount,
-        }).should.be.fulfilled;
-        cumulativeWeiRaised = cumulativeWeiRaised.add(investAmount);
-
-        (await token.balanceOf(investor3))
-          .should.be.bignumber.equal(
-            investAmount.mul(getRate(investAmount)));
-
-        console.log("period0: investor3 buy tokens(6000 ether)");
-
-        period = periods[ periodIndex++ ];
-        await increaseTimeTo(period.startTime - duration.seconds(100));
-
-        await crowdsale.startPeriod(period.startTime, period.endTime)
-          .should.be.fulfilled;
-
-        console.log("period 1 startred");
-
-        await increaseTimeTo(period.startTime + duration.seconds(100));
-        (await crowdsale.getBonus())
-          .should.be.bignumber.equal(period.bonus);
-
-        console.log("period 1 bonus checked");
-
-        // accept purchase by many investors
-        const investors = accounts.slice(0, 10);
-        await kyc.registerByList(investors)
-          .should.be.fulfilled;
-
-        for (const investor of investors) {
-          if (await crowdsale.maxReached()) {
-            break;
-          }
-
-          investAmount = ether(5000);
-
-          await crowdsale.buy(investor, {
-            from: investor,
-            value: investAmount,
-          }).should.be.fulfilled;
-          cumulativeWeiRaised = cumulativeWeiRaised.add(investAmount);
-
-          (await token.balanceOf(investor))
-            .should.be.bignumber.equal(investAmount.mul(getRate(investAmount)));
+            console.log("period 8 reverted (maximum 7 additional period!!!)");
+          } else await checkInvestingForEachPeriod(i);
         }
 
-        console.log("period1: many investors purchased (each 5000 ether)");
-
-        period = periods[ periodIndex++ ];
-        await increaseTimeTo(period.startTime - duration.seconds(100));
-        await crowdsale.startPeriod(period.startTime, period.endTime)
-          .should.be.fulfilled;
-
-        console.log("period 2 startred");
-
-        await increaseTimeTo(period.startTime + duration.seconds(100));
-        (await crowdsale.getBonus())
-          .should.be.bignumber.equal(period.bonus);
-
-        console.log("period 2 bonus checked");
-
-        investAmount = ether(100);
-
-        await crowdsale.buy(investor4, {
-          from: investor4,
-          value: investAmount,
-        }).should.be.fulfilled;
-        cumulativeWeiRaised = cumulativeWeiRaised.add(investAmount);
-
-        (await token.balanceOf(investor4))
-          .should.be.bignumber.equal(investAmount.mul(getRate(investAmount)));
-
-        console.log("period2: investor4 buy tokens(100 ether)");
-
-        await token.transfer(investor2, 100, { from: investor1 })
-          .should.be.rejectedWith(EVMThrow);
-
-        console.log("token transfer rejected");
-
-        period = periods[ periodIndex++ ];
-        await increaseTimeTo(period.startTime - duration.seconds(100));
-        await crowdsale.startPeriod(period.startTime, period.endTime)
-          .should.be.fulfilled;
-
-        console.log("period 3 startred");
-
-        await increaseTimeTo(period.startTime + duration.seconds(100));
-        (await crowdsale.getBonus())
-          .should.be.bignumber.equal(period.bonus);
-
-        console.log("period 3 bonus checked");
-
-        period = periods[ periodIndex++ ];
-        await increaseTimeTo(period.startTime - duration.seconds(100));
-        await crowdsale.startPeriod(period.startTime, period.endTime)
-          .should.be.fulfilled;
-
-        console.log("period 4 startred");
-
-        await increaseTimeTo(period.startTime + duration.seconds(100));
-        (await crowdsale.getBonus())
-          .should.be.bignumber.equal(period.bonus);
-
-        console.log("period 4 bonus checked");
-
-        period = periods[ periodIndex++ ];
-        await increaseTimeTo(period.startTime - duration.seconds(100));
-        await crowdsale.startPeriod(period.startTime, period.endTime)
-          .should.be.fulfilled;
-
-        console.log("period 5 startred");
-
-        await increaseTimeTo(period.startTime + duration.seconds(100));
-        (await crowdsale.getBonus())
-          .should.be.bignumber.equal(period.bonus);
-
-        console.log("period 5 bonus checked");
-
-        period = periods[ periodIndex++ ];
-        await increaseTimeTo(period.startTime - duration.seconds(100));
-        await crowdsale.startPeriod(period.startTime, period.endTime)
-          .should.be.fulfilled;
-
-        console.log("period 6 startred");
-
-        await increaseTimeTo(period.startTime + duration.seconds(100));
-        (await crowdsale.getBonus())
-          .should.be.bignumber.equal(period.bonus);
-
-        console.log("period 6 bonus checked");
-
-        period = periods[ periodIndex++ ];
-        await increaseTimeTo(period.startTime - duration.seconds(100));
-        await crowdsale.startPeriod(period.startTime, period.endTime)
-          .should.be.rejectedWith(EVMThrow);
-
-        console.log("period 7 (for testing revert 7 days) reverted");
-
-        period = periods[ periodIndex++ ];
-        await increaseTimeTo(period.startTime - duration.seconds(100));
-        await crowdsale.startPeriod(period.startTime, period.endTime)
-          .should.be.fulfilled;
-
-        console.log("period 7 startred");
-
-        await increaseTimeTo(period.startTime + duration.seconds(100));
-        (await crowdsale.getBonus())
-          .should.be.bignumber.equal(period.bonus);
-
-        console.log("period 7 bonus checked");
-
-        period = periods[ periodIndex++ ];
-        await increaseTimeTo(period.startTime - duration.seconds(100));
-        await crowdsale.startPeriod(period.startTime, period.endTime)
-          .should.be.rejectedWith(EVMThrow);
-
-        console.log("period 8 reverted (maximum 7 additional period!!!)");
-
-        await increaseTimeTo(period.endTime + duration.seconds(100));
+        await increaseTimeTo(periods[periods.length - 1].endTime + duration.seconds(100));
 
         await crowdsale.finalize()
           .should.be.fulfilled;

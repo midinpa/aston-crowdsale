@@ -18,8 +18,6 @@ const ATCPresale = artifacts.require("ATCPresale.sol");
 const ATC = artifacts.require("ATC.sol");
 const RefundVault = artifacts.require("vault/RefundVault.sol");
 const MiniMeTokenFactory = artifacts.require("token/MiniMeTokenFactory.sol");
-const KYC = artifacts.require("kyc/KYC.sol");
-const PresaleFallbackReceiver = artifacts.require("PresaleFallbackReceiver.sol");
 
 contract(
   "ATCPresale",
@@ -55,17 +53,16 @@ contract(
   ) => {
     let snapshotId;
 
-    let tokenFactory, presale, token, vault, kyc;
+    let tokenFactory, presale, token, vault;
 
     let now, startTime, endTime;
     let beforeStartTime, afterEndTime, afterStartTime;
 
-    let rate, publicRate;
+    let rate;
 
     let maxEtherCap;
 
     let vaultOwner;
-    let newOwner;
 
     before(async () => {
       vaultOwner = [
@@ -84,10 +81,8 @@ contract(
       startTime = moment().add(20, "minutes").unix();
       endTime = moment().add(100, "minutes").unix();
 
-      newOwner = accounts[25];
       const baseRate = new BigNumber(1500);
       rate = baseRate.mul(1.30); // 30% bonus for presale
-      publicRate = baseRate.mul(1.25); // 30% bonus for presale
 
       maxEtherCap = ether(286000);
 
@@ -100,20 +95,15 @@ contract(
       vault = await RefundVault.new(vaultOwner);
       console.log("vault deployed at", vault.address);
 
-      kyc = await KYC.new();
-      console.log("kyc deployed at", kyc.address);
-
 
       /*eslint-disable */
       presale = await ATCPresale.new(
         token.address,
         vault.address,
-        kyc.address,
         startTime,
         endTime,
         maxEtherCap,
-        rate,
-        publicRate
+        rate
       );
       /*eslint-enable */
       console.log("presale deployed at", presale.address);
@@ -282,42 +272,6 @@ now:\t\t\t${ now }
         console.log("buyPresale Gas Used :", buyPresaleTx.receipt.gasUsed);
       }); // end "should buy presaled amount"
 
-      // after start//
-      // /////////////
-      it("should buy presaled amount as public", async () => {
-        const investedAmount = ether(6000);
-
-        await kyc.register(
-          investor2
-        ).should.be.fulfilled;
-
-        (await kyc.registeredAddress(investor2)).should.be.equal(true);
-        const balanceBeforeInvest = await eth.getBalance(investor2);
-
-        const buyPresaleTx = await presale.buyPresale(investor2, {
-          value: investedAmount,
-          from: investor2,
-        }).should.be.fulfilled;
-
-        const balanceAfterInvest = await eth.getBalance(investor2);
-        const expectedTokenAmount = investedAmount.mul(publicRate);
-
-        (await token.balanceOf(investor2))
-          .should.be.bignumber.equal(expectedTokenAmount);
-
-        (await token.totalSupply())
-          .should.be.bignumber.equal(expectedTokenAmount);
-
-        (balanceBeforeInvest - balanceAfterInvest).should.be.within(
-          investedAmount.toNumber(),
-          investedAmount.add(ether(1)).toNumber(),
-        );
-
-        const vaultEtherAmount = await eth.getBalance(vault.address);
-        vaultEtherAmount.should.be.bignumber.equal(investedAmount);
-
-        console.log("buyPresale Gas Used :", buyPresaleTx.receipt.gasUsed);
-      }); // end "should buy presaled amount"
 
       it("not registered investor3 should be rejected", async () => {
         const investedAmount = ether(5000);

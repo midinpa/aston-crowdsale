@@ -25,7 +25,8 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     uint256 bonus; // used to calculate rate with bonus. ragne 0 ~ 15 (0% ~ 15%)
   }
 
-  uint256 public baseRate = 1500; // 1 ETH = 1500 ATC
+  uint256 public baseRate; // 1 ETH = 1500 ATC
+  uint256[] public additionalBonusAmounts;
 
   Period[] public periods;
   uint8 constant public MAX_PERIOD_COUNT = 8;
@@ -40,9 +41,6 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
   mapping (address => bool) inInvestorList;
 
   address public ATCController;
-
-  uint256 public additionalBonusAmount1 = 300 ether;
-  uint256 public additionalBonusAmount2 = 6000 ether;
 
   bool public isFinalized;
   uint256 public refundCompleted;
@@ -68,13 +66,21 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     address _teamLocker,
     address _tokenController,
     uint256 _maxEtherCap,
-    uint256 _minEtherCap
+    uint256 _minEtherCap,
+    uint256 _baseRate,
+    uint256[] _additionalBonusAmounts
+
     ) {
       require(_kyc != 0x00 && _token != 0x00 && _vault != 0x00 && _presale != 0x00);
       require(_bountyAddress != 0x00 && _partnersAddress != 0x00);
       require(_reserverLocker != 0x00 && _teamLocker != 0x00);
       require(_tokenController != 0x00);
       require(0 < _minEtherCap && _minEtherCap < _maxEtherCap);
+      require(_baseRate > 0);
+      require(_additionalBonusAmounts[0] > 0);
+      for (uint i = 0; i < _additionalBonusAmounts.length - 1; i++) {
+        require(_additionalBonusAmounts[i] < _additionalBonusAmounts[i + 1]);
+      }
 
       kyc = KYC(_kyc);
       token = ATC(_token);
@@ -89,6 +95,10 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
 
       maxEtherCap = _maxEtherCap;
       minEtherCap = _minEtherCap;
+
+      baseRate = _baseRate;
+      additionalBonusAmounts = _additionalBonusAmounts;
+
     }
 
   function () public payable {
@@ -136,19 +146,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
       require(toFund > 0);
       require(weiAmount >= toFund);
 
-      // TODO: test bonus
-      uint256 bonus = getBonus();
-
-      // bonus for eth amount
-      if (additionalBonusAmount1 <= toFund) {
-        bonus = add(bonus, 5); // 5% amount bonus for more than 300 ETH
-      }
-
-      if (additionalBonusAmount2 <= toFund) {
-        bonus = add(bonus, 5); // 10% amount bonus for more than 6000 ETH
-      }
-
-      uint256 rate = calculateRate(bonus);
+      uint256 rate = calculateRate(toFund);
       uint256 tokens = mul(toFund, rate);
       uint256 toReturn = sub(weiAmount, toFund);
 
@@ -200,7 +198,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     return weiRaised == maxEtherCap;
   }
 
-  function getBonus() public constant returns (uint256) {
+  function getPeriodBonus() public constant returns (uint256) {
     bool nowOnSale;
     uint256 currentPeriod;
 
@@ -208,6 +206,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
       if (periods[i].startTime <= now && now <= periods[i].endTime) {
         nowOnSale = true;
         currentPeriod = i;
+        break;
       }
     }
 
@@ -218,7 +217,26 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
   /**
    * @dev rate = baseRate * (100 + bonus) / 100
    */
-  function calculateRate(uint256 bonus) internal returns (uint256)  {
+  function calculateRate(uint256 toFund) internal returns (uint256)  {
+    uint bonus = getPeriodBonus();
+
+    // bonus for eth amount
+    if (additionalBonusAmounts[0] <= toFund) {
+      bonus = add(bonus, 5); // 5% amount bonus for more than 300 ETH
+    }
+
+    if (additionalBonusAmounts[1] <= toFund) {
+      bonus = add(bonus, 5); // 10% amount bonus for more than 6000 ETH
+    }
+
+    if (additionalBonusAmounts[2] <= toFund) {
+      bonus = 25; // final 25% amount bonus for more than 8000 ETH
+    }
+
+    if (additionalBonusAmounts[3] <= toFund) {
+      bonus = 30; // final 30% amount bonus for more than 10000 ETH
+    }
+
     return div(mul(baseRate, add(bonus, 100)), 100);
   }
 
@@ -226,8 +244,10 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     require(periods.length < MAX_PERIOD_COUNT);
     require(now < _startTime && _startTime < _endTime);
 
+
     if (periods.length != 0) {
       require(sub(_endTime, _startTime) <= 7 days);
+      require(periods[periods.length - 1].endTime < _startTime);
     }
 
     // 15% -> 10% -> 5% -> 0%
@@ -253,6 +273,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     for (uint i = 0; i < periods.length; i++) {
       if (periods[i].startTime <= now && now <= periods[i].endTime) {
         nowOnSale = true;
+        break;
       }
     }
 

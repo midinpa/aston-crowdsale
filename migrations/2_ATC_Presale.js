@@ -6,7 +6,6 @@ const ATCPresale = artifacts.require("ATCPresale.sol");
 const ATC = artifacts.require("ATC.sol");
 const RefundVault = artifacts.require("vault/RefundVault.sol");
 const MiniMeTokenFactory = artifacts.require("token/MiniMeTokenFactory.sol");
-const KYC = artifacts.require("kyc/KYC.sol");
 
 const migration_src = require("../argv.js");
 
@@ -33,7 +32,6 @@ module.exports = async function (deployer, network, accounts) {
         endTime = moment().add(25, "minutes").unix();
         maxEtherCap = 1 * 10 ** 18;
         rate = 1950;
-        publicRate = 1875;
 
         vaultOwners = accounts.slice(7, 7 + 10);
       }
@@ -47,19 +45,14 @@ module.exports = async function (deployer, network, accounts) {
       vault = await RefundVault.new(vaultOwners);
       console.log("vault deployed at", vault.address);
 
-      kyc = await KYC.new();
-      console.log("kyc deployed at", kyc.address);
-
       /*eslint-disable */
       presale = await ATCPresale.new(
         token.address,
         vault.address,
-        kyc.address,
         startTime,
         endTime,
         maxEtherCap,
-        rate,
-        publicRate
+        rate
       );
       /*eslint-enable */
       console.log("presale deployed at", presale.address);

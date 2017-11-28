@@ -97,7 +97,7 @@
       "absolutePath": "/Users/midinpa/workspace/dapps/aston-crowdsale/contracts/ReserveLocker.sol",
       "exportedSymbols": {
         "ReserveLocker": [
-          1893
+          1926
         ]
       }
     },
@@ -111,39 +111,39 @@
             ".18"
           ]
         },
-        "id": 1857,
+        "id": 1890,
         "name": "PragmaDirective",
         "src": "0:24:4"
       },
       {
         "attributes": {
-          "SourceUnit": 4506,
+          "SourceUnit": 4539,
           "absolutePath": "/Users/midinpa/workspace/dapps/aston-crowdsale/contracts/tokenlock/TokenTimelock.sol",
           "file": "./tokenlock/TokenTimelock.sol",
-          "scope": 1894,
+          "scope": 1927,
           "symbolAliases": [
             null
           ],
           "unitAlias": ""
         },
-        "id": 1858,
+        "id": 1891,
         "name": "ImportDirective",
         "src": "26:39:4"
       },
       {
         "attributes": {
           "contractDependencies": [
-            4505
+            4538
           ],
           "contractKind": "contract",
           "documentation": null,
           "fullyImplemented": true,
           "linearizedBaseContracts": [
-            1893,
-            4505
+            1926,
+            4538
           ],
           "name": "ReserveLocker",
-          "scope": 1894
+          "scope": 1927
         },
         "children": [
           {
@@ -157,15 +157,15 @@
                 "attributes": {
                   "contractScope": null,
                   "name": "TokenTimelock",
-                  "referencedDeclaration": 4505,
+                  "referencedDeclaration": 4538,
                   "type": "contract TokenTimelock"
                 },
-                "id": 1859,
+                "id": 1892,
                 "name": "UserDefinedTypeName",
                 "src": "93:13:4"
               }
             ],
-            "id": 1860,
+            "id": 1893,
             "name": "InheritanceSpecifier",
             "src": "93:13:4"
           },
@@ -176,7 +176,7 @@
               "isConstructor": true,
               "name": "ReserveLocker",
               "payable": false,
-              "scope": 1893,
+              "scope": 1926,
               "stateMutability": "nonpayable",
               "superFunction": null,
               "visibility": "public"
@@ -188,7 +188,7 @@
                     "attributes": {
                       "constant": false,
                       "name": "_token",
-                      "scope": 1875,
+                      "scope": 1908,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "contract ERC20Basic",
@@ -200,15 +200,15 @@
                         "attributes": {
                           "contractScope": null,
                           "name": "ERC20Basic",
-                          "referencedDeclaration": 3196,
+                          "referencedDeclaration": 3229,
                           "type": "contract ERC20Basic"
                         },
-                        "id": 1861,
+                        "id": 1894,
                         "name": "UserDefinedTypeName",
                         "src": "135:10:4"
                       }
                     ],
-                    "id": 1862,
+                    "id": 1895,
                     "name": "VariableDeclaration",
                     "src": "135:17:4"
                   },
@@ -216,7 +216,7 @@
                     "attributes": {
                       "constant": false,
                       "name": "_beneficiary",
-                      "scope": 1875,
+                      "scope": 1908,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "address",
@@ -229,12 +229,12 @@
                           "name": "address",
                           "type": "address"
                         },
-                        "id": 1863,
+                        "id": 1896,
                         "name": "ElementaryTypeName",
                         "src": "154:7:4"
                       }
                     ],
-                    "id": 1864,
+                    "id": 1897,
                     "name": "VariableDeclaration",
                     "src": "154:20:4"
                   },
@@ -242,7 +242,7 @@
                     "attributes": {
                       "constant": false,
                       "name": "_releaseTime",
-                      "scope": 1875,
+                      "scope": 1908,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "uint64",
@@ -255,17 +255,17 @@
                           "name": "uint64",
                           "type": "uint64"
                         },
-                        "id": 1865,
+                        "id": 1898,
                         "name": "ElementaryTypeName",
                         "src": "176:6:4"
                       }
                     ],
-                    "id": 1866,
+                    "id": 1899,
                     "name": "VariableDeclaration",
                     "src": "176:19:4"
                   }
                 ],
-                "id": 1867,
+                "id": 1900,
                 "name": "ParameterList",
                 "src": "134:62:4"
               },
@@ -276,7 +276,7 @@
                   ]
                 },
                 "children": [],
-                "id": 1873,
+                "id": 1906,
                 "name": "ParameterList",
                 "src": "251:0:4"
               },
@@ -288,11 +288,11 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 4505,
+                      "referencedDeclaration": 4538,
                       "type": "type(contract TokenTimelock)",
                       "value": "TokenTimelock"
                     },
-                    "id": 1868,
+                    "id": 1901,
                     "name": "Identifier",
                     "src": "201:13:4"
                   },
@@ -302,11 +302,11 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 1862,
+                      "referencedDeclaration": 1895,
                       "type": "contract ERC20Basic",
                       "value": "_token"
                     },
-                    "id": 1869,
+                    "id": 1902,
                     "name": "Identifier",
                     "src": "215:6:4"
                   },
@@ -316,11 +316,11 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 1864,
+                      "referencedDeclaration": 1897,
                       "type": "address",
                       "value": "_beneficiary"
                     },
-                    "id": 1870,
+                    "id": 1903,
                     "name": "Identifier",
                     "src": "223:12:4"
                   },
@@ -330,16 +330,16 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 1866,
+                      "referencedDeclaration": 1899,
                       "type": "uint64",
                       "value": "_releaseTime"
                     },
-                    "id": 1871,
+                    "id": 1904,
                     "name": "Identifier",
                     "src": "237:12:4"
                   }
                 ],
-                "id": 1872,
+                "id": 1905,
                 "name": "ModifierInvocation",
                 "src": "201:49:4"
               },
@@ -350,12 +350,12 @@
                   ]
                 },
                 "children": [],
-                "id": 1874,
+                "id": 1907,
                 "name": "Block",
                 "src": "251:2:4"
               }
             ],
-            "id": 1875,
+            "id": 1908,
             "name": "FunctionDefinition",
             "src": "112:141:4"
           },
@@ -369,7 +369,7 @@
               ],
               "name": "setToken",
               "payable": false,
-              "scope": 1893,
+              "scope": 1926,
               "stateMutability": "nonpayable",
               "superFunction": null,
               "visibility": "public"
@@ -381,7 +381,7 @@
                     "attributes": {
                       "constant": false,
                       "name": "newToken",
-                      "scope": 1892,
+                      "scope": 1925,
                       "stateVariable": false,
                       "storageLocation": "default",
                       "type": "contract ERC20Basic",
@@ -393,20 +393,20 @@
                         "attributes": {
                           "contractScope": null,
                           "name": "ERC20Basic",
-                          "referencedDeclaration": 3196,
+                          "referencedDeclaration": 3229,
                           "type": "contract ERC20Basic"
                         },
-                        "id": 1876,
+                        "id": 1909,
                         "name": "UserDefinedTypeName",
                         "src": "275:10:4"
                       }
                     ],
-                    "id": 1877,
+                    "id": 1910,
                     "name": "VariableDeclaration",
                     "src": "275:19:4"
                   }
                 ],
-                "id": 1878,
+                "id": 1911,
                 "name": "ParameterList",
                 "src": "274:21:4"
               },
@@ -417,7 +417,7 @@
                   ]
                 },
                 "children": [],
-                "id": 1879,
+                "id": 1912,
                 "name": "ParameterList",
                 "src": "303:0:4"
               },
@@ -451,11 +451,11 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 4742,
+                              "referencedDeclaration": 4775,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
-                            "id": 1880,
+                            "id": 1913,
                             "name": "Identifier",
                             "src": "309:7:4"
                           },
@@ -492,16 +492,16 @@
                                       "overloadedDeclarations": [
                                         null
                                       ],
-                                      "referencedDeclaration": 4739,
+                                      "referencedDeclaration": 4772,
                                       "type": "msg",
                                       "value": "msg"
                                     },
-                                    "id": 1881,
+                                    "id": 1914,
                                     "name": "Identifier",
                                     "src": "317:3:4"
                                   }
                                 ],
-                                "id": 1882,
+                                "id": 1915,
                                 "name": "MemberAccess",
                                 "src": "317:10:4"
                               },
@@ -511,26 +511,26 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 4444,
+                                  "referencedDeclaration": 4477,
                                   "type": "address",
                                   "value": "beneficiary"
                                 },
-                                "id": 1883,
+                                "id": 1916,
                                 "name": "Identifier",
                                 "src": "331:11:4"
                               }
                             ],
-                            "id": 1884,
+                            "id": 1917,
                             "name": "BinaryOperation",
                             "src": "317:25:4"
                           }
                         ],
-                        "id": 1885,
+                        "id": 1918,
                         "name": "FunctionCall",
                         "src": "309:34:4"
                       }
                     ],
-                    "id": 1886,
+                    "id": 1919,
                     "name": "ExpressionStatement",
                     "src": "309:34:4"
                   },
@@ -553,11 +553,11 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 4442,
+                              "referencedDeclaration": 4475,
                               "type": "contract ERC20Basic",
                               "value": "token"
                             },
-                            "id": 1887,
+                            "id": 1920,
                             "name": "Identifier",
                             "src": "350:5:4"
                           },
@@ -567,41 +567,41 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 1877,
+                              "referencedDeclaration": 1910,
                               "type": "contract ERC20Basic",
                               "value": "newToken"
                             },
-                            "id": 1888,
+                            "id": 1921,
                             "name": "Identifier",
                             "src": "358:8:4"
                           }
                         ],
-                        "id": 1889,
+                        "id": 1922,
                         "name": "Assignment",
                         "src": "350:16:4"
                       }
                     ],
-                    "id": 1890,
+                    "id": 1923,
                     "name": "ExpressionStatement",
                     "src": "350:16:4"
                   }
                 ],
-                "id": 1891,
+                "id": 1924,
                 "name": "Block",
                 "src": "303:68:4"
               }
             ],
-            "id": 1892,
+            "id": 1925,
             "name": "FunctionDefinition",
             "src": "257:114:4"
           }
         ],
-        "id": 1893,
+        "id": 1926,
         "name": "ContractDefinition",
         "src": "67:306:4"
       }
     ],
-    "id": 1894,
+    "id": 1927,
     "name": "SourceUnit",
     "src": "0:374:4"
   },
@@ -611,5 +611,5 @@
   },
   "networks": {},
   "schemaVersion": "1.0.1",
-  "updatedAt": "2017-11-27T09:08:50.501Z"
+  "updatedAt": "2017-11-28T04:46:41.979Z"
 }

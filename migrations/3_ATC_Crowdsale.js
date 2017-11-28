@@ -38,6 +38,9 @@ module.exports = async function (deployer, network, accounts) {
       let ATCReserveReleaseTime;
       let teamReleaseTimelines;
 
+      let baseRate;
+      let additionalBonusAmounts;
+
       if (network === "mainnet") {
         firstPeriodStartTime = moment.utc("2017-12-11").unix();
         firstPeriodEndTime = moment.utc("2017-12-17").unix();
@@ -48,7 +51,6 @@ module.exports = async function (deployer, network, accounts) {
         const presaleEndTime = moment().add(25, "minutes").unix();
         const presaleMaxEtherCap = 1 * 10 ** 18;
         const presaleRate = 1950;
-        const presalePublicRate = 1875;
 
         // vaultOwners = accounts.slice(7, 7 + 10);
         vaultOwners = [
@@ -73,19 +75,15 @@ module.exports = async function (deployer, network, accounts) {
         vault = await RefundVault.new(vaultOwners);
         console.log("vault deployed at", vault.address);
 
-        kyc = await KYC.new();
-        console.log("kyc deployed at", kyc.address);
 
         /*eslint-disable */
         presale = await ATCPresale.new(
           token.address,
           vault.address,
-          kyc.address,
           presaleStartTime,
           presaleEndTime,
           presaleMaxEtherCap,
-          presaleRate,
-          presalePublicRate
+          presaleRate
         );
         /* eslint-enable */
         console.log("presale deployed at", presale.address);
@@ -114,8 +112,16 @@ module.exports = async function (deployer, network, accounts) {
         additionalPeriodStartTime7 = moment().add(115, "minutes").unix();
         additionalPeriodEndTime7 = moment().add(120, "minutes").unix();
 
-        maxEtherCap = 1 * 10 ** 18;
-        minEtherCap = 5 * 10 ** 17;
+        maxEtherCap = 1 * 10 ** 18; //mainnet : 286000 ether
+        minEtherCap = 5 * 10 ** 17; //mainnet : 28600
+
+        baseRate = 1500;
+        additionalBonusAmounts = [
+          300 * 10 * 15,
+          6000 * 10 ** 15,
+          8000 * 10 ** 15,
+          10000 * 10 ** 15
+        ];
 
         bountyAddress = "0x922aa0d0e720caf10bcd7a02be187635a6f36ab0";
         partnersAddress = "0xd70705f93472420cc8c6199aca5308df6bd5011b";
@@ -155,6 +161,9 @@ module.exports = async function (deployer, network, accounts) {
         );
         console.log("teamLocker deployed at", teamLocker.address);
 
+        kyc = await KYC.new();
+        console.log("kyc deployed at", kyc.address);
+
         /*eslint-disable */
         crowdsale = await ATCCrowdSale.new(
           kyc.address,
@@ -168,6 +177,8 @@ module.exports = async function (deployer, network, accounts) {
           ATCController,
           maxEtherCap,
           minEtherCap,
+          baseRate,
+          additionalBonusAmounts
         );
         console.log("crowdsale deployed at", crowdsale.address);
 

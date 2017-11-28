@@ -678,7 +678,7 @@
       },
       {
         "attributes": {
-          "SourceUnit": 4268,
+          "SourceUnit": 4301,
           "absolutePath": "/Users/midinpa/workspace/dapps/aston-crowdsale/contracts/token/MiniMeToken.sol",
           "file": "./token/MiniMeToken.sol",
           "scope": 128,
@@ -694,16 +694,16 @@
       {
         "attributes": {
           "contractDependencies": [
-            3124,
-            4226
+            3157,
+            4259
           ],
           "contractKind": "contract",
           "documentation": null,
           "fullyImplemented": true,
           "linearizedBaseContracts": [
             127,
-            4226,
-            3124
+            4259,
+            3157
           ],
           "name": "ATC",
           "scope": 128
@@ -720,7 +720,7 @@
                 "attributes": {
                   "contractScope": null,
                   "name": "MiniMeToken",
-                  "referencedDeclaration": 4226,
+                  "referencedDeclaration": 4259,
                   "type": "contract MiniMeToken"
                 },
                 "id": 3,
@@ -868,7 +868,7 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 4226,
+                      "referencedDeclaration": 4259,
                       "type": "type(contract MiniMeToken)",
                       "value": "MiniMeToken"
                     },
@@ -1022,7 +1022,7 @@
               "payable": false,
               "scope": 127,
               "stateMutability": "nonpayable",
-              "superFunction": 3847,
+              "superFunction": 3880,
               "visibility": "public"
             },
             "children": [
@@ -1131,7 +1131,7 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 3100,
+                      "referencedDeclaration": 3133,
                       "type": "modifier ()",
                       "value": "onlyController"
                     },
@@ -1174,7 +1174,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 4742,
+                              "referencedDeclaration": 4775,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -1280,7 +1280,7 @@
                               "isPure": false,
                               "lValueRequested": false,
                               "member_name": "generateTokens",
-                              "referencedDeclaration": 3847,
+                              "referencedDeclaration": 3880,
                               "type": "function (address,uint256) returns (bool)"
                             },
                             "children": [
@@ -1290,7 +1290,7 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 4761,
+                                  "referencedDeclaration": 4794,
                                   "type": "contract super ATC",
                                   "value": "super"
                                 },
@@ -1363,7 +1363,7 @@
               "payable": false,
               "scope": 127,
               "stateMutability": "nonpayable",
-              "superFunction": 3487,
+              "superFunction": 3520,
               "visibility": "internal"
             },
             "children": [
@@ -1515,7 +1515,7 @@
                               "overloadedDeclarations": [
                                 null
                               ],
-                              "referencedDeclaration": 4742,
+                              "referencedDeclaration": 4775,
                               "type": "function (bool) pure",
                               "value": "require"
                             },
@@ -1654,7 +1654,7 @@
                               "isPure": false,
                               "lValueRequested": false,
                               "member_name": "doTransfer",
-                              "referencedDeclaration": 3487,
+                              "referencedDeclaration": 3520,
                               "type": "function (address,address,uint256) returns (bool)"
                             },
                             "children": [
@@ -1664,7 +1664,7 @@
                                   "overloadedDeclarations": [
                                     null
                                   ],
-                                  "referencedDeclaration": 4761,
+                                  "referencedDeclaration": 4794,
                                   "type": "contract super ATC",
                                   "value": "super"
                                 },
@@ -1809,7 +1809,7 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 3100,
+                      "referencedDeclaration": 3133,
                       "type": "modifier ()",
                       "value": "onlyController"
                     },
@@ -2007,7 +2007,7 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 3100,
+                      "referencedDeclaration": 3133,
                       "type": "modifier ()",
                       "value": "onlyController"
                     },
@@ -2234,7 +2234,7 @@
                       "overloadedDeclarations": [
                         null
                       ],
-                      "referencedDeclaration": 3100,
+                      "referencedDeclaration": 3133,
                       "type": "modifier ()",
                       "value": "onlyController"
                     },
@@ -2385,5 +2385,5 @@
   },
   "networks": {},
   "schemaVersion": "1.0.1",
-  "updatedAt": "2017-11-27T09:08:50.494Z"
+  "updatedAt": "2017-11-28T04:46:41.936Z"
 }
