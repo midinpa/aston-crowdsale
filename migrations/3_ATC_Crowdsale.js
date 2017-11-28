@@ -182,14 +182,14 @@ module.exports = async function (deployer, network, accounts) {
         );
         console.log("crowdsale deployed at", crowdsale.address);
 
-        crowdsale.startPeriod(firstPeriodStartTime, firstPeriodEndTime);
-        crowdsale.startPeriod(additionalPeriodStartTime1, additionalPeriodEndTime1);
-        crowdsale.startPeriod(additionalPeriodStartTime2, additionalPeriodEndTime2);
-        crowdsale.startPeriod(additionalPeriodStartTime3, additionalPeriodEndTime3);
-        crowdsale.startPeriod(additionalPeriodStartTime4, additionalPeriodEndTime4);
-        crowdsale.startPeriod(additionalPeriodStartTime5, additionalPeriodEndTime5);
-        crowdsale.startPeriod(additionalPeriodStartTime6, additionalPeriodEndTime6);
-        crowdsale.startPeriod(additionalPeriodStartTime7, additionalPeriodEndTime7);
+        await crowdsale.startPeriod(firstPeriodStartTime, firstPeriodEndTime);
+        await crowdsale.startPeriod(additionalPeriodStartTime1, additionalPeriodEndTime1);
+        await crowdsale.startPeriod(additionalPeriodStartTime2, additionalPeriodEndTime2);
+        await crowdsale.startPeriod(additionalPeriodStartTime3, additionalPeriodEndTime3);
+        await crowdsale.startPeriod(additionalPeriodStartTime4, additionalPeriodEndTime4);
+        await crowdsale.startPeriod(additionalPeriodStartTime5, additionalPeriodEndTime5);
+        await crowdsale.startPeriod(additionalPeriodStartTime6, additionalPeriodEndTime6);
+        await crowdsale.startPeriod(additionalPeriodStartTime7, additionalPeriodEndTime7);
 
       }// end else
 
