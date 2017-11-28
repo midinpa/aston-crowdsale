@@ -132,10 +132,9 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
 
       // calculate eth amount
       uint256 weiAmount = msg.value;
-      uint256 totalAmount = add(beneficiaryFunded[beneficiary], weiAmount);
       uint256 toFund;
 
-      uint256 postWeiRaised = add(weiRaised, toFund);
+      uint256 postWeiRaised = add(weiRaised, weiAmount);
 
       if (postWeiRaised > maxEtherCap) {
         toFund = sub(maxEtherCap, weiRaised);

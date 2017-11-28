@@ -487,9 +487,42 @@ now:\t\t\t\t${ now }
             await crowdsale.startPeriod(periods[i].startTime, period.endTime)
               .should.be.rejectedWith(EVMThrow);
 
-            console.log("period 8 reverted (maximum 7 additional period!!!)");
+            console.log("period 9 reverted (maximum 7 additional period!!!)");
           } else await checkInvestingForEachPeriod(i);
+
+          if (i == 8) {
+            ///invest to maxEthercap
+            const tmp_weiRaised = await crowdsale.weiRaised();
+            investAmount = maxEtherCap.sub(tmp_weiRaised).add(ether(5));
+            const investedAmount = maxEtherCap.sub(tmp_weiRaised);
+
+            let investor1totalToken = await token.balanceOf(investor1);
+
+            let invertor1BeforeBalance = await eth.getBalance(investor1);
+
+            await crowdsale.buy(investor1, {
+              from: investor1,
+              value: investAmount,
+            }).should.be.fulfilled;
+
+            let invertor1AfterBalance = await eth.getBalance(investor1);
+
+            invertor1BeforeBalance.sub(invertor1AfterBalance).toNumber().should.be.within(
+              investedAmount.toNumber(),
+              investedAmount.add(ether(1)).toNumber()
+            )
+
+            cumulativeWeiRaised = cumulativeWeiRaised.add(investedAmount);
+
+            (await token.balanceOf(investor1))
+              .should.be.bignumber.equal(
+                investor1totalToken.add(investedAmount.mul(getRate(investedAmount))));
+
+            console.log("period %d investor1 invested over maxEtherCap and the toReturn came back", i);
+          }
         }
+
+
 
         await increaseTimeTo(periods[periods.length - 1].endTime + duration.seconds(100));
 
@@ -569,6 +602,63 @@ now:\t\t\t\t${ now }
 
         console.log("token transfer accepted");
       });
-    });
-  },
-);
+
+      // it("Refund Test", async () => {
+      //
+      //   await increaseTimeTo(beforePresaleStartTime);
+      //
+      //   investAmount = ether(1000);
+      //   let presaleInvestor = accounts[0];
+      //   const registerTx = await presale.register(presaleInvestor, investAmount)
+      //     .should.be.fulfilled;
+      //   console.log("presale registered");
+      //
+      //   (await presale.registeredAddress(presaleInvestor))
+      //     .should.be.equal(true);
+      //
+      //   await increaseTimeTo(afterPresaleStartTime);
+      //
+      //   const purchaseTx = await presale.buyPresale(presaleInvestor, {
+      //     value: investAmount,
+      //     from: presaleInvestor,
+      //   }).should.be.fulfilled;
+      //
+      //   cumulativeWeiRaised = cumulativeWeiRaised.add(investAmount);
+      //
+      //   (await token.balanceOf(presaleInvestor))
+      //     .should.be.bignumber.equal(investAmount.mul(presaleRate));
+      //   console.log("presale purchase");
+      //
+      //   await increaseTimeTo(afterPresaleEndTime);
+      //
+      //   const finalizeTx = await presale.finalizePresale(crowdsale.address)
+      //     .should.be.fulfilled;
+      //   (await crowdsale.presaleFallBackCalled())
+      //     .should.be.equal(true);
+      //   console.log("presale finalize");
+      //
+      //   await increaseTimeTo(periods[periods.length - 1].startTime + duration.seconds(100));
+      //
+      //   await crowdsale.finalize()
+      //     .should.be.fulfilled;
+      //
+      //   console.log("finalized");
+      //
+      //   let presaleInvestorBeforeBalance = await eth.getBalance(presaleInvestor);
+      //
+      //   await crowdsale.claimRefund(presaleInvestor, {
+      //     from: presaleInvestor
+      //   }).should.be.fulfilled;
+      //
+      //   console.log("refund claimed");
+      //
+      //   let presaleInvestorAfterBalance = await eth.getBalance(presaleInvestor);
+      //
+      //   presaleInvestorAfterBalance.sub(presaleInvestorBeforeBalance).toNumber()
+      //     .should.be.within(
+      //       investAmount.sub(ether(1)).toNumber(),
+      //       investAmount.toNumber()
+      //     );
+      // });
+  });
+});
