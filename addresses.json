@@ -1,5 +1,8 @@
 {
-  "token": "0x2eda0fde30aa861b809ea3163935cf622711957d",
-  "vault": "0x0b1b5c9bed01437bd07a7a513f967ee1d3c654a5",
-  "presale": "0xcdf75a615bc5993eb8fbbb53e8792b1535b6268f"
+  "token": "0x1496ffd2e129b6ece5b9bd114f99ac9630d84aca",
+  "vault": "0x6182095fb6adc2e367ff274bfdb0de9c87284e7f",
+  "presale": "0x67cedc98c5e47b04c997caebd1475c8a85a5cb1a",
+  "crowdsale": "0xa749f6e4efc89b222666b50ca6f2b0b8bbdc44b9",
+  "ATCReserveLocker": "0x1e43b2c6e111638e7720795c7f8f1e7437fc324e",
+  "teamLocker": "0xb57ddfd1c7d077dc0c6a09aa625eb28afddb570c"
 }

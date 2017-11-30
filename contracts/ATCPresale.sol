@@ -17,7 +17,6 @@ contract ATCPresale is Ownable, PresaleKYC, Pausable {
   RefundVault public vault;
 
   uint256 public rate;
-  uint256 public publicRate;
   uint256 public weiRaised;
   uint256 public maxEtherCap;
   uint64 public startTime;

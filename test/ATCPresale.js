@@ -228,6 +228,28 @@ now:\t\t\t${ now }
         console.log("unregisterByList10Tx Gas Used :", unregisterByList10Tx.receipt.gasUsed);
       }); // end "register and unregister by list presale"
 
+      it("register by list presale test", async () => {
+        const registeredAmounts = new Array(40);
+        const registeredAmount = ether(100);
+
+        for (let i = 0; i < 40; i++) {
+          registeredAmounts[ i ] = registeredAmount;
+        }
+
+        const registerByList40Tx = await presale.registerByList(
+          accounts.slice(0, 40),
+          registeredAmounts,
+        ).should.be.fulfilled;
+
+        for (const account of accounts.slice(0, 40)) {
+          (await presale.registeredAddress(account)).should.be.equal(true);
+          (await presale.presaleGuaranteedLimit(account))
+            .should.be.bignumber.equal(registeredAmount);
+        }
+
+        console.log("registerByList40Tx Gas Used :", registerByList40Tx.receipt.gasUsed);
+      }); // end "register and unregister by list presale"
+
 
       // after start//
       // /////////////

@@ -3,13 +3,13 @@ require("babel-polyfill");
 require("./setup");
 
 // SNT
-const HDWalletProvider = require("truffle-hdwallet-provider");
+const HDWalletProvider = require("truffle-multi-hdwallet-provider");
 require("dotenv").config();
 
 const mnemonic = process.env.MNEMONIC || "onther certon onther certon onther certon onther certon onther certon onther certon ";
 const providerUrl = "https://ropsten.infura.io";
 
-const providerRopsten = new HDWalletProvider(mnemonic, providerUrl, 0);
+const providerRopsten = new HDWalletProvider(mnemonic, providerUrl, 0, 50);
 
 module.exports = {
   networks: {

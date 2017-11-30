@@ -17,6 +17,7 @@ const migration_src = require("../argv.js");
 module.exports = async function (deployer, network, accounts) {
   console.log("[accounts]");
   accounts.forEach((account, i) => console.log(`[${ i }]  ${ account }`));
+
   if (migration_src == "3") {
     try {
       let maxEtherCap, minEtherCap;
@@ -41,12 +42,155 @@ module.exports = async function (deployer, network, accounts) {
       let baseRate;
       let additionalBonusAmounts;
 
+      let additionalPeriodStartTime1, additionalPeriodEndTime1;
+      let additionalPeriodStartTime2, additionalPeriodEndTime2;
+      let additionalPeriodStartTime3, additionalPeriodEndTime3;
+      let additionalPeriodStartTime4, additionalPeriodEndTime4;
+      let additionalPeriodStartTime5, additionalPeriodEndTime5;
+      let additionalPeriodStartTime6, additionalPeriodEndTime6;
+      let additionalPeriodStartTime7, additionalPeriodEndTime7;
+
+
+      const secToMillisec = (sec) => {
+        return sec * 1000;
+      }
+      const toWei = (ether) => {
+        return ether * 10 ** 18;
+      }
+      const timeout = (ms) => {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+      const waitUntil = async (targetTime) => {
+        let now = moment().unix();
+        await timeout(secToMillisec(targetTime - now));
+      }
+      const sendDemoTxes = () => {
+        // test tx
+        const presaleRegisteredInvestor1 = accounts[1];
+        const presaleRegisteredInvestor2 = accounts[2];
+        const mainsaleRegisteredInvestor1 = accounts[3];
+        const mainsaleRegisteredInvestor2 = accounts[4];
+        const UnregisteredInvestor1 = accounts[5];
+
+        await presale.register(presaleRegisteredInvestor1, toWei(0.5), {
+          from: accounts[0]
+        });
+        console.log("presaleRegisteredInvestor1 registered (0.5 ether)");
+        await presale.register(presaleRegisteredInvestor2, toWei(0.4), {
+          from: accounts[0]
+        });
+        console.log("presaleRegisteredInvestor2 registered (0.4 ether)");
+
+        presale.buyPresale(presaleRegisteredInvestor1, {
+          from: presaleRegisteredInvestor1,
+          value: toWei(0.5)
+        });
+
+        console.log("presaleRegisteredInvestor1 send 0.5 ether (should be reverted)");
+
+        await waitUntil(presaleStartTime + 100);
+
+        presale.buyPresale(presaleRegisteredInvestor1, {
+          from: presaleRegisteredInvestor1,
+          value: toWei(0.5)
+        });
+
+        console.log("presaleRegisteredInvestor1 send 0.5 ether (should be accepted)");
+
+        presale.buyPresale(presaleRegisteredInvestor2, {
+          from: presaleRegisteredInvestor2,
+          value: toWei(0.5)
+        });
+
+        console.log("presaleRegisteredInvestor1 send 0.5 ether (should be accepted only 0.4 ether)");
+
+        presale.buyPresale(UnregisteredInvestor1, {
+          from: UnregisteredInvestor1,
+          value: toWei(0.1)
+        });
+
+        console.log("UnregisteredInvestor1 send 0.1 ether (should be rejected)");
+
+        await waitUntil(presaleEndTime + 100);
+
+        await presale.finalizePresale(crowdsale.address, {
+          from: accounts[0]
+        });
+
+        console.log("presale finalized");
+
+        token.transfer(UnregisteredInvestor1, toWei(1), {
+          from: presaleRegisteredInvestor1
+        });
+
+        console.log("presaleRegisteredInvestor1 transfer token to UnregisteredInvestor1 (should be rejected)");
+      }
+
+      //deploy
       if (network === "mainnet") {
-        firstPeriodStartTime = moment.utc("2017-12-11").unix();
-        firstPeriodEndTime = moment.utc("2017-12-17").unix();
+        firstPeriodStartTime = moment.utc("2017-12-11T03:00").unix();
+        firstPeriodEndTime = moment.utc("2017-12-17T15:00").unix();
+
+        additionalPeriodStartTime1 = moment.utc("2017-12-18T03:00").unix();
+        additionalPeriodEndTime1 = moment.utc("2017-12-24T15:00").unix();
+
+        additionalPeriodStartTime2 = moment.utc("2017-12-25T03:00").unix();
+        additionalPeriodEndTime2 = moment.utc("2017-12-31T15:00").unix();
+
+        additionalPeriodStartTime3 = moment.utc("2018-01-01T03:00").unix();
+        additionalPeriodEndTime3 = moment.utc("2018-01-07T15:00").unix();
+
+        additionalPeriodStartTime4 = moment.utc("2018-01-08T03:00").unix();
+        additionalPeriodEndTime4 = moment.utc("2018-01-14T15:00").unix();
+
+        additionalPeriodStartTime5 = moment.utc("2018-01-15T03:00").unix();
+        additionalPeriodEndTime5 = moment.utc("2018-01-21T15:00").unix();
+
+        additionalPeriodStartTime6 = moment.utc("2018-01-22T03:00").unix();
+        additionalPeriodEndTime6 = moment.utc("2018-01-28T15:00").unix();
+
+        additionalPeriodStartTime7 = moment.utc("2018-01-29T03:00").unix();
+        additionalPeriodEndTime7 = moment.utc("2018-02-04T15:00").unix();
+
         maxEtherCap = 286000 * 10 ** 18;
         minEtherCap = 28600 * 10 ** 18;
+
+        baseRate = 1500;
+        additionalBonusAmounts = [
+          300 * 10 * 18,
+          6000 * 10 ** 18,
+          8000 * 10 ** 18,
+          10000 * 10 ** 18
+        ];
+
+        bountyAddress = "0xd2d09864564b7bb741f1cd0c1633719ae617c85e";
+        partnersAddress = "0x714c16435d126c02c7e84c16707b4a1d6ab09147";
+
+        ATCReserveBeneficiary = "0x05bbcf30914239a5dde9e5efded6671518f30196";
+        //TODO
+        ATCReserveReleaseTime = moment().add(140, "minutes").unix();
+
+        teamBeneficiaries = [
+            "0x80049bf695833d1d465623dc1774c8b3e99ca2a7",
+            "0xe863985909e518be7b1d2d7a24d9e4100c9a4820",
+            "0xdb09e4762bd2c7227207871dc80cff86d090fe92"
+        ];
+        //TODO
+        teamReleaseTimelines = [
+          moment().add(130, "minutes").unix(),
+          moment().add(140, "minutes").unix(),
+        ];
+        teamReleaseRatios = [
+          20,
+          50,
+        ];
+
+        // TODO
+        ATCController = "0x7a1bd647f350c130f0d33ae3d76ee28f12070424";
+
+
       } else {
+
         const presaleStartTime = moment().add(10, "minutes").unix();
         const presaleEndTime = moment().add(25, "minutes").unix();
         const presaleMaxEtherCap = 1 * 10 ** 18;
@@ -97,6 +241,7 @@ module.exports = async function (deployer, network, accounts) {
 
         firstPeriodStartTime = moment().add(35, "minutes").unix();
         firstPeriodEndTime = moment().add(50, "minutes").unix();
+
         additionalPeriodStartTime1 = moment().add(55, "minutes").unix();
         additionalPeriodEndTime1 = moment().add(60, "minutes").unix();
         additionalPeriodStartTime2 = moment().add(65, "minutes").unix();
@@ -145,6 +290,7 @@ module.exports = async function (deployer, network, accounts) {
 
         // TODO: ATCPLACEHOLDER ?
         ATCController = "0x7a1bd647f350c130f0d33ae3d76ee28f12070424";
+      } //end else
 
         ATCReserveLocker = await ReserveLocker.new(
           token.address,
@@ -191,14 +337,17 @@ module.exports = async function (deployer, network, accounts) {
         await crowdsale.startPeriod(additionalPeriodStartTime6, additionalPeriodEndTime6);
         await crowdsale.startPeriod(additionalPeriodStartTime7, additionalPeriodEndTime7);
 
-      }// end else
+        console.log("crowdsale periods started");
 
-      //AFTER PRESALE ENDTIME -> SEND TX (finalizePresale(CROWDSALE.ADDRESS))
+        // sendDemoTxes();
 
       fs.writeFileSync(path.join(__dirname, "../addresses.json"), JSON.stringify({
         token: token.address,
         vault: vault.address,
         presale: presale.address,
+        crowdsale: crowdsale.address,
+        ATCReserveLocker: ATCReserveLocker.address,
+        teamLocker: teamLocker.address
       }, undefined, 2));
     } catch (e) {
       console.error(e);
