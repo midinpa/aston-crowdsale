@@ -1,8 +1,8 @@
 {
-  "token": "0x1496ffd2e129b6ece5b9bd114f99ac9630d84aca",
-  "vault": "0x6182095fb6adc2e367ff274bfdb0de9c87284e7f",
-  "presale": "0x67cedc98c5e47b04c997caebd1475c8a85a5cb1a",
-  "crowdsale": "0xa749f6e4efc89b222666b50ca6f2b0b8bbdc44b9",
-  "ATCReserveLocker": "0x1e43b2c6e111638e7720795c7f8f1e7437fc324e",
-  "teamLocker": "0xb57ddfd1c7d077dc0c6a09aa625eb28afddb570c"
+  "token": "0x4a319e54873a46e23c47820f4fa6672d93823698",
+  "vault": "0xacedff706cbe109854e6058abd154e7e90801b39",
+  "presale": "0x1a88a6641f4b0334d94a27d729b449216d30d564",
+  "crowdsale": "0xd5443edbb039f73db4456c83e1685a451481b8fe",
+  "ATCReserveLocker": "0xc1e77124525f038f6446fdf225d05ac2bd2db6a7",
+  "teamLocker": "0x1fab1b45dc1c82c0a4bb16b55fcef4631d60a147"
 }
