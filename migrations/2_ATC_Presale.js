@@ -11,9 +11,9 @@ const migration_src = require("../argv.js");
 
 
 module.exports = async function (deployer, network, accounts) {
-  console.log("[accounts]");
-  accounts.forEach((account, i) => console.log(`[${ i }]  ${ account }`));
   if (migration_src == "2") {
+    console.log("[accounts]");
+    accounts.forEach((account, i) => console.log(`[${ i }]  ${ account }`));
     try {
       let tokenFactory, token, vault, presale;
 

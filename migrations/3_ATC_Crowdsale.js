@@ -15,10 +15,10 @@ const TeamLocker = artifacts.require("TeamLocker.sol");
 const migration_src = require("../argv.js");
 
 module.exports = async function (deployer, network, accounts) {
-  console.log("[accounts]");
-  accounts.forEach((account, i) => console.log(`[${ i }]  ${ account }`));
 
   if (migration_src == "3") {
+    console.log("[accounts]");
+    accounts.forEach((account, i) => console.log(`[${ i }]  ${ account }`));
     try {
       let maxEtherCap, minEtherCap;
 
@@ -111,23 +111,23 @@ module.exports = async function (deployer, network, accounts) {
         // TODO
         ATCController = "0x7a1bd647f350c130f0d33ae3d76ee28f12070424";
 
-        ATCReserveLocker = await ReserveLocker.new(
-          token.address,
-          ATCReserveBeneficiary,
-          ATCReserveReleaseTime,
-        );
-        console.log("ATCReserveLocker deployed at", ATCReserveLocker.address);
-
-        teamLocker = await TeamLocker.new(
-          token.address,
-          teamBeneficiaries,
-          teamReleaseTimelines,
-          teamReleaseRatios,
-        );
-        console.log("teamLocker deployed at", teamLocker.address);
-
-        kyc = await KYC.new();
-        console.log("kyc deployed at", kyc.address);
+        // ATCReserveLocker = await ReserveLocker.new(
+        //   token.address,
+        //   ATCReserveBeneficiary,
+        //   ATCReserveReleaseTime,
+        // );
+        // console.log("ATCReserveLocker deployed at", ATCReserveLocker.address);
+        //
+        // teamLocker = await TeamLocker.new(
+        //   token.address,
+        //   teamBeneficiaries,
+        //   teamReleaseTimelines,
+        //   teamReleaseRatios,
+        // );
+        // console.log("teamLocker deployed at", teamLocker.address);
+        //
+        // kyc = await KYC.new();
+        // console.log("kyc deployed at", kyc.address);
 
         // /*eslint-disable */
         // crowdsale = await ATCCrowdSale.new(
