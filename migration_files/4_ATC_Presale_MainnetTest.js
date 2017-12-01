@@ -9,7 +9,6 @@ const MiniMeTokenFactory = artifacts.require("token/MiniMeTokenFactory.sol");
 
 const migration_src = require("../argv.js");
 
-
 module.exports = async function (deployer, network, accounts) {
   if (migration_src == "4") {
     console.log("[accounts]");
@@ -21,7 +20,6 @@ module.exports = async function (deployer, network, accounts) {
       let presaleMaxEtherCap;
       let presaleRate
       let vaultOwners;
-
 
       presaleStartTime = moment().add(10, "minutes").unix();
       presaleEndTime = moment().add(25, "minutes").unix();

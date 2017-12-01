@@ -40,13 +40,13 @@ module.exports = {
       gas: 4500000,
       gasPrice: 25e9,
     },
-    onther: {
+    parity: {
       host: "onther.io",
-      port: 60010,
-      network_id: "777",
-      from: "0x71283a1d35f63e35a34476f6ad0a85a49317181b", // accounts[0]
-      gas: 4700000,
-      gasPrice: 18e9,
+      port: 60009,
+      network_id: "1",
+      from: "0x266085436a4d9cb25603a3b1ab72338f313d7377", // accounts[0]
+      gas: 4500000,
+      gasPrice: 25e9,
     },
   },
 };
