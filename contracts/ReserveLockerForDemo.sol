@@ -10,7 +10,7 @@ import './ATCCrowdSale.sol';
  * @dev TokenTimelock is a token holder contract that will allow a
  * beneficiary to extract the tokens after a given release time
  */
-contract ReserveLocker is SafeMath{
+contract ReserveLockerForDemo is SafeMath{
   using SafeERC20 for ERC20Basic;
 
   ERC20Basic public token;
@@ -18,7 +18,7 @@ contract ReserveLocker is SafeMath{
   address public beneficiary;
 
 
-  function ReserveLocker(address _token, address _crowdsale, address _beneficiary) {
+  function ReserveLockerForDemo(address _token, address _crowdsale, address _beneficiary) {
 
     require(_token != 0x00);
     require(_crowdsale != 0x00);
@@ -35,7 +35,7 @@ contract ReserveLocker is SafeMath{
    */
    function release() public {
      uint256 finalizedTime = crowdsale.finalizedTime();
-     require(finalizedTime > 0 && now > add(finalizedTime, 2 years));
+     require(finalizedTime > 0 && now > add(finalizedTime, 20 minutes));
 
      uint256 amount = token.balanceOf(this);
      require(amount > 0);

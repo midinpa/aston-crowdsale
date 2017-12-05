@@ -6,6 +6,9 @@ import './vault/RefundVault.sol';
 import './ownership/Ownable.sol';
 import './math/SafeMath.sol';
 import './lifecycle/Pausable.sol';
+import './token/ERC20Basic.sol';
+import './ReserveLocker.sol';
+import './TeamLocker.sol';
 
 contract ATCCrowdSale is Ownable, SafeMath, Pausable {
   KYC public kyc;
@@ -16,12 +19,13 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
 
   address public bountyAddress; //5% for bounty
   address public partnersAddress; //15% for community groups & partners
-  address public reserverLocker; //15% with 2 years lock
+  address public ATCReserveLocker; //15% with 2 years lock
   address public teamLocker; // 15% with 2 years vesting
 
+
   struct Period {
-    uint64 startTime;
-    uint64 endTime;
+    uint256 startTime;
+    uint256 endTime;
     uint256 bonus; // used to calculate rate with bonus. ragne 0 ~ 15 (0% ~ 15%)
   }
 
@@ -46,23 +50,27 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
   uint256 public refundCompleted;
   bool public presaleFallBackCalled;
 
+  uint256 public finalizedTime;
+  bool public initialized;
+
 
   event CrowdSaleTokenPurchase(address indexed _investor, address indexed _beneficiary, uint256 _toFund, uint256 _tokens);
-  event StartPeriod(uint64 _startTime, uint64 _endTime, uint256 _bonus);
+  event StartPeriod(uint256 _startTime, uint256 _endTime, uint256 _bonus);
   event Finalized();
   event PresaleFallBack(uint256 _presaleWeiRaised);
   event PushInvestorList(address _investor);
   event RefundAll(uint256 _numToRefund);
   event ClaimedTokens(address _claimToken, address owner, uint256 balance);
+  event Initialize();
 
-  function ATCCrowdSale (
+  function initialize (
     address _kyc,
     address _token,
     address _vault,
     address _presale,
     address _bountyAddress,
     address _partnersAddress,
-    address _reserverLocker,
+    address _ATCReserveLocker,
     address _teamLocker,
     address _tokenController,
     uint256 _maxEtherCap,
@@ -70,14 +78,17 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     uint256 _baseRate,
     uint256[] _additionalBonusAmounts
 
-    ) {
+    ) onlyOwner {
+      require(!initialized);
+
       require(_kyc != 0x00 && _token != 0x00 && _vault != 0x00 && _presale != 0x00);
       require(_bountyAddress != 0x00 && _partnersAddress != 0x00);
-      require(_reserverLocker != 0x00 && _teamLocker != 0x00);
+      require(_ATCReserveLocker != 0x00 && _teamLocker != 0x00);
       require(_tokenController != 0x00);
       require(0 < _minEtherCap && _minEtherCap < _maxEtherCap);
       require(_baseRate > 0);
       require(_additionalBonusAmounts[0] > 0);
+
       for (uint i = 0; i < _additionalBonusAmounts.length - 1; i++) {
         require(_additionalBonusAmounts[i] < _additionalBonusAmounts[i + 1]);
       }
@@ -89,8 +100,10 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
 
       bountyAddress = _bountyAddress;
       partnersAddress = _partnersAddress;
-      reserverLocker = _reserverLocker;
+
+      ATCReserveLocker = _ATCReserveLocker;
       teamLocker = _teamLocker;
+
       ATCController = _tokenController;
 
       maxEtherCap = _maxEtherCap;
@@ -99,6 +112,8 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
       baseRate = _baseRate;
       additionalBonusAmounts = _additionalBonusAmounts;
 
+      initialized = true;
+      Initialize();
     }
 
   function () public payable {
@@ -239,7 +254,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     return div(mul(baseRate, add(bonus, 100)), 100);
   }
 
-  function startPeriod(uint64 _startTime, uint64 _endTime) public onlyOwner returns (bool) {
+  function startPeriod(uint256 _startTime, uint256 _endTime) public onlyOwner returns (bool) {
     require(periods.length < MAX_PERIOD_COUNT);
     require(now < _startTime && _startTime < _endTime);
 
@@ -285,6 +300,8 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     require(!isFinalized);
     require(!onSale() || maxReached());
 
+    finalizedTime = now;
+
     finalization();
     Finalized();
 
@@ -318,9 +335,12 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
   }
 
   function distributeToken(uint256 bountyAmount, uint256 partnersAmount, uint256 reserveAmount, uint256 teamAmount) internal {
+    require(bountyAddress != 0x00 && partnersAddress != 0x00);
+    require(ATCReserveLocker != 0x00 && teamLocker != 0x00);
+
     token.generateTokens(bountyAddress, bountyAmount);
     token.generateTokens(partnersAddress, partnersAmount);
-    token.generateTokens(reserverLocker, reserveAmount);
+    token.generateTokens(ATCReserveLocker, reserveAmount);
     token.generateTokens(teamLocker, teamAmount);
   }
 

@@ -91,6 +91,32 @@ contract(
     let additionalBonusAmounts;
     let investAmount;
 
+    let firstPeriodStartTime, firstPeriodEndTime;
+    let additionalPeriodStartTime1, additionalPeriodEndTime1;
+    let additionalPeriodStartTime2, additionalPeriodEndTime2;
+    let additionalPeriodStartTime3, additionalPeriodEndTime3;
+    let additionalPeriodStartTime4, additionalPeriodEndTime4;
+    let additionalPeriodStartTime5, additionalPeriodEndTime5;
+    let additionalPeriodStartTime6, additionalPeriodEndTime6;
+    let additionalPeriodStartTime7, additionalPeriodEndTime7;
+
+    getAdditionalBonus = (amount) => {
+      if (amount.gte(ether(6000))) return additionalBonuses[1];
+      else if (amount.gte(ether(300))) return additionalBonuses[0];
+      return new BigNumber(0);
+    };
+
+    getRate = (amount) => {
+      let bonus = new BigNumber(0);
+
+      if (amount.gte(additionalBonusAmounts[3])) bonus = finalBonuses[1];
+      else if (amount.gte(additionalBonusAmounts[2])) bonus = finalBonuses[0];
+      else {
+        bonus = period.bonus.add(getAdditionalBonus(amount));
+      }
+      return baseRate.mul(bonus.add(100).div(100));
+    };
+
     const contractDeploy = async (logging = true) => {
       const logger = (...args) => (logging ? console.log(...args) : null);
 
@@ -109,10 +135,9 @@ contract(
 
       cumulativeWeiRaised = new BigNumber(0);
 
-      baseTime = baseTime.add(1, "month");
-      now = baseTime.unix();
-      presaleStartTime = baseTime.add(5, "minutes").unix();
-      presaleEndTime = baseTime.add(5, "minutes").unix();
+      presaleStartTime = moment.utc("2017-12-06T03:00").unix();
+      presaleEndTime = moment.utc("2017-12-10T15:00").unix();
+
 
       maxEtherCap = ether(286000);
       minEtherCap = ether(28600);
@@ -137,82 +162,73 @@ contract(
         ether(10000)
       ]
 
-      getAdditionalBonus = (amount) => {
-        if (amount.gte(ether(6000))) return additionalBonuses[1];
-        else if (amount.gte(ether(300))) return additionalBonuses[0];
-        return new BigNumber(0);
-      };
+      firstPeriodStartTime = moment.utc("2017-12-11T03:00").unix();
+      firstPeriodEndTime = moment.utc("2017-12-17T15:00").unix();
 
-      getRate = (amount) => {
-        let bonus = new BigNumber(0);
+      additionalPeriodStartTime1 = moment.utc("2017-12-18T03:00").unix();
+      additionalPeriodEndTime1 = moment.utc("2017-12-24T15:00").unix();
 
-        if (amount.gte(additionalBonusAmounts[3])) bonus = finalBonuses[1];
-        else if (amount.gte(additionalBonusAmounts[2])) bonus = finalBonuses[0];
-        else {
-          bonus = period.bonus.add(getAdditionalBonus(amount));
-        }
-        return baseRate.mul(bonus.add(100).div(100));
-      };
+      additionalPeriodStartTime2 = moment.utc("2017-12-25T03:00").unix();
+      additionalPeriodEndTime2 = moment.utc("2017-12-31T15:00").unix();
+
+      additionalPeriodStartTime3 = moment.utc("2018-01-01T03:00").unix();
+      additionalPeriodEndTime3 = moment.utc("2018-01-07T15:00").unix();
+
+      additionalPeriodStartTime4 = moment.utc("2018-01-08T03:00").unix();
+      additionalPeriodEndTime4 = moment.utc("2018-01-14T15:00").unix();
+
+      additionalPeriodStartTime5 = moment.utc("2018-01-15T03:00").unix();
+      additionalPeriodEndTime5 = moment.utc("2018-01-21T15:00").unix();
+
+      additionalPeriodStartTime6 = moment.utc("2018-01-22T03:00").unix();
+      additionalPeriodEndTime6 = moment.utc("2018-01-28T15:00").unix();
+
+      additionalPeriodStartTime7 = moment.utc("2018-01-29T03:00").unix();
+      additionalPeriodEndTime7 = moment.utc("2018-02-04T15:00").unix();
 
       /*eslint-disable */
       periods = [
         new Period( // 0
-          baseTime.add(5, "minutes").unix(),
-          baseTime.add(5, "minutes").unix(),
+          firstPeriodStartTime,
+          firstPeriodEndTime,
           new BigNumber(15)
         ),
         new Period( // 1
-          baseTime.add(5, "minutes").unix(),
-          baseTime.add(5, "minutes").unix(),
+          additionalPeriodStartTime1,
+          additionalPeriodEndTime1,
           new BigNumber(10)
         ),
         new Period( // 2
-          baseTime.add(5, "minutes").unix(),
-          baseTime.add(5, "minutes").unix(),
+          additionalPeriodStartTime2,
+          additionalPeriodEndTime2,
           new BigNumber(5)
         ),
         new Period( // 3
-          baseTime.add(5, "minutes").unix(),
-          baseTime.add(5, "minutes").unix(),
+          additionalPeriodStartTime3,
+          additionalPeriodEndTime3,
           new BigNumber(0)
         ),
         new Period( // 4
-          baseTime.add(5, "minutes").unix(),
-          baseTime.add(5, "minutes").unix(),
+          additionalPeriodStartTime4,
+          additionalPeriodEndTime4,
           new BigNumber(0)
         ),
         new Period( // 5
-          baseTime.add(5, "minutes").unix(),
-          baseTime.add(5, "minutes").unix(),
+          additionalPeriodStartTime5,
+          additionalPeriodEndTime5,
           new BigNumber(0)
         ),
         new Period( // 6
-          baseTime.add(5, "minutes").unix(),
-          baseTime.add(5, "minutes").unix(),
-          new BigNumber(0)
-        ),
-        new Period( // 7 for revert (over 7 days)
-          baseTime.add(5, "minutes").unix(),
-          baseTime.add(8, "days").unix(),
+          additionalPeriodStartTime6,
+          additionalPeriodEndTime6,
           new BigNumber(0)
         ),
         new Period( // 7
-          baseTime.add(5, "minutes").unix(),
-          baseTime.add(5, "minutes").unix(),
+          additionalPeriodStartTime7,
+          additionalPeriodEndTime7,
           new BigNumber(0)
-        ),
-        new Period( // 8
-          baseTime.add(5, "minutes").unix(),
-          baseTime.add(5, "minutes").unix(),
-          new BigNumber(0)
-        ),
+        )
       ];
-
-      teamReleaseTimelines = [
-        baseTime.add(5, "minutes").unix(),
-        baseTime.add(5, "minutes").unix()
-      ];
-      ATCReserveReleaseTime = baseTime.unix();
 
       teamReleaseRatios = [
         20,
@@ -223,7 +239,7 @@ contract(
         teamBeneficiary0,
         teamBeneficiary1,
         teamBeneficiary2
-      ]
+      ];
 
       /* eslint-enable */
       tokenFactory = await MiniMeTokenFactory.new();
@@ -255,26 +271,26 @@ contract(
       // PRESALE DONE//
       // //////////////
 
-      ATCReserveLocker = await ReserveLocker.new(
-        token.address,
-        ATCReserveBeneficiary,
-        ATCReserveReleaseTime
-      );
-      logger("ATCReserveLocker deployed at", ATCReserveLocker.address);
-
-      teamLocker = await TeamLocker.new(
-        token.address,
-        teamBeneficiaries,
-        teamReleaseTimelines,
-        teamReleaseRatios
-      );
-      logger("teamLocker deployed at", teamLocker.address);
-
       kyc = await KYC.new();
       logger("kyc deployed at", kyc.address);
 
-      /*eslint-disable */
-      crowdsale = await ATCCrowdSale.new(
+      crowdsale = await ATCCrowdSale.new();
+      logger("crowdsale deployed at", crowdsale.address);
+
+      ATCReserveLocker = await ReserveLocker.new(
+        token.address,
+        crowdsale.address,
+        ATCReserveBeneficiary
+      );
+      logger("ATCReserveLocker deployed at", ATCReserveLocker.address);
+      teamLocker = await TeamLocker.new(
+        token.address,
+        crowdsale.address,
+        teamBeneficiaries
+      );
+      logger("teamLocker deployed at", teamLocker.address);
+
+      await crowdsale.initialize(
         kyc.address,
         token.address,
         vault.address,
@@ -289,8 +305,18 @@ contract(
         baseRate,
         additionalBonusAmounts
       );
-      /* eslint-enable */
-      logger("crowdsale deployed at", crowdsale.address);
+
+      logger("crowdsale initialized")
+
+      for (let i = 0; i < periods.length; i++) {
+        period = periods[i];
+
+        await crowdsale.startPeriod(period.startTime, period.endTime)
+          .should.be.fulfilled;
+
+        console.log("period %d startred", i);
+      }
+
 
       // backup
       snapshotId = await capture();
@@ -318,12 +344,6 @@ now:\t\t\t\t${ now }
 
     const checkInvestingForEachPeriod = async (period_num) => {
       period = periods[ period_num ];
-      await increaseTimeTo(period.startTime - duration.seconds(100));
-
-      await crowdsale.startPeriod(period.startTime, period.endTime)
-        .should.be.fulfilled;
-
-      console.log("period %d startred", period_num);
 
       await increaseTimeTo(period.startTime + duration.seconds(100));
       (await crowdsale.getPeriodBonus())
@@ -413,7 +433,6 @@ now:\t\t\t\t${ now }
       console.log("period %d: investor5 buy tokens(10000 ether) at rate %d", period_num, getRate(investAmount));
     }
 
-
     before(contractDeploy);
 
     beforeEach(async () => {
@@ -476,21 +495,9 @@ now:\t\t\t\t${ now }
         console.log("reject purchase before period");
 
         for (let i = 0; i < periods.length; i++) {
+          await checkInvestingForEachPeriod(i);
+
           if (i == 7) {
-            await increaseTimeTo(periods[i].startTime - duration.seconds(100));
-            await crowdsale.startPeriod(periods[i].startTime, period.endTime)
-              .should.be.rejectedWith(EVMThrow);
-
-            console.log("period 7 (for testing revert 7 days) reverted");
-          } else if (i == 9) {
-            await increaseTimeTo(periods[i].startTime - duration.seconds(100));
-            await crowdsale.startPeriod(periods[i].startTime, period.endTime)
-              .should.be.rejectedWith(EVMThrow);
-
-            console.log("period 9 reverted (maximum 7 additional period!!!)");
-          } else await checkInvestingForEachPeriod(i);
-
-          if (i == 8) {
             ///invest to maxEthercap
             const tmp_weiRaised = await crowdsale.weiRaised();
             investAmount = maxEtherCap.sub(tmp_weiRaised).add(ether(5));
@@ -522,12 +529,13 @@ now:\t\t\t\t${ now }
           }
         }
 
-
-
         await increaseTimeTo(periods[periods.length - 1].endTime + duration.seconds(100));
 
         await crowdsale.finalize()
           .should.be.fulfilled;
+
+        (await crowdsale.finalizedTime())
+          .should.be.bignumber.gt(new BigNumber(0));
 
         console.log("finalized");
 
@@ -562,25 +570,37 @@ now:\t\t\t\t${ now }
 
         console.log("token & ether distribution checked");
 
+        //Locker Test
+
         await ATCReserveLocker.release()
           .should.be.rejectedWith(EVMThrow);
 
         console.log("ATCReserveLocker release reverted before releaseTime");
 
-        for (var i = 0; i < teamReleaseTimelines.length; i++) {
-          await increaseTimeTo(teamReleaseTimelines[i] - duration.seconds(100));
-          await teamLocker.release()
-            .should.be.fulfilled;
+        await teamLocker.release()
+          .should.be.fulfilled;
 
-          for (var j = 0; j < teamBeneficiaries.length; j++) {
-            (await token.balanceOf(teamBeneficiaries[j]))
-              .should.be.bignumber.equal(teamAmount.mul(teamReleaseRatios[i]).div(100).div(3))
-          }
-
-          console.log("teamLocker release %d (%d %)", i, teamReleaseRatios[i]);
+        for (var j = 0; j < teamBeneficiaries.length; j++) {
+          (await token.balanceOf(teamBeneficiaries[j]))
+            .should.be.bignumber.equal(teamAmount.mul(teamReleaseRatios[0]).div(100).div(3))
         }
 
-        await increaseTimeTo(teamReleaseTimelines[teamReleaseTimelines.length - 1] + duration.seconds(100));
+        console.log("teamLocker release 0 (%d %)", teamReleaseRatios[0]);
+
+        await increaseTimeTo((await crowdsale.finalizedTime()).add(duration.days(184)));
+
+        await teamLocker.release()
+          .should.be.fulfilled;
+
+        for (var j = 0; j < teamBeneficiaries.length; j++) {
+          (await token.balanceOf(teamBeneficiaries[j]))
+            .should.be.bignumber.equal(teamAmount.mul(teamReleaseRatios[1]).div(100).div(3))
+        }
+
+        console.log("teamLocker release 1 (%d %)", teamReleaseRatios[1]);
+
+        await increaseTimeTo((await crowdsale.finalizedTime()).add(duration.days(368)));
+
         await teamLocker.release()
           .should.be.fulfilled;
 
@@ -589,7 +609,9 @@ now:\t\t\t\t${ now }
             .should.be.bignumber.equal(teamAmount.div(3))
         }
 
-        console.log("teamLocker release 3 (100 %)");
+        console.log("teamLocker release 2 (%d %)", 100);
+
+        await increaseTimeTo((await crowdsale.finalizedTime()).add(duration.days(731)));
 
         await ATCReserveLocker.release()
           .should.be.fulfilled;
@@ -601,6 +623,29 @@ now:\t\t\t\t${ now }
         await token.transfer(investor2, 100, { from: investor1 }).should.be.fulfilled;
 
         console.log("token transfer accepted");
+
+        await token.generateTokens(investor2, 10, {from: ATCController})
+          .should.be.rejectedWith(EVMThrow);
+
+        console.log("token generation rejected");
+
+        await token.blacklistAccount(investor2, {from: ATCController})
+          .should.be.fulfilled;
+
+        await token.transfer(investor1, 100, { from: investor2 })
+          .should.be.rejectedWith(EVMThrow);
+
+        console.log("token investor2 blacklisted");
+
+        await token.unBlacklistAccount(investor2, {from: ATCController})
+          .should.be.fulfilled;
+
+        await token.transfer(investor1, 100, { from: investor2 })
+          .should.be.fulfilled;
+
+        console.log("token investor2 unblacklisted");
+
+
       });
 
       // it("Refund Test", async () => {
