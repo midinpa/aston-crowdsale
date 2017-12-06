@@ -3,7 +3,7 @@ require("babel-polyfill");
 require("./setup");
 
 // SNT
-const HDWalletProvider = require("truffle-multi-hdwallet-provider");
+const HDWalletProvider = require("truffle-hdwallet-provider");
 require("dotenv").config();
 
 const mnemonic = process.env.MNEMONIC || "onther certon onther certon onther certon onther certon onther certon onther certon ";

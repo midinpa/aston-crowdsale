@@ -28,7 +28,7 @@
     "moment": "^2.19.2",
     "path": "^0.12.7",
     "truffle-contract": "^3.0.1",
-    "truffle-hdwallet-provider": "0.0.3"
+    "truffle-hdwallet-provider": "git+https://github.com/cemozerr/truffle-hdwallet-provider.git"
   },
   "devDependencies": {},
   "scripts": {
