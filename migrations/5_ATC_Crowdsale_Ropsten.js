@@ -188,33 +188,69 @@ module.exports = async function (deployer, network, accounts) {
       }
 
       const sendInvestTx = () => {
+
         crowdsale.buy(mainsaleRegisteredInvestor1, {
           from: mainsaleRegisteredInvestor1,
           value: toWei(0.01)
+        }).then(() => {
+            console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.01 ether");
+        }).catch((e) => {
+          crowdsale.buy(mainsaleRegisteredInvestor1, {
+            from: mainsaleRegisteredInvestor1,
+            value: toWei(0.01)
+          })
+          console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.01 ether again !!!");
         });
-
-        console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.01 ether");
 
         crowdsale.buy(mainsaleRegisteredInvestor1, {
           from: mainsaleRegisteredInvestor1,
           value: toWei(0.03)
+        }).then(() => {
+            console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.03 ether");
+        }).catch((e) => {
+          crowdsale.buy(mainsaleRegisteredInvestor1, {
+            from: mainsaleRegisteredInvestor1,
+            value: toWei(0.03)
+          })
+          console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.03 ether again !!!");
         });
-        console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.03 ether");
+
         crowdsale.buy(mainsaleRegisteredInvestor1, {
           from: mainsaleRegisteredInvestor1,
-          value: toWei(0.6)
+          value: toWei(0.06)
+        }).then(() => {
+            console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.06 ether");
+        }).catch((e) => {
+          crowdsale.buy(mainsaleRegisteredInvestor1, {
+            from: mainsaleRegisteredInvestor1,
+            value: toWei(0.06)
+          })
+          console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.06 ether again !!!");
         });
-        console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.6 ether");
         crowdsale.buy(mainsaleRegisteredInvestor1, {
           from: mainsaleRegisteredInvestor1,
-          value: toWei(0.8)
+          value: toWei(0.08)
+        }).then(() => {
+            console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.08 ether");
+        }).catch((e) => {
+          crowdsale.buy(mainsaleRegisteredInvestor1, {
+            from: mainsaleRegisteredInvestor1,
+            value: toWei(0.08)
+          })
+          console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.08 ether again !!!");
         });
-        console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.8 ether");
         crowdsale.buy(mainsaleRegisteredInvestor1, {
           from: mainsaleRegisteredInvestor1,
-          value: toWei(1)
+          value: toWei(0.1)
+        }).then(() => {
+            console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.1 ether");
+        }).catch((e) => {
+          crowdsale.buy(mainsaleRegisteredInvestor1, {
+            from: mainsaleRegisteredInvestor1,
+            value: toWei(0.1)
+          })
+          console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.1 ether again !!!");
         });
-        console.log("crowdsale mainsaleRegisteredInvestor1 invest 1 ether");
       }
 
         const presaleStartTime = moment().add(20, "minutes").unix();

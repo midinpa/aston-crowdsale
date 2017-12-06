@@ -354,7 +354,6 @@ now:\t\t\t\t${ now }
       investAmount = ether(1);
 
       console.log(await crowdsale.calculateRate(investAmount));
-      console.log(await crowdsale.additionalBonusAmounts(0));
 
       let investor1totalToken = await token.balanceOf(investor1);
 
