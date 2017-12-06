@@ -183,9 +183,9 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     if (!inInvestorList[investor]) {
       inInvestorList[investor] = true;
       investorList.push(investor);
-    }
 
-    PushInvestorList(investor);
+      PushInvestorList(investor);
+    }
   }
 
   function validPurchase() internal constant returns (bool) {
@@ -231,7 +231,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
   /**
    * @dev rate = baseRate * (100 + bonus) / 100
    */
-  function calculateRate(uint256 toFund) internal returns (uint256)  {
+  function calculateRate(uint256 toFund) public constant returns (uint256)  {
     uint bonus = getPeriodBonus();
 
     // bonus for eth amount

@@ -73,44 +73,45 @@ module.exports = async function (deployer, network, accounts) {
         await timeout(secToMillisec(targetTime - now));
       }
       const sendDemoTxes = async () => {
-        // test tx
-        await presale.register(presaleRegisteredInvestor1, toWei(0.5), {
-          from: accounts[0]
-        });
-        console.log("presaleRegisteredInvestor1 registered (0.5 ether)");
-        await presale.register(presaleRegisteredInvestor2, toWei(0.4), {
-          from: accounts[0]
-        });
-        console.log("presaleRegisteredInvestor2 registered (0.4 ether)");
+        //presale Test
 
-        presale.buyPresale(presaleRegisteredInvestor1, {
-          from: presaleRegisteredInvestor1,
-          value: toWei(0.5)
-        });
-        console.log("presaleRegisteredInvestor1 send 0.5 ether (should be reverted)");
+        // await presale.register(presaleRegisteredInvestor1, toWei(0.5), {
+        //   from: accounts[0]
+        // });
+        // console.log("presaleRegisteredInvestor1 registered (0.5 ether)");
+        // await presale.register(presaleRegisteredInvestor2, toWei(0.4), {
+        //   from: accounts[0]
+        // });
+        // console.log("presaleRegisteredInvestor2 registered (0.4 ether)");
+        //
+        // presale.buyPresale(presaleRegisteredInvestor1, {
+        //   from: presaleRegisteredInvestor1,
+        //   value: toWei(0.5)
+        // });
+        // console.log("presaleRegisteredInvestor1 send 0.5 ether (should be reverted)");
+        //
+        // await waitUntil(presaleStartTime + 10);
+        // console.log("waitUntil after presaleStartTime");
+        //
+        // presale.buyPresale(presaleRegisteredInvestor1, {
+        //   from: presaleRegisteredInvestor1,
+        //   value: toWei(0.5)
+        // });
+        // console.log("presaleRegisteredInvestor1 send 0.5 ether (should be accepted)");
+        //
+        // presale.buyPresale(presaleRegisteredInvestor2, {
+        //   from: presaleRegisteredInvestor2,
+        //   value: toWei(0.5)
+        // });
+        // console.log("presaleRegisteredInvestor2 send 0.5 ether (should be accepted only 0.4 ether)");
+        //
+        // presale.buyPresale(UnregisteredInvestor1, {
+        //   from: UnregisteredInvestor1,
+        //   value: toWei(0.1)
+        // });
+        // console.log("UnregisteredInvestor1 send 0.1 ether (should be rejected)");
 
-        await waitUntil(presaleStartTime + 100);
-        console.log("waitUntil after presaleStartTime");
-
-        presale.buyPresale(presaleRegisteredInvestor1, {
-          from: presaleRegisteredInvestor1,
-          value: toWei(0.5)
-        });
-        console.log("presaleRegisteredInvestor1 send 0.5 ether (should be accepted)");
-
-        presale.buyPresale(presaleRegisteredInvestor2, {
-          from: presaleRegisteredInvestor2,
-          value: toWei(0.5)
-        });
-        console.log("presaleRegisteredInvestor2 send 0.5 ether (should be accepted only 0.4 ether)");
-
-        presale.buyPresale(UnregisteredInvestor1, {
-          from: UnregisteredInvestor1,
-          value: toWei(0.1)
-        });
-        console.log("UnregisteredInvestor1 send 0.1 ether (should be rejected)");
-
-        await waitUntil(presaleEndTime + 100);
+        await waitUntil(presaleEndTime + 10);
         console.log("waitUntil after presaleEndTime");
 
         await presale.finalizePresale(crowdsale.address, {
@@ -118,44 +119,46 @@ module.exports = async function (deployer, network, accounts) {
         });
         console.log("presale finalized");
 
+        //mainnet Test
+
         await kyc.register(mainsaleRegisteredInvestor1, {
           from: accounts[0]
         });
         console.log("crowdsale register mainsaleRegisteredInvestor1");
 
-        await waitUntil(firstPeriodStartTime + 100);
+        await waitUntil(firstPeriodStartTime + 10);
         console.log("waitUntil after firstPeriodStartTime");
         sendInvestTx();
 
-        await waitUntil(additionalPeriodStartTime1 + 100);
+        await waitUntil(additionalPeriodStartTime1 + 10);
         console.log("waitUntil after additionalPeriodStartTime1");
         sendInvestTx();
 
-        await waitUntil(additionalPeriodStartTime2 + 100);
+        await waitUntil(additionalPeriodStartTime2 + 10);
         console.log("waitUntil after additionalPeriodStartTime2");
         sendInvestTx();
 
-        await waitUntil(additionalPeriodStartTime3 + 100);
+        await waitUntil(additionalPeriodStartTime3 + 10);
         console.log("waitUntil after additionalPeriodStartTime3");
         sendInvestTx();
 
-        await waitUntil(additionalPeriodStartTime4 + 100);
+        await waitUntil(additionalPeriodStartTime4 + 10);
         console.log("waitUntil after additionalPeriodStartTime4");
         sendInvestTx();
 
-        await waitUntil(additionalPeriodStartTime5 + 100);
+        await waitUntil(additionalPeriodStartTime5 + 10);
         console.log("waitUntil after additionalPeriodStartTime5");
         sendInvestTx();
 
-        await waitUntil(additionalPeriodStartTime6 + 100);
+        await waitUntil(additionalPeriodStartTime6 + 10);
         console.log("waitUntil after additionalPeriodStartTime6");
         sendInvestTx();
 
-        await waitUntil(additionalPeriodStartTime7 + 100);
+        await waitUntil(additionalPeriodStartTime7 + 10);
         console.log("waitUntil after additionalPeriodStartTime7");
         sendInvestTx();
 
-        await waitUntil(additionalPeriodEndTime7 + 100);
+        await waitUntil(additionalPeriodEndTime7 + 10);
         console.log("waitUntil after additionalPeriodEndTime7");
         await crowdsale.finalize({
           from: accounts[0]
@@ -165,19 +168,19 @@ module.exports = async function (deployer, network, accounts) {
         teamLocker.release({from: _teamBeneficiary1});
         console.log("teamLocker 20% release");
 
-        await waitUntil(await crowdsale.finalizedTime() + 11 * 60);
+        await waitUntil((await crowdsale.finalizedTime()).add(11 * 60));
         console.log("wait until finalizedTime + 11 minutes");
 
         teamLocker.release({from: _teamBeneficiary1});
         console.log("teamLocker 50% release");
 
-        await waitUntil(await crowdsale.finalizedTime() + 21 * 60);
+        await waitUntil((await crowdsale.finalizedTime()).add(21 * 60));
         console.log("wait until finalizedTime + 21 minutes");
 
         teamLocker.release({from: _teamBeneficiary1});
         console.log("teamLocker 100% release");
 
-        ReserveLocker.release({from: _ATCReserveBeneficiary});
+        ATCReserveLocker.release({from: _ATCReserveBeneficiary});
         console.log("ATCReserveLocker 100% release");
       }
 
@@ -186,6 +189,7 @@ module.exports = async function (deployer, network, accounts) {
           from: mainsaleRegisteredInvestor1,
           value: toWei(0.01)
         });
+
         console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.01 ether");
 
         crowdsale.buy(mainsaleRegisteredInvestor1, {
@@ -200,13 +204,18 @@ module.exports = async function (deployer, network, accounts) {
         console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.6 ether");
         crowdsale.buy(mainsaleRegisteredInvestor1, {
           from: mainsaleRegisteredInvestor1,
+          value: toWei(0.8)
+        });
+        console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.8 ether");
+        crowdsale.buy(mainsaleRegisteredInvestor1, {
+          from: mainsaleRegisteredInvestor1,
           value: toWei(1)
         });
         console.log("crowdsale mainsaleRegisteredInvestor1 invest 1 ether");
       }
 
-        const presaleStartTime = moment().add(10, "minutes").unix();
-        const presaleEndTime = moment().add(25, "minutes").unix();
+        const presaleStartTime = moment().add(9, "minutes").unix();
+        const presaleEndTime = moment().add(10, "minutes").unix();
         const presaleMaxEtherCap = 10 * 10 ** 18;
         const presaleRate = 1950;
 
@@ -251,23 +260,23 @@ module.exports = async function (deployer, network, accounts) {
         // PRESALE DONE//
         // //////////////
 
-        firstPeriodStartTime = moment().add(35, "minutes").unix();
-        firstPeriodEndTime = moment().add(50, "minutes").unix();
+        firstPeriodStartTime = moment().add(15, "minutes").unix();
+        firstPeriodEndTime = moment().add(20, "minutes").unix();
 
-        additionalPeriodStartTime1 = moment().add(55, "minutes").unix();
-        additionalPeriodEndTime1 = moment().add(60, "minutes").unix();
-        additionalPeriodStartTime2 = moment().add(65, "minutes").unix();
-        additionalPeriodEndTime2 = moment().add(70, "minutes").unix();
-        additionalPeriodStartTime3 = moment().add(75, "minutes").unix();
-        additionalPeriodEndTime3 = moment().add(80, "minutes").unix();
-        additionalPeriodStartTime4 = moment().add(85, "minutes").unix();
-        additionalPeriodEndTime4 = moment().add(90, "minutes").unix();
-        additionalPeriodStartTime5 = moment().add(95, "minutes").unix();
-        additionalPeriodEndTime5 = moment().add(100, "minutes").unix();
-        additionalPeriodStartTime6 = moment().add(105, "minutes").unix();
-        additionalPeriodEndTime6 = moment().add(110, "minutes").unix();
-        additionalPeriodStartTime7 = moment().add(115, "minutes").unix();
-        additionalPeriodEndTime7 = moment().add(120, "minutes").unix();
+        additionalPeriodStartTime1 = moment().add(25, "minutes").unix();
+        additionalPeriodEndTime1 = moment().add(30, "minutes").unix();
+        additionalPeriodStartTime2 = moment().add(35, "minutes").unix();
+        additionalPeriodEndTime2 = moment().add(40, "minutes").unix();
+        additionalPeriodStartTime3 = moment().add(45, "minutes").unix();
+        additionalPeriodEndTime3 = moment().add(50, "minutes").unix();
+        additionalPeriodStartTime4 = moment().add(55, "minutes").unix();
+        additionalPeriodEndTime4 = moment().add(60, "minutes").unix();
+        additionalPeriodStartTime5 = moment().add(65, "minutes").unix();
+        additionalPeriodEndTime5 = moment().add(70, "minutes").unix();
+        additionalPeriodStartTime6 = moment().add(75, "minutes").unix();
+        additionalPeriodEndTime6 = moment().add(80, "minutes").unix();
+        additionalPeriodStartTime7 = moment().add(85, "minutes").unix();
+        additionalPeriodEndTime7 = moment().add(90, "minutes").unix();
 
         maxEtherCap = 10 * 10 ** 18; //mainnet : 286000 ether
         minEtherCap = 5 * 10 ** 18; //mainnet : 28600

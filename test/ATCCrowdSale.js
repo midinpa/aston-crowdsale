@@ -135,7 +135,7 @@ contract(
 
       cumulativeWeiRaised = new BigNumber(0);
 
-      presaleStartTime = moment.utc("2017-12-06T03:00").unix();
+      presaleStartTime = moment.utc("2017-12-10T03:00").unix();
       presaleEndTime = moment.utc("2017-12-10T15:00").unix();
 
 
@@ -353,6 +353,8 @@ now:\t\t\t\t${ now }
 
       investAmount = ether(1);
 
+      console.log(await crowdsale.calculateRate(investAmount));
+
       let investor1totalToken = await token.balanceOf(investor1);
 
       await crowdsale.buy(investor1, {
@@ -372,6 +374,7 @@ now:\t\t\t\t${ now }
 
       let investor2totalToken = await token.balanceOf(investor2);
 
+      console.log(await crowdsale.calculateRate(investAmount));
       await crowdsale.buy(investor2, {
         from: investor2,
         value: investAmount,
@@ -388,6 +391,7 @@ now:\t\t\t\t${ now }
 
       let investor3totalToken = await token.balanceOf(investor3);
 
+      console.log(await crowdsale.calculateRate(investAmount));
       await crowdsale.buy(investor3, {
         from: investor3,
         value: investAmount,
@@ -404,6 +408,7 @@ now:\t\t\t\t${ now }
 
       let investor4totalToken = await token.balanceOf(investor4);
 
+      console.log(await crowdsale.calculateRate(investAmount));
       await crowdsale.buy(investor4, {
         from: investor4,
         value: investAmount,
@@ -418,6 +423,7 @@ now:\t\t\t\t${ now }
 
       investAmount = ether(10000);
 
+      console.log(await crowdsale.calculateRate(investAmount));
       let investor5totalToken = await token.balanceOf(investor5);
 
       await crowdsale.buy(investor5, {
@@ -645,6 +651,7 @@ now:\t\t\t\t${ now }
 
         console.log("token investor2 unblacklisted");
 
+        console.log((await crowdsale.finalizedTime()).add(11 * 60));
 
       });
 

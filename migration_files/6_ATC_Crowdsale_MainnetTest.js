@@ -10,7 +10,6 @@ const MiniMeTokenFactory = artifacts.require("token/MiniMeTokenFactory.sol");
 const ATCCrowdSale = artifacts.require("ATCCrowdSale.sol");
 const KYC = artifacts.require("kyc/KYC.sol");
 
-//TODO: FOR DEMO
 const ReserveLocker = artifacts.require("ReserveLockerForDemo.sol");
 const TeamLocker = artifacts.require("TeamLockerForDemo.sol");
 
@@ -18,7 +17,7 @@ const migration_src = require("../argv.js");
 
 module.exports = async function (deployer, network, accounts) {
 
-  if (migration_src == "6") {
+  if (migration_src == "5") {
     console.log("[accounts]");
     accounts.forEach((account, i) => console.log(`[${ i }]  ${ account }`));
     try {
@@ -52,22 +51,180 @@ module.exports = async function (deployer, network, accounts) {
       let additionalPeriodStartTime6, additionalPeriodEndTime6;
       let additionalPeriodStartTime7, additionalPeriodEndTime7;
 
-        const presaleStartTime = moment().add(10, "minutes").unix();
-        const presaleEndTime = moment().add(25, "minutes").unix();
-        const presaleMaxEtherCap = 10 * 10 ** 18;
+      const presaleRegisteredInvestor1 = accounts[1];
+      const presaleRegisteredInvestor2 = accounts[2];
+      const mainsaleRegisteredInvestor1 = accounts[3];
+      const UnregisteredInvestor1 = accounts[4];
+      const _ATCReserveBeneficiary = accounts[17];
+      const _teamBeneficiary1 = accounts[18];
+
+      const secToMillisec = (sec) => {
+        return sec * 1000;
+      }
+      const toWei = (ether) => {
+        return ether * 10 ** 18;
+      }
+      const timeout = (ms) => {
+        return new Promise(resolve => setTimeout(resolve, ms));
+      }
+      const waitUntil = async (targetTime) => {
+        let now = moment().unix();
+        await timeout(secToMillisec(targetTime - now));
+      }
+      const sendDemoTxes = async () => {
+        // test tx
+        await presale.register(presaleRegisteredInvestor1, toWei(0.01), {
+          from: accounts[0]
+        });
+        console.log("presaleRegisteredInvestor1 registered (0.01 ether)");
+        await presale.register(presaleRegisteredInvestor2, toWei(0.01), {
+          from: accounts[0]
+        });
+        console.log("presaleRegisteredInvestor2 registered (0.01 ether)");
+
+        presale.buyPresale(presaleRegisteredInvestor1, {
+          from: presaleRegisteredInvestor1,
+          value: toWei(0.01)
+        });
+        console.log("presaleRegisteredInvestor1 send 0.01 ether (should be reverted)");
+
+        await waitUntil(presaleStartTime + 10);
+        console.log("waitUntil after presaleStartTime");
+
+        presale.buyPresale(presaleRegisteredInvestor1, {
+          from: presaleRegisteredInvestor1,
+          value: toWei(0.01)
+        });
+        console.log("presaleRegisteredInvestor1 send 0.01 ether (should be accepted)");
+
+        presale.buyPresale(presaleRegisteredInvestor2, {
+          from: presaleRegisteredInvestor2,
+          value: toWei(0.02)
+        });
+        console.log("presaleRegisteredInvestor2 send 0.02 ether (should be accepted only 0.01 ether)");
+
+        presale.buyPresale(UnregisteredInvestor1, {
+          from: UnregisteredInvestor1,
+          value: toWei(0.01)
+        });
+        console.log("UnregisteredInvestor1 send 0.01 ether (should be rejected)");
+
+        await waitUntil(presaleEndTime + 10);
+        console.log("waitUntil after presaleEndTime");
+
+        await presale.finalizePresale(crowdsale.address, {
+          from: accounts[0]
+        });
+        console.log("presale finalized");
+
+        await kyc.register(mainsaleRegisteredInvestor1, {
+          from: accounts[0]
+        });
+        console.log("crowdsale register mainsaleRegisteredInvestor1");
+
+        await waitUntil(firstPeriodStartTime + 10);
+        console.log("waitUntil after firstPeriodStartTime");
+        sendInvestTx();
+
+        await waitUntil(additionalPeriodStartTime1 + 10);
+        console.log("waitUntil after additionalPeriodStartTime1");
+        sendInvestTx();
+
+        await waitUntil(additionalPeriodStartTime2 + 10);
+        console.log("waitUntil after additionalPeriodStartTime2");
+        sendInvestTx();
+
+        await waitUntil(additionalPeriodStartTime3 + 10);
+        console.log("waitUntil after additionalPeriodStartTime3");
+        sendInvestTx();
+
+        await waitUntil(additionalPeriodStartTime4 + 10);
+        console.log("waitUntil after additionalPeriodStartTime4");
+        sendInvestTx();
+
+        await waitUntil(additionalPeriodStartTime5 + 10);
+        console.log("waitUntil after additionalPeriodStartTime5");
+        sendInvestTx();
+
+        await waitUntil(additionalPeriodStartTime6 + 10);
+        console.log("waitUntil after additionalPeriodStartTime6");
+        sendInvestTx();
+
+        await waitUntil(additionalPeriodStartTime7 + 10);
+        console.log("waitUntil after additionalPeriodStartTime7");
+        sendInvestTx();
+
+        await waitUntil(additionalPeriodEndTime7 + 10);
+        console.log("waitUntil after additionalPeriodEndTime7");
+        await crowdsale.finalize({
+          from: accounts[0]
+        });
+        console.log("crowdsale finalized");
+
+        teamLocker.release({from: _teamBeneficiary1});
+        console.log("teamLocker 20% release");
+
+        await waitUntil((await crowdsale.finalizedTime()).add(11 * 60));
+        console.log("wait until finalizedTime + 11 minutes");
+
+        teamLocker.release({from: _teamBeneficiary1});
+        console.log("teamLocker 50% release");
+
+        await waitUntil((await crowdsale.finalizedTime()).add(21 * 60));
+        console.log("wait until finalizedTime + 21 minutes");
+
+        teamLocker.release({from: _teamBeneficiary1});
+        console.log("teamLocker 100% release");
+
+        ATCReserveLocker.release({from: _ATCReserveBeneficiary});
+        console.log("ATCReserveLocker 100% release");
+      }
+
+      const sendInvestTx = () => {
+        crowdsale.buy(mainsaleRegisteredInvestor1, {
+          from: mainsaleRegisteredInvestor1,
+          value: toWei(0.0001)
+        });
+        console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.0001 ether");
+
+        crowdsale.buy(mainsaleRegisteredInvestor1, {
+          from: mainsaleRegisteredInvestor1,
+          value: toWei(0.0003)
+        });
+        console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.0003 ether");
+        crowdsale.buy(mainsaleRegisteredInvestor1, {
+          from: mainsaleRegisteredInvestor1,
+          value: toWei(0.006)
+        });
+        console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.006 ether");
+        crowdsale.buy(mainsaleRegisteredInvestor1, {
+          from: mainsaleRegisteredInvestor1,
+          value: toWei(0.008)
+        });
+        console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.008 ether");
+        crowdsale.buy(mainsaleRegisteredInvestor1, {
+          from: mainsaleRegisteredInvestor1,
+          value: toWei(0.01)
+        });
+        console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.01 ether");
+      }
+
+        const presaleStartTime = moment().add(20, "minutes").unix();
+        const presaleEndTime = moment().add(30, "minutes").unix();
+        const presaleMaxEtherCap = 1 * 10 ** 18;
         const presaleRate = 1950;
 
         vaultOwners = [
-          "0x85f619b71bd475d61afcf834012c92aaafb4638c",
-          "0xca1fdd22010b0b285d54175376c2ba246cf64f6d",
-          "0x12336615e1195eb972edbda3d06d090f11b692e1",
-          "0x744719574324ad5f21e7d4e9230795556d18d26b",
-          "0xd91915cc062b663a8370e6bb6117b2670279a986",
-          "0x7739fff8cc653e6bc92dd58c3672680895dd00da",
-          "0x5e2ea1a30fe54957e77e2370840aab8be2b55dc6",
-          "0x93bc7aa9bff7755f7c51685c0a800e41bf1a8c4f",
-          "0xb1544acc9ab5d596d87fdfa588ee8074b48fe168",
-          "0xc9a7fa941a334aef53c0f6900d07b7634fdf3367"
+          "0x4b44b64292e9053cade94bcac96f1995eb4b3bea",
+          "0x4e93ea4b357b8e2f18cb7ca98a08d1a611b72d38",
+          "0x4f457c062001ba56f60c053ad03961f7fc9a0420",
+          "0x6397433fd2753ca62356e78bc1c27b07044bc7c0",
+          "0x643b48dacaaa1191ed607e74c6363c711e625118",
+          "0x70f4f24758e6b2f7044ca624e71e3bba1214f66c",
+          "0x82fd455fede4f676432026122092bb31c51bd31d",
+          "0x895e7cd7437d49344db362c42ac07a919f40d66b",
+          "0x957ce4ef3a0be9365bdcd6897caae932b7de6a6b",
+          "0xbc5eb105ec8739763d25287efcd802cd0b7b08f3"
         ];
 
         tokenFactory = await MiniMeTokenFactory.new();
@@ -116,27 +273,29 @@ module.exports = async function (deployer, network, accounts) {
         additionalPeriodStartTime7 = moment().add(115, "minutes").unix();
         additionalPeriodEndTime7 = moment().add(120, "minutes").unix();
 
-        maxEtherCap = 10 * 10 ** 18; //mainnet : 286000 ether
-        minEtherCap = 5 * 10 ** 18; //mainnet : 28600
+        maxEtherCap = 1 * 10 ** 18; //mainnet : 286000 ether
+        minEtherCap = 5 * 10 ** 16; //mainnet : 28600
 
         baseRate = 1500;
         additionalBonusAmounts = [
-          300 * 10 * 14,
-          6000 * 10 ** 14,
-          8000 * 10 ** 14,
-          10000 * 10 ** 14
+          300 * 10 * 12,
+          6000 * 10 ** 12,
+          8000 * 10 ** 12,
+          10000 * 10 ** 12
         ];
 
         bountyAddress = "0xd2d09864564b7bb741f1cd0c1633719ae617c85e";
         partnersAddress = "0x714c16435d126c02c7e84c16707b4a1d6ab09147";
 
-        ATCReserveBeneficiary = "0x05bbcf30914239a5dde9e5efded6671518f30196";
+        ATCReserveBeneficiary = "0xa4ef760ed5ccd81a2073359a6c3017671f03d1d9";
+
         teamBeneficiaries = [
-            "0x80049bf695833d1d465623dc1774c8b3e99ca2a7",
-            "0xe863985909e518be7b1d2d7a24d9e4100c9a4820",
-            "0xdb09e4762bd2c7227207871dc80cff86d090fe92"
+            "0xe5e1ae713575f229f9b358c9362efc5c336ccc47",
+            "0x822433f134e739dca9e1454c5a2bee88c20628e1",
+            "0x68f92c86a9f2d7067afc08294676725f09910684"
         ];
-        ATCController = "0x05bbcf30914239a5dde9e5efded6671518f30196";
+
+        ATCController = "0x0166685dD1FA8e6c061B13Fc16fFf3DEA94E8ba2";
 
         kyc = await KYC.new();
         console.log("kyc deployed at", kyc.address);
@@ -188,7 +347,7 @@ module.exports = async function (deployer, network, accounts) {
 
         console.log("crowdsale periods started");
 
-        // sendDemoTxes();
+        sendDemoTxes();
 
       fs.writeFileSync(path.join(__dirname, "../addresses.json"), JSON.stringify({
         token: token.address,
