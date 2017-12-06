@@ -30,7 +30,7 @@ module.exports = {
       network_id: 3,
       provider: providerRopsten,
       gas: 4500000,
-      gasPrice: 25e9,
+      // gasPrice: 25e9,
     },
     mainnet: {
       host: "onther.io",

@@ -77,8 +77,8 @@ module.exports = async function (deployer, network, accounts) {
       additionalPeriodStartTime7 = moment.utc("2018-01-29T03:00").unix();
       additionalPeriodEndTime7 = moment.utc("2018-02-04T15:00").unix();
 
-      maxEtherCap = 286000 * 10 ** 18;
-      minEtherCap = 28600 * 10 ** 18;
+      maxEtherCap = 286000e18;
+      minEtherCap = 28600e18;
 
       baseRate = 1500;
       additionalBonusAmounts = [

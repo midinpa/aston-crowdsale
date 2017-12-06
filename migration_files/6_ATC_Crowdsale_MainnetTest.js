@@ -51,12 +51,12 @@ module.exports = async function (deployer, network, accounts) {
       let additionalPeriodStartTime6, additionalPeriodEndTime6;
       let additionalPeriodStartTime7, additionalPeriodEndTime7;
 
-      const presaleRegisteredInvestor1 = accounts[1];
-      const presaleRegisteredInvestor2 = accounts[2];
-      const mainsaleRegisteredInvestor1 = accounts[3];
-      const UnregisteredInvestor1 = accounts[4];
-      const _ATCReserveBeneficiary = accounts[17];
-      const _teamBeneficiary1 = accounts[18];
+      const presaleRegisteredInvestor1 = "0x059923c0c3fbbf5bac86b098bc4c9df02c01829d";
+      const presaleRegisteredInvestor2 = "0x0970c9fb7cb7f01307debfdf775e536b89a38ab5";
+      const mainsaleRegisteredInvestor1 = "0x5dbd73c817a2330f182172046d4e22579d8ec550";
+      const UnregisteredInvestor1 = "0x1e2de1110149fb5d78cab2974b13b58b40c15dfd";
+      const _ATCReserveBeneficiary = "0x7511b380de6b172c3cb71404d769995c4d9eb577";
+      const _teamBeneficiary1 = "0x7fc28acf90c642422f6d94e3ff2438a4ff8879b1";
 
       const secToMillisec = (sec) => {
         return sec * 1000;
@@ -273,8 +273,8 @@ module.exports = async function (deployer, network, accounts) {
         additionalPeriodStartTime7 = moment().add(115, "minutes").unix();
         additionalPeriodEndTime7 = moment().add(120, "minutes").unix();
 
-        maxEtherCap = 1 * 10 ** 18; //mainnet : 286000 ether
-        minEtherCap = 5 * 10 ** 16; //mainnet : 28600
+        maxEtherCap = 1e18; //mainnet : 286000 ether
+        minEtherCap = 5e16; //mainnet : 28600
 
         baseRate = 1500;
         additionalBonusAmounts = [
@@ -284,18 +284,18 @@ module.exports = async function (deployer, network, accounts) {
           10000e12
         ];
 
-        bountyAddress = "0xd2d09864564b7bb741f1cd0c1633719ae617c85e";
-        partnersAddress = "0x714c16435d126c02c7e84c16707b4a1d6ab09147";
+        bountyAddress = "0xcc0b7bfb34c17cc6e21d00a542e22fe2000f8a33";
+        partnersAddress = "0xcf0394e0b3b983604e47f6332beb83115313dfb7";
 
-        ATCReserveBeneficiary = "0xa4ef760ed5ccd81a2073359a6c3017671f03d1d9";
+        ATCReserveBeneficiary = "0x7511b380de6b172c3cb71404d769995c4d9eb577";
 
         teamBeneficiaries = [
-            "0xe5e1ae713575f229f9b358c9362efc5c336ccc47",
-            "0x822433f134e739dca9e1454c5a2bee88c20628e1",
-            "0x68f92c86a9f2d7067afc08294676725f09910684"
+            "0x7fc28acf90c642422f6d94e3ff2438a4ff8879b1",
+            "0xeccdd8cc9fca423aeda4fc9c382b9d49f4c98f7e",
+            "0xf5e39c9a2cb992e03f05f4b6514f3e6e76fac8dc"
         ];
 
-        ATCController = "0x0166685dD1FA8e6c061B13Fc16fFf3DEA94E8ba2";
+        ATCController = "0x266085436a4d9cb25603a3b1ab72338f313d7377";
 
         kyc = await KYC.new();
         console.log("kyc deployed at", kyc.address);
