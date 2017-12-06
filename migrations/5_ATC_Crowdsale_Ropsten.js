@@ -76,41 +76,41 @@ module.exports = async function (deployer, network, accounts) {
       const sendDemoTxes = async () => {
         //presale Test
 
-        // await presale.register(presaleRegisteredInvestor1, toWei(0.5), {
-        //   from: accounts[0]
-        // });
-        // console.log("presaleRegisteredInvestor1 registered (0.5 ether)");
-        // await presale.register(presaleRegisteredInvestor2, toWei(0.4), {
-        //   from: accounts[0]
-        // });
-        // console.log("presaleRegisteredInvestor2 registered (0.4 ether)");
-        //
-        // presale.buyPresale(presaleRegisteredInvestor1, {
-        //   from: presaleRegisteredInvestor1,
-        //   value: toWei(0.5)
-        // });
-        // console.log("presaleRegisteredInvestor1 send 0.5 ether (should be reverted)");
-        //
-        // await waitUntil(presaleStartTime + 10);
-        // console.log("waitUntil after presaleStartTime");
-        //
-        // presale.buyPresale(presaleRegisteredInvestor1, {
-        //   from: presaleRegisteredInvestor1,
-        //   value: toWei(0.5)
-        // });
-        // console.log("presaleRegisteredInvestor1 send 0.5 ether (should be accepted)");
-        //
-        // presale.buyPresale(presaleRegisteredInvestor2, {
-        //   from: presaleRegisteredInvestor2,
-        //   value: toWei(0.5)
-        // });
-        // console.log("presaleRegisteredInvestor2 send 0.5 ether (should be accepted only 0.4 ether)");
-        //
-        // presale.buyPresale(UnregisteredInvestor1, {
-        //   from: UnregisteredInvestor1,
-        //   value: toWei(0.1)
-        // });
-        // console.log("UnregisteredInvestor1 send 0.1 ether (should be rejected)");
+        await presale.register(presaleRegisteredInvestor1, toWei(0.5), {
+          from: accounts[0]
+        });
+        console.log("presaleRegisteredInvestor1 registered (0.5 ether)");
+        await presale.register(presaleRegisteredInvestor2, toWei(0.4), {
+          from: accounts[0]
+        });
+        console.log("presaleRegisteredInvestor2 registered (0.4 ether)");
+
+        presale.buyPresale(presaleRegisteredInvestor1, {
+          from: presaleRegisteredInvestor1,
+          value: toWei(0.5)
+        });
+        console.log("presaleRegisteredInvestor1 send 0.5 ether (should be reverted)");
+
+        await waitUntil(presaleStartTime + 10);
+        console.log("waitUntil after presaleStartTime");
+
+        presale.buyPresale(presaleRegisteredInvestor1, {
+          from: presaleRegisteredInvestor1,
+          value: toWei(0.5)
+        });
+        console.log("presaleRegisteredInvestor1 send 0.5 ether (should be accepted)");
+
+        presale.buyPresale(presaleRegisteredInvestor2, {
+          from: presaleRegisteredInvestor2,
+          value: toWei(0.5)
+        });
+        console.log("presaleRegisteredInvestor2 send 0.5 ether (should be accepted only 0.4 ether)");
+
+        presale.buyPresale(UnregisteredInvestor1, {
+          from: UnregisteredInvestor1,
+          value: toWei(0.1)
+        });
+        console.log("UnregisteredInvestor1 send 0.1 ether (should be rejected)");
 
         await waitUntil(presaleEndTime + 10);
         console.log("waitUntil after presaleEndTime");
@@ -121,6 +121,8 @@ module.exports = async function (deployer, network, accounts) {
         console.log("presale finalized");
 
         //mainnet Test
+
+        console.log("crowdsale weiRaised (should be 9e17): ", await crowdsale.weiRaised());
 
         await kyc.register(mainsaleRegisteredInvestor1, {
           from: accounts[0]
@@ -215,9 +217,9 @@ module.exports = async function (deployer, network, accounts) {
         console.log("crowdsale mainsaleRegisteredInvestor1 invest 1 ether");
       }
 
-        const presaleStartTime = moment().add(9, "minutes").unix();
-        const presaleEndTime = moment().add(10, "minutes").unix();
-        const presaleMaxEtherCap = 10 * 10 ** 18;
+        const presaleStartTime = moment().add(20, "minutes").unix();
+        const presaleEndTime = moment().add(30, "minutes").unix();
+        const presaleMaxEtherCap = 30e18;
         const presaleRate = 1950;
 
         vaultOwners = [
@@ -261,25 +263,25 @@ module.exports = async function (deployer, network, accounts) {
         // PRESALE DONE//
         // //////////////
 
-        firstPeriodStartTime = moment().add(15, "minutes").unix();
-        firstPeriodEndTime = moment().add(25, "minutes").unix();
+        firstPeriodStartTime = moment().add(35, "minutes").unix();
+        firstPeriodEndTime = moment().add(45, "minutes").unix();
 
-        additionalPeriodStartTime1 = moment().add(30, "minutes").unix();
-        additionalPeriodEndTime1 = moment().add(40, "minutes").unix();
-        additionalPeriodStartTime2 = moment().add(45, "minutes").unix();
-        additionalPeriodEndTime2 = moment().add(55, "minutes").unix();
-        additionalPeriodStartTime3 = moment().add(60, "minutes").unix();
-        additionalPeriodEndTime3 = moment().add(70, "minutes").unix();
-        additionalPeriodStartTime4 = moment().add(75, "minutes").unix();
-        additionalPeriodEndTime4 = moment().add(85, "minutes").unix();
-        additionalPeriodStartTime5 = moment().add(90, "minutes").unix();
-        additionalPeriodEndTime5 = moment().add(100, "minutes").unix();
-        additionalPeriodStartTime6 = moment().add(105, "minutes").unix();
-        additionalPeriodEndTime6 = moment().add(115, "minutes").unix();
-        additionalPeriodStartTime7 = moment().add(120, "minutes").unix();
-        additionalPeriodEndTime7 = moment().add(130, "minutes").unix();
+        additionalPeriodStartTime1 = moment().add(50, "minutes").unix();
+        additionalPeriodEndTime1 = moment().add(60, "minutes").unix();
+        additionalPeriodStartTime2 = moment().add(65, "minutes").unix();
+        additionalPeriodEndTime2 = moment().add(75, "minutes").unix();
+        additionalPeriodStartTime3 = moment().add(80, "minutes").unix();
+        additionalPeriodEndTime3 = moment().add(90, "minutes").unix();
+        additionalPeriodStartTime4 = moment().add(95, "minutes").unix();
+        additionalPeriodEndTime4 = moment().add(105, "minutes").unix();
+        additionalPeriodStartTime5 = moment().add(110, "minutes").unix();
+        additionalPeriodEndTime5 = moment().add(120, "minutes").unix();
+        additionalPeriodStartTime6 = moment().add(125, "minutes").unix();
+        additionalPeriodEndTime6 = moment().add(135, "minutes").unix();
+        additionalPeriodStartTime7 = moment().add(140, "minutes").unix();
+        additionalPeriodEndTime7 = moment().add(150, "minutes").unix();
 
-        maxEtherCap = 10e18; //mainnet : 286000 ether
+        maxEtherCap = 30e18; //mainnet : 286000 ether
         minEtherCap = 5e18; //mainnet : 28600
 
         baseRate = 1500;
