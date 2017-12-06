@@ -14,6 +14,7 @@ const ReserveLocker = artifacts.require("ReserveLockerForDemo.sol");
 const TeamLocker = artifacts.require("TeamLockerForDemo.sol");
 
 const migration_src = require("../argv.js");
+const BigNumber = require('bignumber.js');
 
 module.exports = async function (deployer, network, accounts) {
 
@@ -283,10 +284,10 @@ module.exports = async function (deployer, network, accounts) {
 
         baseRate = 1500;
         additionalBonusAmounts = [
-          300 * 10 * 14,
-          6000 * 10 ** 14,
-          8000 * 10 ** 14,
-          10000 * 10 ** 14
+          new BigNumber(300e14),
+          new BigNumber(6000e14),
+          new BigNumber(8000e14),
+          new BigNumber(10000e14)
         ];
 
         bountyAddress = "0xd2d09864564b7bb741f1cd0c1633719ae617c85e";
@@ -340,6 +341,12 @@ module.exports = async function (deployer, network, accounts) {
         );
 
         console.log("crowdsale initialized");
+
+        console.log(await crowdsale.additionalBonusAmounts(0));
+        console.log(await crowdsale.additionalBonusAmounts(1));
+        console.log(await crowdsale.additionalBonusAmounts(2));
+        console.log(await crowdsale.additionalBonusAmounts(3));
+        console.log(await crowdsale.baseRate());
 
 
         await crowdsale.startPeriod(firstPeriodStartTime, firstPeriodEndTime);

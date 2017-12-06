@@ -82,10 +82,10 @@ module.exports = async function (deployer, network, accounts) {
 
       baseRate = 1500;
       additionalBonusAmounts = [
-        300 * 10 * 18,
-        6000 * 10 ** 18,
-        8000 * 10 ** 18,
-        10000 * 10 ** 18
+        300e18,
+        6000e18,
+        8000e18,
+        10000e18
       ];
 
       token_address = "0x2c6c596cfd4c2c3b039db90fd3c8acb564e13251";

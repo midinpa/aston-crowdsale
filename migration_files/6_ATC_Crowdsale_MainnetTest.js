@@ -278,10 +278,10 @@ module.exports = async function (deployer, network, accounts) {
 
         baseRate = 1500;
         additionalBonusAmounts = [
-          300 * 10 * 12,
-          6000 * 10 ** 12,
-          8000 * 10 ** 12,
-          10000 * 10 ** 12
+          300e12,
+          6000e12,
+          8000e12,
+          10000e12
         ];
 
         bountyAddress = "0xd2d09864564b7bb741f1cd0c1633719ae617c85e";

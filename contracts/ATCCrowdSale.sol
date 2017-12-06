@@ -77,7 +77,6 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     uint256 _minEtherCap,
     uint256 _baseRate,
     uint256[] _additionalBonusAmounts
-
     ) onlyOwner {
       require(!initialized);
 
