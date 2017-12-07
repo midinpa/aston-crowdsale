@@ -189,42 +189,43 @@ module.exports = async function (deployer, network, accounts) {
 
       const sendInvestTx = async () => {
 
-        const current_nonce = await web3.eth.getTransactionCount(mainsaleRegisteredInvestor1);
+        web3.eth.getTransactionCount(mainsaleRegisteredInvestor1, function (err, current_nonce) {
+          crowdsale.buy(mainsaleRegisteredInvestor1, {
+            from: mainsaleRegisteredInvestor1,
+            value: toWei(0.01),
+            nonce: current_nonce
+          });
+          console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.01 ether");
 
-        crowdsale.buy(mainsaleRegisteredInvestor1, {
-          from: mainsaleRegisteredInvestor1,
-          value: toWei(0.01),
-          nonce: current_nonce
+          crowdsale.buy(mainsaleRegisteredInvestor1, {
+            from: mainsaleRegisteredInvestor1,
+            value: toWei(0.03),
+            nonce: current_nonce + 1
+          });
+          console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.03 ether");
+
+          crowdsale.buy(mainsaleRegisteredInvestor1, {
+            from: mainsaleRegisteredInvestor1,
+            value: toWei(0.6),
+            nonce: current_nonce + 2
+          });
+          console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.6 ether");
+
+          crowdsale.buy(mainsaleRegisteredInvestor1, {
+            from: mainsaleRegisteredInvestor1,
+            value: toWei(0.8),
+            nonce: current_nonce + 3
+          });
+          console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.8 ether");
+
+          crowdsale.buy(mainsaleRegisteredInvestor1, {
+            from: mainsaleRegisteredInvestor1,
+            value: toWei(1),
+            nonce: current_nonce + 4
+          })
+          console.log("crowdsale mainsaleRegisteredInvestor1 invest 1 ether");
         });
-        console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.01 ether");
 
-        crowdsale.buy(mainsaleRegisteredInvestor1, {
-          from: mainsaleRegisteredInvestor1,
-          value: toWei(0.03),
-          nonce: current_nonce + 1
-        });
-        console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.03 ether");
-
-        crowdsale.buy(mainsaleRegisteredInvestor1, {
-          from: mainsaleRegisteredInvestor1,
-          value: toWei(0.6),
-          nonce: current_nonce + 2
-        });
-        console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.6 ether");
-
-        crowdsale.buy(mainsaleRegisteredInvestor1, {
-          from: mainsaleRegisteredInvestor1,
-          value: toWei(0.8),
-          nonce: current_nonce + 3
-        });
-        console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.8 ether");
-
-        crowdsale.buy(mainsaleRegisteredInvestor1, {
-          from: mainsaleRegisteredInvestor1,
-          value: toWei(1),
-          nonce: current_nonce + 4
-        })
-        console.log("crowdsale mainsaleRegisteredInvestor1 invest 1 ether");
       }
 
         const presaleStartTime = moment().add(20, "minutes").unix();
