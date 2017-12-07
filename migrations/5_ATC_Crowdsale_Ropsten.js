@@ -131,35 +131,35 @@ module.exports = async function (deployer, network, accounts) {
 
         await waitUntil(firstPeriodStartTime + 10);
         console.log("waitUntil after firstPeriodStartTime");
-        await sendInvestTx();
+        sendInvestTx();
 
         await waitUntil(additionalPeriodStartTime1 + 10);
         console.log("waitUntil after additionalPeriodStartTime1");
-        await sendInvestTx();
+        sendInvestTx();
 
         await waitUntil(additionalPeriodStartTime2 + 10);
         console.log("waitUntil after additionalPeriodStartTime2");
-        await sendInvestTx();
+        sendInvestTx();
 
         await waitUntil(additionalPeriodStartTime3 + 10);
         console.log("waitUntil after additionalPeriodStartTime3");
-        await sendInvestTx();
+        sendInvestTx();
 
         await waitUntil(additionalPeriodStartTime4 + 10);
         console.log("waitUntil after additionalPeriodStartTime4");
-        await sendInvestTx();
+        sendInvestTx();
 
         await waitUntil(additionalPeriodStartTime5 + 10);
         console.log("waitUntil after additionalPeriodStartTime5");
-        await sendInvestTx();
+        sendInvestTx();
 
         await waitUntil(additionalPeriodStartTime6 + 10);
         console.log("waitUntil after additionalPeriodStartTime6");
-        await sendInvestTx();
+        sendInvestTx();
 
         await waitUntil(additionalPeriodStartTime7 + 10);
         console.log("waitUntil after additionalPeriodStartTime7");
-        await sendInvestTx();
+        sendInvestTx();
 
         await waitUntil(additionalPeriodEndTime7 + 10);
         console.log("waitUntil after additionalPeriodEndTime7");
@@ -187,7 +187,7 @@ module.exports = async function (deployer, network, accounts) {
         console.log("ATCReserveLocker 100% release");
       }
 
-      const sendInvestTx = async () => {
+      const sendInvestTx = () => {
 
         web3.eth.getTransactionCount(mainsaleRegisteredInvestor1, function (err, current_nonce) {
           crowdsale.buy(mainsaleRegisteredInvestor1, {
