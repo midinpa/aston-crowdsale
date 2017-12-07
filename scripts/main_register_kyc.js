@@ -1,22 +1,22 @@
+const fs = require('fs');
 const Web3 = require('web3');
+const path = require('path');
 
 //TODO: ONTHER NODE
-const providerUrl = "https://ropsten.infura.io";
+const providerUrl = "http://localhost:8545";
 const web3 = new Web3(new Web3.providers.HttpProvider(providerUrl));
 const kycAbi = require('../build/contracts/KYC.json').abi;
 
 
 //TODO: KYCADDRESS
-const kycAddress = "0xef2d57a6bf5c13c0b0c1af096361c7bd6c16bc34";
+const kycAddress = "0x0b1b5c9bed01437bd07a7a513f967ee1d3c654a5";
 
 //TODO: kycOwnerAccount
-const kycOwnerAccount = "0x0166685dD1FA8e6c061B13Fc16fFf3DEA94E8ba2";
+const kycOwnerAccount = "0xe90824420dee2b623faa16d7c9f50c8cb690462f";
 
 const kyc = web3.eth.contract(kycAbi).at(kycAddress);
 
-const registerList = [
-  "0xE184E9e4B283A7c2E06EF4957bed5002389b53Aa"
-];
+const registerList = require('./main_registerList');
 
 // EXECUTE
 const register = async (_registerList) => {
@@ -24,8 +24,14 @@ const register = async (_registerList) => {
     const registerTx = await kyc.registerByList(_registerList, {
       from: kycOwnerAccount
     });
-
     console.log('registerTx :', registerTx);
+
+    //write in kyc_addresses.json
+    fs.appendFileSync(path.join(__dirname, "./main_kyc_addresses.json"), JSON.stringify({
+      txHash: registerTx,
+      addresses: _registerList
+    }, undefined, 2));
+
   } catch (err) {
     console.log(err);
   }

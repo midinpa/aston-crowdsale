@@ -44,9 +44,9 @@ module.exports = {
       host: "onther.io",
       port: 60009,
       network_id: "1",
-      from: "0x266085436a4d9cb25603a3b1ab72338f313d7377", // accounts[0]
+      from: "0x266085436a4d9cb25603a3b1ab72338f313d7377",
       gas: 4500000,
-      gasPrice: 25e9,
+      gasPrice: 70e9,
     },
   },
 };

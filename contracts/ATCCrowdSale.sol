@@ -187,7 +187,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
     }
   }
 
-  function validPurchase() internal constant returns (bool) {
+  function validPurchase() internal view returns (bool) {
     bool nonZeroPurchase = msg.value != 0;
     return nonZeroPurchase && !maxReached();
   }
@@ -200,18 +200,18 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
    * @dev Checks whether minEtherCap is reached
    * @return true if min ether cap is reaced
    */
-  function minReached() public constant returns (bool) {
+  function minReached() public view returns (bool) {
     return weiRaised >= minEtherCap;
   }
   /**
    * @dev Checks whether maxEtherCap is reached
    * @return true if max ether cap is reaced
    */
-  function maxReached() public constant returns (bool) {
+  function maxReached() public view returns (bool) {
     return weiRaised == maxEtherCap;
   }
 
-  function getPeriodBonus() public constant returns (uint256) {
+  function getPeriodBonus() public view returns (uint256) {
     bool nowOnSale;
     uint256 currentPeriod;
 
@@ -230,7 +230,7 @@ contract ATCCrowdSale is Ownable, SafeMath, Pausable {
   /**
    * @dev rate = baseRate * (100 + bonus) / 100
    */
-  function calculateRate(uint256 toFund) public constant returns (uint256)  {
+  function calculateRate(uint256 toFund) public view returns (uint256)  {
     uint bonus = getPeriodBonus();
 
     // bonus for eth amount
