@@ -273,15 +273,6 @@ module.exports = async function (deployer, network, accounts) {
         console.log("crowdsale periods started");
 
         sendDemoTxes();
-
-      fs.writeFileSync(path.join(__dirname, "../addresses.json"), JSON.stringify({
-        token: token.address,
-        vault: vault.address,
-        presale: presale.address,
-        crowdsale: crowdsale.address,
-        ATCReserveLocker: ATCReserveLocker.address,
-        teamLocker: teamLocker.address
-      }, undefined, 2));
     } catch (e) {
       console.error(e);
     }
