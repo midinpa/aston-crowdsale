@@ -222,6 +222,10 @@ module.exports = async function (deployer, network, accounts) {
             "0xf5e39c9a2cb992e03f05f4b6514f3e6e76fac8dc"
         ];
 
+        presale = ATCPresale.at(presale_address);
+
+        console.log(presale);
+
         kyc = await KYC.new();
         console.log("kyc deployed at", kyc.address);
 
