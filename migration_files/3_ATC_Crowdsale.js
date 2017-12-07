@@ -159,7 +159,9 @@ module.exports = async function (deployer, network, accounts) {
       token: token_address,
       vault: vault_address,
       presale: presale_address,
-      crowdsale: crowdsale.address
+      crowdsale: crowdsale.address,
+      ATCReserveLocker: ATCReserveLocker.address,
+      teamLocker: teamLocker.address
       }, undefined, 2));
     } catch (e) {
       console.error(e);
