@@ -174,7 +174,7 @@ module.exports = async function (deployer, network, accounts) {
             nonce: current_nonce + 4
           });
           console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.01 ether");
-        }
+        })
       }
 
         firstPeriodStartTime = moment().add(60, "minutes").unix();

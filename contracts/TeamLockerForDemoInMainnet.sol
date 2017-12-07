@@ -10,7 +10,7 @@ import './ATCCrowdSale.sol';
  * @dev TokenTimelock is a token holder contract that will allow a
  * beneficiary to extract the tokens after a given release time
  */
-contract TeamLockerForDemo is SafeMath{
+contract TeamLockerForDemoInMainnet is SafeMath{
   using SafeERC20 for ERC20Basic;
 
   ERC20Basic public token;
