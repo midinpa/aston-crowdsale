@@ -131,35 +131,35 @@ module.exports = async function (deployer, network, accounts) {
 
         await waitUntil(firstPeriodStartTime + 10);
         console.log("waitUntil after firstPeriodStartTime");
-        sendInvestTx();
+        await sendInvestTx();
 
         await waitUntil(additionalPeriodStartTime1 + 10);
         console.log("waitUntil after additionalPeriodStartTime1");
-        sendInvestTx();
+        await sendInvestTx();
 
         await waitUntil(additionalPeriodStartTime2 + 10);
         console.log("waitUntil after additionalPeriodStartTime2");
-        sendInvestTx();
+        await sendInvestTx();
 
         await waitUntil(additionalPeriodStartTime3 + 10);
         console.log("waitUntil after additionalPeriodStartTime3");
-        sendInvestTx();
+        await sendInvestTx();
 
         await waitUntil(additionalPeriodStartTime4 + 10);
         console.log("waitUntil after additionalPeriodStartTime4");
-        sendInvestTx();
+        await sendInvestTx();
 
         await waitUntil(additionalPeriodStartTime5 + 10);
         console.log("waitUntil after additionalPeriodStartTime5");
-        sendInvestTx();
+        await sendInvestTx();
 
         await waitUntil(additionalPeriodStartTime6 + 10);
         console.log("waitUntil after additionalPeriodStartTime6");
-        sendInvestTx();
+        await sendInvestTx();
 
         await waitUntil(additionalPeriodStartTime7 + 10);
         console.log("waitUntil after additionalPeriodStartTime7");
-        sendInvestTx();
+        await sendInvestTx();
 
         await waitUntil(additionalPeriodEndTime7 + 10);
         console.log("waitUntil after additionalPeriodEndTime7");
@@ -187,70 +187,44 @@ module.exports = async function (deployer, network, accounts) {
         console.log("ATCReserveLocker 100% release");
       }
 
-      const sendInvestTx = () => {
+      const sendInvestTx = async () => {
+
+        const current_nonce = await web3.eth.getTransactionCount(mainsaleRegisteredInvestor1);
 
         crowdsale.buy(mainsaleRegisteredInvestor1, {
           from: mainsaleRegisteredInvestor1,
-          value: toWei(0.01)
-        }).then(() => {
-            console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.01 ether");
-        }).catch((e) => {
-          crowdsale.buy(mainsaleRegisteredInvestor1, {
-            from: mainsaleRegisteredInvestor1,
-            value: toWei(0.01)
-          })
-          console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.01 ether again !!!");
+          value: toWei(0.01),
+          nonce: current_nonce
         });
+        console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.01 ether");
 
         crowdsale.buy(mainsaleRegisteredInvestor1, {
           from: mainsaleRegisteredInvestor1,
-          value: toWei(0.03)
-        }).then(() => {
-            console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.03 ether");
-        }).catch((e) => {
-          crowdsale.buy(mainsaleRegisteredInvestor1, {
-            from: mainsaleRegisteredInvestor1,
-            value: toWei(0.03)
-          })
-          console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.03 ether again !!!");
+          value: toWei(0.03),
+          nonce: current_nonce + 1
         });
+        console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.03 ether");
 
         crowdsale.buy(mainsaleRegisteredInvestor1, {
           from: mainsaleRegisteredInvestor1,
-          value: toWei(0.6)
-        }).then(() => {
-            console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.6 ether");
-        }).catch((e) => {
-          crowdsale.buy(mainsaleRegisteredInvestor1, {
-            from: mainsaleRegisteredInvestor1,
-            value: toWei(0.6)
-          })
-          console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.6 ether again !!!");
+          value: toWei(0.6),
+          nonce: current_nonce + 2
         });
+        console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.6 ether");
+
         crowdsale.buy(mainsaleRegisteredInvestor1, {
           from: mainsaleRegisteredInvestor1,
-          value: toWei(0.8)
-        }).then(() => {
-            console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.8 ether");
-        }).catch((e) => {
-          crowdsale.buy(mainsaleRegisteredInvestor1, {
-            from: mainsaleRegisteredInvestor1,
-            value: toWei(0.8)
-          })
-          console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.8 ether again !!!");
+          value: toWei(0.8),
+          nonce: current_nonce + 3
         });
+        console.log("crowdsale mainsaleRegisteredInvestor1 invest 0.8 ether");
+
         crowdsale.buy(mainsaleRegisteredInvestor1, {
           from: mainsaleRegisteredInvestor1,
-          value: toWei(1)
-        }).then(() => {
-            console.log("crowdsale mainsaleRegisteredInvestor1 invest 1 ether");
-        }).catch((e) => {
-          crowdsale.buy(mainsaleRegisteredInvestor1, {
-            from: mainsaleRegisteredInvestor1,
-            value: toWei(1)
-          })
-          console.log("crowdsale mainsaleRegisteredInvestor1 invest 1 ether again !!!");
-        });
+          value: toWei(1),
+          nonce: current_nonce + 4
+        })
+        console.log("crowdsale mainsaleRegisteredInvestor1 invest 1 ether");
       }
 
         const presaleStartTime = moment().add(20, "minutes").unix();

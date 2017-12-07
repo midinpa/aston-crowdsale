@@ -349,6 +349,9 @@ now:\t\t\t\t${ now }
       (await crowdsale.getPeriodBonus())
         .should.be.bignumber.equal(period.bonus);
 
+      const current_nonce = await web3.eth.getTransactionCount(investor1);
+      console.log('current_nonce :', current_nonce);
+
       console.log("period %d bonus checked", period_num);
 
       investAmount = ether(1);
@@ -360,6 +363,7 @@ now:\t\t\t\t${ now }
       await crowdsale.buy(investor1, {
         from: investor1,
         value: investAmount,
+        nonce: current_nonce
       }).should.be.fulfilled;
 
       cumulativeWeiRaised = cumulativeWeiRaised.add(investAmount);
