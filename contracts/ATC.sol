@@ -13,7 +13,7 @@ contract ATC is MiniMeToken {
               _tokenFactory,
               0x0,                     // no parent token
               0,                       // no snapshot block number from parent
-              "ATCon Token",  // Token name
+              "Aston Token",  // Token name
               18,                      // Decimals
               "ATC",                   // Symbol
               false                     // Enable transfers
