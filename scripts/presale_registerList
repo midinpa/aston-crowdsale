@@ -1,9 +1,0 @@
-exports.addresses = [
-  "0xdaaa51c1aabc8bf2d0763a8f068fb6786e33c962",
-  "0xad507f576c076afd7574e8387636614ca46aeb4f"
-];
-
-exports.amounts = [
-  1000e18,
-  1000e18,
-]
