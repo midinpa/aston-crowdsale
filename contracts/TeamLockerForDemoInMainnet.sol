@@ -21,7 +21,7 @@ contract TeamLockerForDemoInMainnet is SafeMath{
 
   uint256 public collectedTokens;
 
-  function TeamLockerForDemo(address _token, address _crowdsale, address[] _beneficiaries) {
+  function TeamLockerForDemoInMainnet(address _token, address _crowdsale, address[] _beneficiaries) {
 
     require(_token != 0x00);
     require(_crowdsale != 0x00);

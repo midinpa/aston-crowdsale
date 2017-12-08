@@ -18,7 +18,7 @@ contract ReserveLockerForDemoInMainnet is SafeMath{
   address public beneficiary;
 
 
-  function ReserveLockerForDemo(address _token, address _crowdsale, address _beneficiary) {
+  function ReserveLockerForDemoInMainnet(address _token, address _crowdsale, address _beneficiary) {
 
     require(_token != 0x00);
     require(_crowdsale != 0x00);

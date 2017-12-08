@@ -1,3 +1,3 @@
 node_modules
 .node*
-kyc_addresses.json
+scripts/main_kyc_addresses.json

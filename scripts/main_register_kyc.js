@@ -9,7 +9,7 @@ const kycAbi = require('../build/contracts/KYC.json').abi;
 
 
 //TODO: KYCADDRESS
-const kycAddress = "0x0b1b5c9bed01437bd07a7a513f967ee1d3c654a5";
+const kycAddress = "0xdc26353119751e5aeae1efb136bdd59d0164d4d8";
 
 //TODO: kycOwnerAccount
 const kycOwnerAccount = "0xe90824420dee2b623faa16d7c9f50c8cb690462f";
