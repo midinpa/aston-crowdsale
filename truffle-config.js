@@ -36,7 +36,7 @@ module.exports = {
       host: "onther.io",
       port: 60001,
       network_id: "1",
-      from: "0x07bfd26f09a90564fbc72f77758b0259b65b783b",
+      from: "e",
       gas: 4500000,
       gasPrice: 25e9,
     },
